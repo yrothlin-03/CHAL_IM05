@@ -1,0 +1,46 @@
+evaluation: True
+
+training:
+  save_ckpt: true
+  ckpt_dir: /home/infres/yrothlin-24/CHAL_IM05/checkpoints
+  ckpt_every: 1
+  resume_from: checkpoints/best.pt
+  resume: true
+  monitor: macro_f1
+  lr: 0.001
+  weight_decay: 0.01
+  num_epochs: 10
+  optimizer: adamw
+  scheduler: cosine
+  use_amp: false
+  grad_clip: null
+  label_smoothing: 0.1
+  log_step: 50
+  label_smoothing: 0.0
+  weights:
+    - 0.007721779127402864
+    - 0.012405746863738833
+    - 0.03659830857361554
+    - 0.1167235253695102
+    - 0.24216615745336936
+    - 0.274587309680733
+    - 0.2570305763251874
+    - 0.27916376484207855
+    - 0.22788878762618656
+    - 0.881569783711827
+    - 0.0499497789975886
+    - 1.4779258138698275
+    - 9.2 
+
+data:
+  dataset_dir: /home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/test
+  label_path: /home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/test_metadata.csv
+  train_ratio: 0.8
+  seed: 42
+  batch_size: 64
+  shuffle: true
+  num_workers: 0
+  pin_memory: false
+
+model:
+  num_classes: 13
