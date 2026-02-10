@@ -11,6 +11,7 @@ class Trainer:
         self.config = config
         self.model = model
         self.evaluation = evaluation
+        print(f"MODE EVALUATION : {self.evaluation}")
 
         self.device = next(model.parameters()).device
         self.train_loader = dataloaders["train"]
@@ -29,7 +30,7 @@ class Trainer:
         self.warmup_steps = config.get("warmup_steps", 0)
         self.warmup_ratio = config.get("warmup_ratio", 0.1)
 
-        self.loss_name = config.get("loss", "cross_entropy").lower()
+        self.loss_name = config.get("loss", "focal").lower()
 
         self.gamma = config.get("gamma", 0.1)
         self.step_size_steps = config.get("step_size_steps", 1000)
@@ -66,7 +67,7 @@ class Trainer:
         self.resume_from = config.get("resume_from", None)
         self.resume = bool(config.get("resume", True))
 
-        if self.resume_from:
+        if self.resume and self.evaluation:
             self._load_checkpoint(self.resume_from, resume=self.resume)
             print(f"Resumed from checkpoint: {self.resume_from}")
 
@@ -140,12 +141,14 @@ class Trainer:
 
         raise ValueError(f"Scheduler {self.scheduler_name} not supported.")
 
-    def _build_criterion(self, loss_name="cross_entropy", label_smoothing=0.1, gamma=2.0, alpha=None):
+    def _build_criterion(self, loss_name="focal", label_smoothing=0.0, gamma=2.0, alpha=None):
         w = self.weights
         w = torch.tensor(w, dtype=torch.float32, device=self.device) if w is not None else None
 
+        loss_name = str(loss_name).lower()
+
         if loss_name == "cross_entropy":
-            if label_smoothing and label_smoothing > 0:
+            if label_smoothing is not None and float(label_smoothing) > 0:
                 return nn.CrossEntropyLoss(weight=w, label_smoothing=float(label_smoothing))
             return nn.CrossEntropyLoss(weight=w)
 
@@ -156,13 +159,20 @@ class Trainer:
             elif w is not None:
                 alpha_t = w
 
+            if alpha_t is not None:
+                alpha_t = alpha_t / (alpha_t.mean() + 1e-12)
+
             def focal_loss(logits, targets):
                 ce = nn.functional.cross_entropy(logits, targets, reduction="none")
-                pt = torch.exp(-ce)
+                logpt = -ce
+                pt = logpt.exp()
+                modulating = (1.0 - pt).clamp(0.0, 1.0).pow(float(gamma))
                 if alpha_t is not None:
                     at = alpha_t.gather(0, targets)
-                    return (at * (1 - pt) ** gamma * ce).mean()
-                return ((1 - pt) ** gamma * ce).mean()
+                    loss = at * modulating * ce
+                else:
+                    loss = modulating * ce
+                return loss.mean()
 
             return focal_loss
 

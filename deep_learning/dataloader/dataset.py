@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 import pandas as pd
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
 from torchvision import transforms
 from sklearn.model_selection import train_test_split
 
@@ -135,7 +135,10 @@ def get_loaders(
     batch_size: int = 32,
     shuffle: bool = True,
     num_workers: int = 2,
-    pin_memory: bool = True
+    pin_memory: bool = True,
+    use_weighted_sampler: bool = True,
+    num_classes: int = 13,
+    sampler_power: float = 0.5,
 ):
     files = get_filespath(dataset_dir)
     if not test:
@@ -145,36 +148,73 @@ def get_loaders(
         train_files, val_files = split_files_stratified(files, labels, train_ratio, seed)
         train_dataset = IM05_Dataset(train_files, labels=labels, evaluation=False, train=True)
         val_dataset = IM05_Dataset(val_files, labels=labels, evaluation=False, train=False)
+
+        sampler = None
+        if use_weighted_sampler:
+            y_train = np.array([labels[os.path.basename(f)] for f in train_files], dtype=np.int64)
+            counts = np.bincount(y_train, minlength=num_classes).astype(np.float32)
+            class_w = 1.0 / np.power(counts + 1e-6, sampler_power)
+            sample_w = class_w[y_train]
+            sampler = WeightedRandomSampler(
+                weights=torch.tensor(sample_w, dtype=torch.double),
+                num_samples=len(sample_w),
+                replacement=True,
+            )
+
         train_loader = DataLoader(
-            train_dataset, batch_size=batch_size, shuffle=shuffle,
-            num_workers=num_workers, pin_memory=pin_memory
+            train_dataset,
+            batch_size=batch_size,
+            shuffle=(shuffle and sampler is None),
+            sampler=sampler,
+            num_workers=num_workers,
+            pin_memory=pin_memory,
         )
+
         val_loader = DataLoader(
-            val_dataset, batch_size=batch_size, shuffle=False,
-            num_workers=num_workers, pin_memory=pin_memory
+            val_dataset,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=num_workers,
+            pin_memory=pin_memory,
         )
         return train_loader, val_loader
-    else:
-        test_dataset = IM05_Dataset(files, labels=None, evaluation=True, train=False)
-        test_loader = DataLoader(
-            test_dataset, batch_size=batch_size, shuffle=False,
-            num_workers=num_workers, pin_memory=pin_memory
-        )
-        return test_loader
+
+    test_dataset = IM05_Dataset(files, labels=None, evaluation=True, train=False)
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+    )
+    return test_loader
 
 if __name__ == "__main__":
     train_dir = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/train"
     train_csv = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/train_metadata.csv"
 
     train_loader, val_loader = get_loaders(
-        train_dir, train_csv, test=False, train_ratio=0.8, seed=42,
-        batch_size=32, num_workers=2, pin_memory=True
+        train_dir,
+        train_csv,
+        test=False,
+        train_ratio=0.8,
+        seed=42,
+        batch_size=32,
+        num_workers=2,
+        pin_memory=True,
+        use_weighted_sampler=True,
+        num_classes=13,
+        sampler_power=0.5,
     )
 
     test_dir = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/test"
     test_csv = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/test_metadata.csv"
 
     test_loader = get_loaders(
-        test_dir, test_csv, test=True,
-        batch_size=32, num_workers=2, pin_memory=True
+        test_dir,
+        test_csv,
+        test=True,
+        batch_size=32,
+        num_workers=2,
+        pin_memory=True,
     )

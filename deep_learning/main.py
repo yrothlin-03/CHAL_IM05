@@ -76,7 +76,7 @@ def main(config: Dict[str, Any]):
 
     if evaluation:
         preds = trainer.evaluate()
-        create_submission_file(preds, Path("/home/infres/yrothlin-24/CHAL_IM05/submissions/submission2.csv"))
+        create_submission_file(preds, Path("/home/infres/yrothlin-24/CHAL_IM05/submissions/submission3.csv"))
 
         for i, (k, v) in enumerate(preds.items()):
             if i >= 50:
