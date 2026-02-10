@@ -1,4 +1,5 @@
 import os
+import time
 import torch
 import torch.nn as nn
 import numpy as np
@@ -28,6 +29,8 @@ class Trainer:
         self.warmup_steps = config.get("warmup_steps", 0)
         self.warmup_ratio = config.get("warmup_ratio", 0.1)
 
+        self.loss_name = config.get("loss", "cross_entropy").lower()
+
         self.gamma = config.get("gamma", 0.1)
         self.step_size_steps = config.get("step_size_steps", 1000)
         self.log_step = config.get("log_step", 50)
@@ -54,7 +57,7 @@ class Trainer:
 
             self.optimizer = self._build_optimizer()
             self.scheduler = self._build_scheduler()
-            self.criterion = self._build_criterion(label_smoothing=self.label_smoothing)
+            self.criterion = self._build_criterion(label_smoothing=self.label_smoothing, loss_name=self.loss_name, alpha=self.weights)
 
             self.scaler = torch.cuda.amp.GradScaler(enabled=self.use_amp)
 
@@ -137,12 +140,33 @@ class Trainer:
 
         raise ValueError(f"Scheduler {self.scheduler_name} not supported.")
 
-    def _build_criterion(self, label_smoothing=0.1):
+    def _build_criterion(self, loss_name="cross_entropy", label_smoothing=0.1, gamma=2.0, alpha=None):
         w = self.weights
         w = torch.tensor(w, dtype=torch.float32, device=self.device) if w is not None else None
-        if label_smoothing and label_smoothing > 0:
-            return nn.CrossEntropyLoss(weight=w, label_smoothing=float(label_smoothing))
-        return nn.CrossEntropyLoss(weight=w)
+
+        if loss_name == "cross_entropy":
+            if label_smoothing and label_smoothing > 0:
+                return nn.CrossEntropyLoss(weight=w, label_smoothing=float(label_smoothing))
+            return nn.CrossEntropyLoss(weight=w)
+
+        if loss_name == "focal":
+            alpha_t = None
+            if alpha is not None:
+                alpha_t = torch.tensor(alpha, dtype=torch.float32, device=self.device)
+            elif w is not None:
+                alpha_t = w
+
+            def focal_loss(logits, targets):
+                ce = nn.functional.cross_entropy(logits, targets, reduction="none")
+                pt = torch.exp(-ce)
+                if alpha_t is not None:
+                    at = alpha_t.gather(0, targets)
+                    return (at * (1 - pt) ** gamma * ce).mean()
+                return ((1 - pt) ** gamma * ce).mean()
+
+            return focal_loss
+
+        raise ValueError(f"Unknown loss_name: {loss_name}")
 
     def _format_metrics(self, m: dict, top_k: int = 5):
         bacc = float(m.get("bacc", 0.0))
@@ -169,18 +193,33 @@ class Trainer:
         total_loss = 0.0
         n_batch = len(self.train_loader) if self.max_step_train is None else min(len(self.train_loader), self.max_step_train)
 
-        for step, (inputs, targets) in enumerate(self.train_loader):
-            if self.max_step_train is not None and step >= self.max_step_train:
-                break
+        data_times = []
+        infer_times = []
+        it = iter(self.train_loader)
+
+        for step in range(n_batch):
+            t0 = time.perf_counter()
+            inputs, targets = next(it)
+            dt = time.perf_counter() - t0
+            if step < 30:
+                data_times.append(dt)
 
             inputs = inputs.to(self.device, non_blocking=True)
             targets = targets.to(self.device, non_blocking=True)
 
             self.optimizer.zero_grad(set_to_none=True)
 
+            if step < 30 and self.device.type == "cuda":
+                torch.cuda.synchronize()
+            t1 = time.perf_counter()
             with torch.autocast(device_type=self.device.type, enabled=self.use_amp):
                 outputs = self.model(inputs)
                 loss = self.criterion(outputs, targets)
+            if step < 30 and self.device.type == "cuda":
+                torch.cuda.synchronize()
+            itime = time.perf_counter() - t1
+            if step < 30:
+                infer_times.append(itime)
 
             self.scaler.scale(loss).backward()
 
@@ -200,6 +239,9 @@ class Trainer:
             if (step + 1) % self.log_step == 0:
                 lr = self.optimizer.param_groups[0]["lr"]
                 print(f"Step {step+1}/{n_batch} | loss={loss.item():.4f} lr={lr:.6f}")
+
+        if data_times and infer_times:
+            print(f"Timing (first {min(30, n_batch)} train batches) | data={sum(data_times)/len(data_times):.6f}s infer={sum(infer_times)/len(infer_times):.6f}s")
 
         return total_loss / max(1, n_batch)
 

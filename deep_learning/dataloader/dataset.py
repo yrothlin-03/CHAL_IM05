@@ -1,13 +1,39 @@
-import torch
-from torch.utils.data import Dataset
-import pandas as pd
-import cv2
-import numpy as np
-from typing import List
 import os
 import sys
 import contextlib
+from typing import List, Dict, Tuple, Optional
+
 import cv2
+import numpy as np
+import pandas as pd
+import torch
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms
+from sklearn.model_selection import train_test_split
+
+
+IMAGENET_MEAN = (0.485, 0.456, 0.406)
+IMAGENET_STD = (0.229, 0.224, 0.225)
+
+train_tfms = transforms.Compose([
+    transforms.ToPILImage(),
+    transforms.Resize(256),
+    transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.RandomVerticalFlip(p=0.5),
+    transforms.RandomRotation(180, fill=128),
+    transforms.ColorJitter(brightness=0.15, contrast=0.15, saturation=0.10, hue=0.02),
+    transforms.ToTensor(),
+    transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
+])
+
+val_tfms = transforms.Compose([
+    transforms.ToPILImage(),
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
+])
 
 @contextlib.contextmanager
 def _filter_stderr(substr: str):
@@ -29,144 +55,126 @@ def imread_silent(path: str):
     with _filter_stderr("Corrupt JPEG data"):
         return cv2.imread(path, cv2.IMREAD_COLOR)
 
-
 label2id = {
-    "SNE": 0,   # Segmented neutrophil
-    "LY": 1,    # Lymphocyte
-    "MO": 2,    # Monocyte
-    "EO": 3,    # Eosinophil
-    "BA": 4,    # Basophil
-    "VLY": 5,   # Variant lymphocyte
-    "BNE": 6,   # Band-form neutrophil
-    "MMY": 7,   # Metamyelocyte
-    "MY": 8,    # Myelocyte
-    "PMY": 9,   # Promyelocyte
-    "BL": 10,   # Blast cell
-    "PC": 11,   # Plasma cell
-    "PLY": 12,  # Prolymphocyte
+    "SNE": 0, "LY": 1, "MO": 2, "EO": 3, "BA": 4, "VLY": 5, "BNE": 6,
+    "MMY": 7, "MY": 8, "PMY": 9, "BL": 10, "PC": 11, "PLY": 12,
 }
 
-
-
-def get_filespath(dataset_dir: str):
+def get_filespath(dataset_dir: str) -> List[str]:
     files = []
-    for dirpath, dirnames, filenames in os.walk(dataset_dir):
+    for dirpath, _, filenames in os.walk(dataset_dir):
         for filename in filenames:
-            if filename.endswith('.png'):
+            if filename.endswith(".png"):
                 files.append(os.path.join(dirpath, filename))
+    files.sort()
     return files
 
-def get_labels(csv_path: str) -> dict:
+def get_labels(csv_path: str) -> Dict[str, int]:
     df = pd.read_csv(csv_path)
     labels = {}
-    for index, row in df.iterrows():
-        labels[row['ID']] = label2id[str(row['label'])]
+    for _, row in df.iterrows():
+        labels[str(row["ID"])] = label2id[str(row["label"])]
     return labels
 
-    
-
 class IM05_Dataset(Dataset):
-    def __init__(self, files: List[str] = None, label_path: str = None, evaluation: bool = False):
+    def __init__(
+        self,
+        files: List[str],
+        labels: Optional[Dict[str, int]] = None,
+        evaluation: bool = False,
+        train: bool = True,
+    ):
         self.files = files
-        self.labels = get_labels(label_path) if not evaluation else None
+        self.labels = labels
         self.evaluation = evaluation
+        self.transform = train_tfms if train else val_tfms
+        if not self.evaluation and self.labels is None:
+            raise ValueError
 
     def __len__(self):
         return len(self.files)
 
-    
-    def _preprocess_image(self, img):
+    def _preprocess_image(self, img: np.ndarray) -> torch.Tensor:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = cv2.resize(img, (256, 256))
-        img = img.astype(np.float32) / 255.0
-        img = np.transpose(img, (2, 0, 1))  # (C, H, W)
-        return torch.from_numpy(img)
+        img = self.transform(img)
+        return img
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int):
         img_path = self.files[idx]
         img = imread_silent(img_path)
-
         if img is None:
-            raise RuntimeError(f"Image illisible : {img_path}")
-
+            raise RuntimeError(img_path)
         img = self._preprocess_image(img)
         filename = os.path.basename(img_path)
         if self.evaluation:
             return img, filename
-        label = self.labels[filename] if not self.evaluation else None
+        label = self.labels[filename]
         return img, label
 
-    
-
-
-def split_files(files: List[str], train_ratio: float = 0.8, seed: int = None):
-    if seed is not None:
-        np.random.seed(seed)
-    np.random.shuffle(files)
-    total_files = len(files)
-    train_size = int(total_files * train_ratio)
-    train_files = files[:train_size]
-    val_files = files[train_size:]
-    return train_files, val_files
-
+def split_files_stratified(
+    files: List[str],
+    labels: Dict[str, int],
+    train_ratio: float = 0.8,
+    seed: int = 42,
+) -> Tuple[List[str], List[str]]:
+    y = [labels[os.path.basename(f)] for f in files]
+    train_files, val_files = train_test_split(
+        files,
+        train_size=train_ratio,
+        random_state=seed,
+        stratify=y
+    )
+    return list(train_files), list(val_files)
 
 def get_loaders(
     dataset_dir: str,
     label_path: str,
-    test: bool = True, 
+    test: bool = False,
     train_ratio: float = 0.8,
     seed: int = 42,
-    batch_size: int = 10,
+    batch_size: int = 32,
     shuffle: bool = True,
-    num_workers: int = 0,
-    pin_memory: bool = False
+    num_workers: int = 2,
+    pin_memory: bool = True
 ):
     files = get_filespath(dataset_dir)
     if not test:
-        train_files, val_files = split_files(files, train_ratio, seed)
-        train_dataset = IM05_Dataset(train_files, label_path, evaluation = test)
-        val_dataset = IM05_Dataset(val_files, label_path)
-        train_loader = torch.utils.data.DataLoader(
-            train_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, pin_memory=pin_memory
+        labels = get_labels(label_path) if (label_path and os.path.exists(label_path)) else None
+
+    if not test:
+        train_files, val_files = split_files_stratified(files, labels, train_ratio, seed)
+        train_dataset = IM05_Dataset(train_files, labels=labels, evaluation=False, train=True)
+        val_dataset = IM05_Dataset(val_files, labels=labels, evaluation=False, train=False)
+        train_loader = DataLoader(
+            train_dataset, batch_size=batch_size, shuffle=shuffle,
+            num_workers=num_workers, pin_memory=pin_memory
         )
-        val_loader = torch.utils.data.DataLoader(
-            val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory
+        val_loader = DataLoader(
+            val_dataset, batch_size=batch_size, shuffle=False,
+            num_workers=num_workers, pin_memory=pin_memory
         )
         return train_loader, val_loader
     else:
-        dataset = IM05_Dataset(files, label_path, evaluation= test)
-        dataloader = torch.utils.data.DataLoader(
-            dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory
-        )     
-        return dataloader
-
-
+        test_dataset = IM05_Dataset(files, labels=None, evaluation=True, train=False)
+        test_loader = DataLoader(
+            test_dataset, batch_size=batch_size, shuffle=False,
+            num_workers=num_workers, pin_memory=pin_memory
+        )
+        return test_loader
 
 if __name__ == "__main__":
-    dataset_dir = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/train"
-    label_path = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/train_metadata.csv"
-    train_loader, val_loader = get_loaders(dataset_dir, label_path, train_ratio = 1.0, test=False)
-    print(f"Train dataset size: {len(train_loader.dataset)}")
-    y = {}
-    for imgs, labels in train_loader:
-        for label in labels:
-            label = label.item()
-            if label not in y:
-                y[label] = 0
-            y[label] += 1
-    print(f"Train distribution : {y}")
-    y = {}
-    for imgs, labels in val_loader:
-        for label in labels:
-            label = label.item()
-            if label not in y:
-                y[label] = 0
-            y[label] += 1
-    print(f"Validation distribution : {y}")
+    train_dir = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/train"
+    train_csv = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/train_metadata.csv"
 
-    dataset_dir = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/test"
-    label_path = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/test_metadata.csv"
-    test_loader = get_loaders(dataset_dir, label_path, train_ratio = 1.0, test = True)
-    print(f"Test dataset size: {len(test_loader.dataset)}")
+    train_loader, val_loader = get_loaders(
+        train_dir, train_csv, test=False, train_ratio=0.8, seed=42,
+        batch_size=32, num_workers=2, pin_memory=True
+    )
 
+    test_dir = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/test"
+    test_csv = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/test_metadata.csv"
 
+    test_loader = get_loaders(
+        test_dir, test_csv, test=True,
+        batch_size=32, num_workers=2, pin_memory=True
+    )

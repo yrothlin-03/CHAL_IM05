@@ -2,19 +2,19 @@ evaluation: True
 
 training:
   save_ckpt: true
-  ckpt_dir: /home/infres/yrothlin-24/CHAL_IM05/checkpoints
+  ckpt_dir: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/resnet_w_preprocessing
   ckpt_every: 1
-  resume_from: checkpoints/best.pt
+  resume_from: checkpoints/resnet_w_preprocessing/best.pt
   resume: true
   monitor: macro_f1
+  loss: cross_entropy
   lr: 0.001
   weight_decay: 0.01
-  num_epochs: 10
+  num_epochs: 20
   optimizer: adamw
   scheduler: cosine
   use_amp: false
   grad_clip: null
-  label_smoothing: 0.1
   log_step: 50
   label_smoothing: 0.0
   weights:
@@ -39,8 +39,8 @@ data:
   seed: 42
   batch_size: 64
   shuffle: true
-  num_workers: 0
-  pin_memory: false
+  num_workers: 4
+  pin_memory: True
 
 model:
   num_classes: 13
