@@ -5,12 +5,12 @@ training:
   ckpt_dir: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/resnet50_w_preprocessing
   ckpt_every: 1
   resume_from: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/resnet50_w_preprocessing/best.pt
-  resume: True
+  resume: False
   monitor: macro_f1
   loss: focal
   lr: 0.001
   weight_decay: 0.01
-  num_epochs: 30
+  num_epochs: 50
   optimizer: adamw
   scheduler: cosine
   use_amp: false
@@ -33,8 +33,6 @@ training:
     - 4.536496
 
 data:
-  dataset_dir: /home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/test
-  label_path: /home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/test_metadata.csv
   train_ratio: 0.8
   seed: 42
   batch_size: 64

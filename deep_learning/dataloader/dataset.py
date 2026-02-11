@@ -127,8 +127,6 @@ def split_files_stratified(
     return list(train_files), list(val_files)
 
 def get_loaders(
-    dataset_dir: str,
-    label_path: str,
     test: bool = False,
     train_ratio: float = 0.8,
     seed: int = 42,
@@ -140,6 +138,14 @@ def get_loaders(
     num_classes: int = 13,
     sampler_power: float = 0.5,
 ):
+
+    if test:
+        dataset_dir = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/test"
+        label_path = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/test_metadata.csv"
+    else:
+        dataset_dir = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/train"
+        label_path = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/train_metadata.csv"
+
     files = get_filespath(dataset_dir)
     if not test:
         labels = get_labels(label_path) if (label_path and os.path.exists(label_path)) else None
@@ -190,12 +196,8 @@ def get_loaders(
     return test_loader
 
 if __name__ == "__main__":
-    train_dir = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/train"
-    train_csv = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/train_metadata.csv"
 
     train_loader, val_loader = get_loaders(
-        train_dir,
-        train_csv,
         test=False,
         train_ratio=0.8,
         seed=42,
@@ -207,12 +209,8 @@ if __name__ == "__main__":
         sampler_power=0.5,
     )
 
-    test_dir = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/test"
-    test_csv = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/test_metadata.csv"
 
     test_loader = get_loaders(
-        test_dir,
-        test_csv,
         test=True,
         batch_size=32,
         num_workers=2,

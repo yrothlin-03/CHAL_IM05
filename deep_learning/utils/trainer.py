@@ -76,22 +76,6 @@ class Trainer:
         msd = ckpt.get("model_state_dict", ckpt)
         self.model.load_state_dict(msd, strict=True)
 
-        # if not resume:
-        #     return
-
-        # if ckpt.get("optimizer_state_dict") is not None and self.optimizer is not None:
-        #     self.optimizer.load_state_dict(ckpt["optimizer_state_dict"])
-
-        # if ckpt.get("scheduler_state_dict") is not None and self.scheduler is not None:
-        #     self.scheduler.load_state_dict(ckpt["scheduler_state_dict"])
-
-        # if ckpt.get("scaler_state_dict") is not None and self.scaler is not None:
-        #     self.scaler.load_state_dict(ckpt["scaler_state_dict"])
-
-        # self.global_epoch = int(ckpt.get("epoch", 0))
-        # self.global_step = int(ckpt.get("global_step", 0))
-        # self.best_score = float(ckpt.get("best_score", self.best_score))
-
     def _save_checkpoint(self, name: str, val_metrics: dict | None = None):
         if not self.save_ckpt:
             return
@@ -110,12 +94,14 @@ class Trainer:
             },
             path,
         )
+        print(f"Checkpoint saved: {path}")
 
     def _build_optimizer(self):
+        params = [p for p in self.model.parameters() if p.requires_grad]
         if self.optimizer_name == "adamw":
-            return torch.optim.AdamW(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
+            return torch.optim.AdamW(params, lr=self.lr, weight_decay=self.weight_decay)
         if self.optimizer_name == "sgd":
-            return torch.optim.SGD(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay, momentum=0.9)
+            return torch.optim.SGD(params, lr=self.lr, weight_decay=self.weight_decay, momentum=0.9)
         raise ValueError(f"Optimizer {self.optimizer_name} not supported.")
 
     def _build_scheduler(self):
@@ -197,6 +183,16 @@ class Trainer:
             s += "\n  worst: " + pack(worst)
 
         return s
+
+
+    def _freeze_backbone(self): 
+        for param in self.model.backbone.parameters():
+            param.requires_grad = False
+
+    def _unfreeze_backbone(self):
+        for param in self.model.backbone.parameters():
+            param.requires_grad = True
+
 
     def train_one_epoch(self):
         self.model.train()
@@ -314,6 +310,18 @@ class Trainer:
 
     def train(self):
         for epoch in range(1, self.num_epochs + 1):
+            if epoch == 1:
+                self._freeze_backbone()
+                self.optimizer = self._build_optimizer()
+                self.scheduler = self._build_scheduler()
+                print(f"Backbone frozen at epoch {epoch}. Trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad)}")
+            
+            if epoch==6:
+                self._unfreeze_backbone()
+                self.optimizer = self._build_optimizer()
+                self.scheduler = self._build_scheduler()
+                print(f"Backbone unfrozen at epoch {epoch}. Trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad)}")
+
             self.global_epoch = epoch
             train_loss = self.train_one_epoch()
             val_loss, val_metrics = self.validate_one_epoch()
