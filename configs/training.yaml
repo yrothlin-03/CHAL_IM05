@@ -5,7 +5,7 @@ training:
   ckpt_dir: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/resnet50_w_preprocessing
   ckpt_every: 1
   resume_from: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/resnet50_w_preprocessing/best.pt
-  resume: False
+  resume: True
   monitor: macro_f1
   loss: focal
   lr: 0.001
