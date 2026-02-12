@@ -35,6 +35,18 @@ val_tfms = transforms.Compose([
     transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
 ])
 
+
+# transf = transforms.Compose([
+#     transforms.ToPILImage(),
+#     transforms.Resize((338, 338)),   
+#     transforms.Equalize(),   
+#     transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
+#     transforms.RandomHorizontalFlip(p=0.5),
+#     transforms.RandomVerticalFlip(p=0.5),
+#     transforms.RandomRotation(180, fill=128),           
+#     transforms.ToTensor(),        
+# ])
+
 @contextlib.contextmanager
 def _filter_stderr(substr: str):
     r_fd, w_fd = os.pipe()
@@ -88,6 +100,7 @@ class IM05_Dataset(Dataset):
         self.labels = labels
         self.evaluation = evaluation
         self.transform = train_tfms if train else val_tfms
+        # self.transform = transf
         if not self.evaluation and self.labels is None:
             raise ValueError
 

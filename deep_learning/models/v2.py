@@ -7,7 +7,7 @@ class BackboneV2(nn.Module):
     def __init__(self, num_classes: int):
         super().__init__()
         backbone = resnet50(weights=ResNet50_Weights.DEFAULT)
-
+        self.features = backbone.fc.in_features 
         self.backbone = nn.Sequential(*list(backbone.children())[:-1])
         # self.head = nn.Linear(backbone.fc.in_features, num_classes)
 

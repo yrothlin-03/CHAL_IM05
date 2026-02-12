@@ -310,17 +310,17 @@ class Trainer:
 
     def train(self):
         for epoch in range(1, self.num_epochs + 1):
-            if epoch == 1:
-                self._freeze_backbone()
-                self.optimizer = self._build_optimizer()
-                self.scheduler = self._build_scheduler()
-                print(f"Backbone frozen at epoch {epoch}. Trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad)}")
+            # if epoch == 1:
+            #     self._freeze_backbone()
+            #     self.optimizer = self._build_optimizer()
+            #     self.scheduler = self._build_scheduler()
+            #     print(f"Backbone frozen at epoch {epoch}. Trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad)}")
             
-            if epoch==6:
-                self._unfreeze_backbone()
-                self.optimizer = self._build_optimizer()
-                self.scheduler = self._build_scheduler()
-                print(f"Backbone unfrozen at epoch {epoch}. Trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad)}")
+            # if epoch==6:
+            #     self._unfreeze_backbone()
+            #     self.optimizer = self._build_optimizer()
+            #     self.scheduler = self._build_scheduler()
+            #     print(f"Backbone unfrozen at epoch {epoch}. Trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad)}")
 
             self.global_epoch = epoch
             train_loss = self.train_one_epoch()
@@ -331,7 +331,7 @@ class Trainer:
             self.history["val_loss"].append(val_loss)
             self.history["val_metrics"].append(val_metrics)
 
-            if self.save_ckpt and (epoch % self.ckpt_every == 0):
+            if self.save_ckpt and (self.global_epoch == self.num_epochs):
                 self._save_checkpoint("last.pt", val_metrics)
 
             score = float(val_metrics.get(self.monitor, float("-inf")))
