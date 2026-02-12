@@ -50,6 +50,12 @@ def create_submission_file(preds: Dict[str, Any], output_path: Path):
     df = pd.DataFrame(rows)
     df.to_csv(output_path, index=False)
 
+def get_val_distribution(val_loader):
+    distribution = {i: 0 for i in range(13)}
+    for _, labels in val_loader:
+        for label in labels:
+            distribution[int(label)] += 1
+    return distribution
 
 def main(config: Dict[str, Any]):
 
@@ -59,24 +65,16 @@ def main(config: Dict[str, Any]):
     model_config = config["model"]
     training_config = config["training"]
 
+
     if evaluation:
+        model = Model(**model_config).to(device)
         dataloader = get_loaders(**data_config, test=True)
         dataloaders = {"train": None, "val": None, "test": dataloader}
         print(f"Succesfully loaded test data with size: {len(dataloaders['test'].dataset) if dataloaders['test'] else 'N/A'}")
-    else:
-        train_loader, val_loader = get_loaders(**data_config, test=False)
-        dataloaders = {"train": train_loader, "val": val_loader, "test": None}
-        print(f"Succesfully loaded data with sizes : train={len(dataloaders['train'].dataset) if dataloaders['train'] else 'N/A'}, val={len(dataloaders['val'].dataset) if dataloaders['val'] else 'N/A'}, test={len(dataloaders['test'].dataset) if dataloaders['test'] else 'N/A'}")
-
-    model = Model(**model_config).to(device)
-    print(f"Model initialized with {sum(p.numel() for p in model.parameters())} parameters.")
-
-    trainer = Trainer(model=model, dataloaders=dataloaders, config=training_config, evaluation=evaluation)
-    print(f"Trainer initialized with config: {training_config}")
-
-    if evaluation:
+        trainer = Trainer(model=model, dataloaders=dataloaders, config=training_config, evaluation=evaluation)
+        print(f"Trainer initialized with config: {training_config}")
         preds = trainer.evaluate()
-        create_submission_file(preds, Path("/home/infres/yrothlin-24/CHAL_IM05/submissions/submission5.csv"))
+        create_submission_file(preds, Path("/home/infres/yrothlin-24/CHAL_IM05/submissions/submission6.csv"))
 
         for i, (k, v) in enumerate(preds.items()):
             if i >= 50:
@@ -84,8 +82,29 @@ def main(config: Dict[str, Any]):
             print(k, v)
 
     else:
+        # for fold in range(5):
+        #     fold_config = deepcopy(training_config)
+        #     fold_config["ckpt_dir"] = str(Path(training_config.get("ckpt_dir", "checkpoints")) / f"fold_{fold}")
+        #     model = Model(**model_config).to(device)
+        #     print(f"Model initialized with {sum(p.numel() for p in model.parameters())} parameters.")
+        #     train_loader, val_loader = get_loaders(**data_config, test=False, n_splits=5, fold_index=fold)
+        #     dataloaders = {"train": train_loader, "val": val_loader, "test": None}
+        #     val_distri = get_val_distribution(val_loader)
+        #     print(f"Validation set distribution: {val_distri}")
+        #     print(f"Succesfully loaded data with sizes : train={len(dataloaders['train'].dataset) if dataloaders['train'] else 'N/A'}, val={len(dataloaders['val'].dataset) if dataloaders['val'] else 'N/A'}, test={len(dataloaders['test'].dataset) if dataloaders['test'] else 'N/A'}")
+        #     print(f"!!!!!!! Checkpoint directory for fold {fold}: {fold_config['ckpt_dir']}")
+        #     trainer = Trainer(model=model, dataloaders=dataloaders, config=fold_config, evaluation=evaluation)
+        #     print(f"Trainer initialized with config: {fold_config}")
+        #     trainer.train()
+
+        model = Model(**model_config).to(device)
+        train_loader, val_loader = get_loaders(**data_config, test=False)
+        dataloaders = {"train": train_loader, "val": val_loader, "test": None}
+        print(f"Succesfully loaded data with sizes : train={len(dataloaders['train'].dataset) if dataloaders['train'] else 'N/A'}, val={len(dataloaders['val'].dataset) if dataloaders['val'] else 'N/A'}, test={len(dataloaders['test'].dataset) if dataloaders['test'] else 'N/A'}")
+        trainer = Trainer(model=model, dataloaders=dataloaders, config=training_config, evaluation=evaluation)
+        print(f"Trainer initialized with config: {training_config}")
         trainer.train()
-    
+
 
 
 

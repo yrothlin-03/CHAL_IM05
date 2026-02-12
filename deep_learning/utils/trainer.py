@@ -17,6 +17,16 @@ class Trainer:
         self.train_loader = dataloaders["train"]
         self.val_loader = dataloaders["val"]
         self.test_loader = dataloaders.get("test", None)
+        if self.test_loader is not None:
+            x = next(iter(self.test_loader))[0].to(self.device, non_blocking=True)
+        elif self.train_loader is not None:
+            x = next(iter(self.train_loader))[0].to(self.device, non_blocking=True) 
+        with torch.no_grad():
+            if x is not None: 
+                self.model(x)
+        print(f"Model parameters after init : {sum(p.numel() for p in self.model.parameters())} parameters.")
+        print(f"Backbone parameters: {sum(p.numel() for p in self.model.backbone.parameters())} parameters.")
+        print(f"Head parameters: {sum(p.numel() for p in self.model.head.parameters())} parameters.")
 
         self.use_amp = config.get("use_amp", False)
         self.grad_clip = config.get("grad_clip", None)
@@ -25,6 +35,8 @@ class Trainer:
 
         self.weight_decay = config.get("weight_decay", 0.01)
         self.lr = config.get("lr", 1e-3)
+        self.bb_lr = config.get("bb_lr", 0.0001)
+        self.head_lr = config.get("head_lr", 0.001)
         self.num_epochs = config.get("num_epochs", 20)
 
         self.warmup_steps = config.get("warmup_steps", 0)
@@ -71,6 +83,7 @@ class Trainer:
             self._load_checkpoint(self.resume_from, resume=self.resume)
             print(f"Resumed from checkpoint: {self.resume_from}")
 
+
     def _load_checkpoint(self, path: str, resume: bool = True):
         ckpt = torch.load(path, map_location=self.device, weights_only=False)
         msd = ckpt.get("model_state_dict", ckpt)
@@ -97,11 +110,36 @@ class Trainer:
         print(f"Checkpoint saved: {path}")
 
     def _build_optimizer(self):
-        params = [p for p in self.model.parameters() if p.requires_grad]
+        backbone_params = []
+        head_params = []
+
+        for name, param in self.model.named_parameters():
+            if not param.requires_grad:
+                continue
+            if "backbone" in name:
+                backbone_params.append(param)
+            else:
+                head_params.append(param)
+
         if self.optimizer_name == "adamw":
-            return torch.optim.AdamW(params, lr=self.lr, weight_decay=self.weight_decay)
+            return torch.optim.AdamW(
+                [
+                    {"params": backbone_params, "lr": self.bb_lr},
+                    {"params": head_params, "lr": self.head_lr},
+                ],
+                weight_decay=self.weight_decay,
+            )
+
         if self.optimizer_name == "sgd":
-            return torch.optim.SGD(params, lr=self.lr, weight_decay=self.weight_decay, momentum=0.9)
+            return torch.optim.SGD(
+                [
+                    {"params": backbone_params, "lr": self.bb_lr},
+                    {"params": head_params, "lr": self.head_lr},
+                ],
+                momentum=0.9,
+                weight_decay=self.weight_decay,
+            )
+
         raise ValueError(f"Optimizer {self.optimizer_name} not supported.")
 
     def _build_scheduler(self):
@@ -243,8 +281,9 @@ class Trainer:
             self.global_step += 1
 
             if (step + 1) % self.log_step == 0:
-                lr = self.optimizer.param_groups[0]["lr"]
-                print(f"Step {step+1}/{n_batch} | loss={loss.item():.4f} lr={lr:.6f}")
+                lr_bb = self.optimizer.param_groups[0]["lr"]
+                lr_head = self.optimizer.param_groups[1]["lr"]
+                print(f"Step {step+1}/{n_batch} | loss={total_loss/(step+1):.4f} bb_lr={lr_bb:.6f} head_lr={lr_head:.6f}")
 
         if data_times and infer_times:
             print(f"Timing (first {min(30, n_batch)} train batches) | data={sum(data_times)/len(data_times):.6f}s infer={sum(infer_times)/len(infer_times):.6f}s")
@@ -316,7 +355,7 @@ class Trainer:
             #     self.scheduler = self._build_scheduler()
             #     print(f"Backbone frozen at epoch {epoch}. Trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad)}")
             
-            # if epoch==6:
+            # if epoch==3:
             #     self._unfreeze_backbone()
             #     self.optimizer = self._build_optimizer()
             #     self.scheduler = self._build_scheduler()
@@ -337,4 +376,5 @@ class Trainer:
             score = float(val_metrics.get(self.monitor, float("-inf")))
             if self.save_ckpt and score > self.best_score:
                 self.best_score = score
+                print(f"New best {self.monitor}: {self.best_score:.4f} at epoch {epoch}. Saving checkpoint.")
                 self._save_checkpoint("best.pt", val_metrics)

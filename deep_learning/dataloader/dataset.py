@@ -10,10 +10,35 @@ import torch
 from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
 from torchvision import transforms
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedKFold
+import torchvision.transforms.functional as F
 
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
+
+# train_tfms = transforms.Compose([
+#     transforms.ToPILImage(),
+#     transforms.Resize((338, 338)),
+#     transforms.Lambda(lambda img: F.equalize(img)),
+#     transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
+#     transforms.RandomHorizontalFlip(0.5),
+#     transforms.RandomVerticalFlip(0.5),
+#     transforms.RandomRotation(180, fill=128),
+#     transforms.ToTensor(),
+#     transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
+# ])
+
+# val_tfms = transforms.Compose([
+#     transforms.ToPILImage(),
+#     transforms.Resize((338, 338)),
+#     transforms.Lambda(lambda img: F.equalize(img)),
+#     transforms.CenterCrop(224),
+#     transforms.ToTensor(),
+#     transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
+# ])
+
+
 
 train_tfms = transforms.Compose([
     transforms.ToPILImage(),
@@ -34,18 +59,6 @@ val_tfms = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
 ])
-
-
-# transf = transforms.Compose([
-#     transforms.ToPILImage(),
-#     transforms.Resize((338, 338)),   
-#     transforms.Equalize(),   
-#     transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
-#     transforms.RandomHorizontalFlip(p=0.5),
-#     transforms.RandomVerticalFlip(p=0.5),
-#     transforms.RandomRotation(180, fill=128),           
-#     transforms.ToTensor(),        
-# ])
 
 @contextlib.contextmanager
 def _filter_stderr(substr: str):
@@ -100,7 +113,6 @@ class IM05_Dataset(Dataset):
         self.labels = labels
         self.evaluation = evaluation
         self.transform = train_tfms if train else val_tfms
-        # self.transform = transf
         if not self.evaluation and self.labels is None:
             raise ValueError
 
@@ -139,6 +151,33 @@ def split_files_stratified(
     )
     return list(train_files), list(val_files)
 
+
+
+def split_files_kfold(
+    files: List[str],
+    labels: Dict[str, int],
+    n_splits: int = 5,
+    fold_index: int = 0,
+    seed: int = 42,
+):
+    y = np.array([labels[os.path.basename(f)] for f in files])
+
+    skf = StratifiedKFold(
+        n_splits=n_splits,
+        shuffle=True,
+        random_state=seed
+    )
+
+    splits = list(skf.split(files, y))
+    train_idx, val_idx = splits[fold_index]
+
+    train_files = [files[i] for i in train_idx]
+    val_files = [files[i] for i in val_idx]
+
+    return train_files, val_files
+
+
+
 def get_loaders(
     test: bool = False,
     train_ratio: float = 0.8,
@@ -150,6 +189,8 @@ def get_loaders(
     use_weighted_sampler: bool = True,
     num_classes: int = 13,
     sampler_power: float = 0.5,
+    n_splits: int = 5,
+    fold_index: int = 0,
 ):
 
     if test:
@@ -165,6 +206,13 @@ def get_loaders(
 
     if not test:
         train_files, val_files = split_files_stratified(files, labels, train_ratio, seed)
+        # train_files, val_files = split_files_kfold(
+        #     files,
+        #     labels,
+        #     n_splits=n_splits,
+        #     fold_index=fold_index,
+        #     seed=seed
+        # )
         train_dataset = IM05_Dataset(train_files, labels=labels, evaluation=False, train=True)
         val_dataset = IM05_Dataset(val_files, labels=labels, evaluation=False, train=False)
 

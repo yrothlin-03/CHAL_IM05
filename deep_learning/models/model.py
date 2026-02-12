@@ -1,24 +1,23 @@
 import torch
 import torch.nn as nn
 
-from .head import ClassificationHead
+from .head import ClassificationHead, Head
 from .v3 import BackboneV3
 from .v2 import BackboneV2
 
 class Model(nn.Module):
     def __init__(self, num_classes: int = 13, pretrained_backbone: bool = True):
         super().__init__()
-        self.backbone = BackboneV3(pretrained=pretrained_backbone)
-        self.in_features = self.backbone.out_channels
-        # self.backbone = BackboneV2(num_classes=num_classes)
-        # self.in_features = self.backbone.features
-        self.pool = nn.AdaptiveAvgPool2d(1)
-        self.head = ClassificationHead(in_features=self.in_features, num_classes=num_classes)
+        # self.backbone = BackboneV3(pretrained=pretrained_backbone)
+        # self.in_features = self.backbone.out_channels
+        self.backbone = BackboneV2(num_classes=num_classes)
+        self.in_features = self.backbone.features
+        # self.pool = nn.AdaptiveAvgPool2d(1)
+        # self.head = ClassificationHead(in_features=self.in_features, num_classes=num_classes)
+        self.head = Head(num_classes=num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.backbone(x)
         # print(f"Backbone output shape: {x.shape}")
-        x = self.pool(x)
-        x = torch.flatten(x, 1)
         x = self.head(x)
         return x

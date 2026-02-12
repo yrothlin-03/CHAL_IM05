@@ -9,8 +9,10 @@ training:
   monitor: macro_f1
   loss: focal
   lr: 0.001
+  bb_lr: 0.001
+  head_lr: 0.001
   weight_decay: 0.01
-  num_epochs: 50
+  num_epochs: 30
   optimizer: adamw
   scheduler: cosine
   use_amp: false
@@ -33,7 +35,7 @@ training:
     - 4.536496
 
 data:
-  train_ratio: 0.8
+  train_ratio: 0.9
   seed: 42
   batch_size: 64
   shuffle: true
