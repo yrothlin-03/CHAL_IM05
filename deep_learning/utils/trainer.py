@@ -9,6 +9,7 @@ from .metrics import Metrics
 class Trainer:
     def __init__(self, config, model, dataloaders, evaluation=False):
         self.config = config
+        print(f"Trainer config: {self.config}")
         self.model = model
         self.evaluation = evaluation
         print(f"MODE EVALUATION : {self.evaluation}")
@@ -59,6 +60,7 @@ class Trainer:
         self.ckpt_every = int(config.get("ckpt_every", 1))
         self.monitor = str(config.get("monitor", "macro_f1"))
         self.best_score = float("-inf")
+
         if self.save_ckpt:
             os.makedirs(self.ckpt_dir, exist_ok=True)
         
@@ -324,12 +326,13 @@ class Trainer:
         return total_loss / max(1, n_batch), m
 
     @torch.no_grad()
-    def evaluate(self):
+    def evaluate(self, return_logits=False):
         if self.test_loader is None:
             raise ValueError("No test dataloader provided (dataloaders['test']).")
 
         self.model.eval()
         preds = {}
+        preds_logits = {}
 
         for step, (inputs, filenames) in enumerate(self.test_loader):
             if self.max_step_test is not None and step >= self.max_step_test:
@@ -339,11 +342,17 @@ class Trainer:
 
             with torch.autocast(device_type=self.device.type, enabled=self.use_amp):
                 outputs = self.model(inputs)
+                if return_logits:
+                    for fname, logit in zip(filenames, outputs.cpu().numpy()):
+                        preds_logits[str(fname)] = logit
 
             batch_preds = torch.argmax(outputs, dim=1).cpu().numpy()
 
             for fname, pred in zip(filenames, batch_preds):
                 preds[str(fname)] = int(pred)
+
+        if return_logits:
+            return preds_logits
 
         return preds
 

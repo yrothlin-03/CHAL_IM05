@@ -12,7 +12,7 @@ training:
   bb_lr: 0.001
   head_lr: 0.001
   weight_decay: 0.01
-  num_epochs: 30
+  num_epochs: 50
   optimizer: adamw
   scheduler: cosine
   use_amp: false
