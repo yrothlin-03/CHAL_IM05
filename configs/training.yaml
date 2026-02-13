@@ -1,4 +1,4 @@
-evaluation: True
+evaluation: true
 
 training:
   save_ckpt: true
@@ -9,7 +9,7 @@ training:
   monitor: macro_f1
   loss: focal
   lr: 0.001
-  bb_lr: 0.001
+  bb_lr: 0.0001
   head_lr: 0.001
   weight_decay: 0.01
   num_epochs: 50
