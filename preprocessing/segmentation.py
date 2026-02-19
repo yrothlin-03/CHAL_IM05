@@ -163,13 +163,122 @@ def segment_wbc(img_rgb: np.ndarray, k: int = 8, seed: int = 42) -> np.ndarray:
 
     return mask_refined
 
+def extract_wbc_crop(img_rgb: np.ndarray) -> np.ndarray:
+    hsv = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2HSV)
+    H, S, V = hsv[:,:,0], hsv[:,:,1], hsv[:,:,2]
+
+    nuc = ((S > 60) & (V < 170) & (H > 110) & (H < 170)).astype(np.uint8)
+
+    nuc = cv2.medianBlur(nuc*255, 5)
+    nuc = (nuc > 0).astype(np.uint8)
+
+    nuc = largest_component(nuc)
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (45,45))
+    mask = cv2.dilate(nuc, kernel)
+
+    ys, xs = np.where(mask > 0)
+    if len(xs) == 0:
+        return img_rgb
+
+    x1, x2 = xs.min(), xs.max()
+    y1, y2 = ys.min(), ys.max()
+
+    pad = 20
+    x1 = max(0, x1-pad)
+    y1 = max(0, y1-pad)
+    x2 = min(img_rgb.shape[1], x2+pad)
+    y2 = min(img_rgb.shape[0], y2+pad)
+
+    return img_rgb[y1:y2, x1:x2]
+
+
+
+def extract_wbc_crop2(
+    img_rgb: np.ndarray,
+    pad: int = 20,
+    min_area_frac: float = 0.0005,
+    q: float = 0.92,
+) -> np.ndarray:
+    hsv = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2HSV).astype(np.float32)
+    H = hsv[:, :, 0]
+    S = hsv[:, :, 1]
+    V = hsv[:, :, 2]
+
+    hdist = np.minimum(np.abs(H - 140.0), 180.0 - np.abs(H - 140.0)) / 90.0
+    hscore = 1.0 - np.clip(hdist, 0.0, 1.0)
+    sscore = np.clip((S - 30.0) / 225.0, 0.0, 1.0)
+    vscore = 1.0 - np.clip(V / 255.0, 0.0, 1.0)
+
+    score = 0.55 * hscore + 0.25 * sscore + 0.20 * vscore
+    thr = float(np.quantile(score, q))
+    nuc = (score >= thr).astype(np.uint8)
+
+    nuc = cv2.medianBlur(nuc * 255, 5)
+    nuc = (nuc > 0).astype(np.uint8)
+
+    k1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    nuc = cv2.morphologyEx(nuc, cv2.MORPH_OPEN, k1, iterations=1)
+    nuc = cv2.morphologyEx(nuc, cv2.MORPH_CLOSE, k1, iterations=2)
+
+    num, lab, stats, _ = cv2.connectedComponentsWithStats(nuc.astype(np.uint8), connectivity=8)
+    if num <= 1:
+        return img_rgb
+
+    h, w = nuc.shape
+    min_area = int(min_area_frac * h * w)
+
+    cx0, cy0 = w * 0.5, h * 0.5
+    best_i = None
+    best_score = -1e18
+    for i in range(1, num):
+        area = int(stats[i, cv2.CC_STAT_AREA])
+        if area < min_area:
+            continue
+        cx = float(stats[i, cv2.CC_STAT_LEFT] + 0.5 * stats[i, cv2.CC_STAT_WIDTH])
+        cy = float(stats[i, cv2.CC_STAT_TOP] + 0.5 * stats[i, cv2.CC_STAT_HEIGHT])
+        d2 = (cx - cx0) ** 2 + (cy - cy0) ** 2
+        s = np.log1p(area) - 0.0008 * d2
+        if s > best_score:
+            best_score = s
+            best_i = i
+
+    if best_i is None:
+        return img_rgb
+
+    nuc = (lab == best_i).astype(np.uint8)
+
+    kbig = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (45, 45))
+    mask = cv2.dilate(nuc, kbig, iterations=1)
+
+    ys, xs = np.where(mask > 0)
+    if xs.size == 0:
+        return img_rgb
+
+    x1, x2 = int(xs.min()), int(xs.max())
+    y1, y2 = int(ys.min()), int(ys.max())
+
+    x1 = max(0, x1 - pad)
+    y1 = max(0, y1 - pad)
+    x2 = min(img_rgb.shape[1], x2 + pad)
+    y2 = min(img_rgb.shape[0], y2 + pad)
+
+    if (x2 - x1) < 10 or (y2 - y1) < 10:
+        return img_rgb
+
+    return img_rgb[y1:y2, x1:x2]
+
+
 
 if __name__ == "__main__":
-    path = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/train/train_28899.png"
+    path = "/home/infres/yrothlin-24/CHAL_IM05/data/IMA205-challenge/train/train_28483.png"
     bgr = cv2.imread(path, cv2.IMREAD_COLOR)
     rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
 
-    mask = segment_wbc(rgb, k=8, seed=42)
-
-    vis = (mask * 255).astype(np.uint8)
-    cv2.imwrite("/home/infres/yrothlin-24/CHAL_IM05/mask.png", vis)
+    # mask = segment_wbc(rgb, k=8, seed=42)
+    mask = extract_wbc_crop2(rgb)
+    bgr_mask = cv2.cvtColor(mask*255, cv2.COLOR_RGB2BGR)
+    # overlay = cv2.addWeighted(bgr, 0.7, bgr_mask, 0.3, 0)
+    # cv2.imwrite("/home/infres/yrothlin-24/CHAL_IM05/overlay.png", overlay)
+    # vis = (mask * 255).astype(np.uint8) 
+    cv2.imwrite("/home/infres/yrothlin-24/CHAL_IM05/mask.png", mask)

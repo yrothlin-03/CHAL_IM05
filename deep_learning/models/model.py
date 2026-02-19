@@ -8,10 +8,10 @@ from .v2 import BackboneV2
 class Model(nn.Module):
     def __init__(self, num_classes: int = 13, pretrained_backbone: bool = True):
         super().__init__()
-        self.backbone = BackboneV3(pretrained=pretrained_backbone)
-        self.in_features = self.backbone.out_channels
-        # self.backbone = BackboneV2(num_classes=num_classes)
-        # self.in_features = self.backbone.features
+        # self.backbone = BackboneV3(pretrained=pretrained_backbone)
+        # self.in_features = self.backbone.out_channels
+        self.backbone = BackboneV2(num_classes=num_classes)
+        self.in_features = self.backbone.features
         # self.pool = nn.AdaptiveAvgPool2d(1)
         # self.head = ClassificationHead(in_features=self.in_features, num_classes=num_classes)
         self.head = Head(num_classes=num_classes)
