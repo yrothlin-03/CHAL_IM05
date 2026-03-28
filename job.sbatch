@@ -6,7 +6,7 @@
 #SBATCH --mem=48G
 #SBATCH --gres=gpu:1
 #SBATCH --time=20:00:00
-#SBATCH --job-name=efficientNet
+#SBATCH --job-name=training
 #SBATCH --output=logs/IM05/%x_%j.out
 #SBATCH --error=logs/IM05/%x_%j.err
 
@@ -22,4 +22,4 @@ micromamba activate IM05
 
 cd /home/infres/yrothlin-24/CHAL_IM05
 
-python -m deep_learning.main
+python -m deep_learning.tests

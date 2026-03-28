@@ -1,18 +1,17 @@
 from pathlib import Path
+from copy import deepcopy
+from typing import Any, Dict
+
 import pandas as pd
-from typing import Dict, Any, Optional
-from yaml import safe_load
 import torch
+from yaml import safe_load
 
 from .utils import Trainer
 from .models import Model
 from .dataloader import get_loaders
 
-from typing import Dict, Any
-from copy import deepcopy
 
-
-id2label = {
+ID2LABEL = {
     0: "SNE",
     1: "LY",
     2: "MO",
@@ -29,128 +28,266 @@ id2label = {
 }
 
 
-def get_config(config_path: Path) -> dict:
+def get_config(config_path: Path) -> Dict[str, Any]:
     with open(config_path, "r") as f:
         config = safe_load(f)
-        if not isinstance(config, dict):
-            raise ValueError(f"Config file {config_path} is empty or invalid YAML.")
+    if not isinstance(config, dict):
+        raise ValueError(f"Config file {config_path} is empty or invalid YAML.")
     return config
 
 
-
-def create_submission_file(preds: Dict[str, Any], output_path: Path):
+def create_submission_file(preds: Dict[str, Any], output_path: Path) -> None:
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     rows = [
-        {"ID": filename, "label": id2label[int(pred_id)]}
+        {"ID": filename, "label": ID2LABEL[int(pred_id)]}
         for filename, pred_id in sorted(preds.items(), key=lambda x: x[0])
     ]
+    pd.DataFrame(rows).to_csv(output_path, index=False)
 
-    df = pd.DataFrame(rows)
-    df.to_csv(output_path, index=False)
 
-def get_val_distribution(val_loader):
+def get_val_distribution(val_loader) -> Dict[int, int]:
     distribution = {i: 0 for i in range(13)}
     for _, labels in val_loader:
         for label in labels:
             distribution[int(label)] += 1
     return distribution
 
-def main(config: Dict[str, Any]):
 
-    evaluation = config.get("evaluation", False)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    data_config = config["data"]
-    model_config = config["model"]
-    training_config = config["training"]
+def print_dataset_sizes(
+    train_loader=None,
+    val_loader=None,
+    test_loader=None,
+) -> None:
+    train_size = len(train_loader.dataset) if train_loader is not None else "N/A"
+    val_size = len(val_loader.dataset) if val_loader is not None else "N/A"
+    test_size = len(test_loader.dataset) if test_loader is not None else "N/A"
+
+    print(
+        f"Successfully loaded data with sizes: "
+        f"train={train_size}, val={val_size}, test={test_size}"
+    )
 
 
-    if evaluation:
-        n_folds = 5
-        logits_sum = {}
+def build_model(model_config: Dict[str, Any], device: torch.device):
+    model = Model_V2(**model_config).to(device)
+    return model
 
-        test_loader = get_loaders(**data_config, test=True)
-        dataloaders = {"train": None, "val": None, "test": test_loader}
 
-        for fold in range(n_folds):
-            model = Model(**model_config).to(device)
+def run_single_train(
+    device: torch.device,
+    model_config: Dict[str, Any],
+    data_config: Dict[str, Any],
+    training_config: Dict[str, Any],
+) -> None:
+    model = build_model(model_config, device)
 
-            fold_config = deepcopy(training_config)
-            fold_config["resume_from"] = str(
-                Path(training_config.get("ckpt_dir", "checkpoints")) / f"fold_{fold}" / "best.pt"
-            )
-            print(f"!!!!!!! Resume checkpoint for fold {fold}: {fold_config['resume_from']}")
+    train_loader, val_loader, val_tta_loader, test_loader, test_tta_loader = get_loaders(
+        **data_config,
+        test=False,
+    )
 
-            trainer = Trainer(
-                model=model,
-                dataloaders=dataloaders,
-                config=fold_config,
-                evaluation=True,
-            )
+    dataloaders = {
+        "train": train_loader,
+        "val": val_loader,
+        "val_tta": val_tta_loader,
+        "test": test_loader,
+        "test_tta": test_tta_loader,
+    }
 
-            preds_logits = trainer.evaluate(return_logits=True)
+    print_dataset_sizes(train_loader, val_loader, test_loader)
+    print(f"Validation set distribution: {get_val_distribution(val_loader)}")
 
-            for filename, logits in preds_logits.items():
-                if not torch.is_tensor(logits):
-                    logits = torch.tensor(logits)
-                logits = logits.detach().cpu()
+    trainer = Trainer(
+        model=model,
+        dataloaders=dataloaders,
+        config=training_config,
+        evaluation=False,
+    )
+    trainer.train()
 
-                if filename in logits_sum:
-                    logits_sum[filename] += logits
-                else:
-                    logits_sum[filename] = logits.clone()
 
-        preds = {
-            fn: int(torch.argmax(lg / n_folds).item())
-            for fn, lg in logits_sum.items()
+def run_kfold_train(
+    device: torch.device,
+    model_config: Dict[str, Any],
+    data_config: Dict[str, Any],
+    training_config: Dict[str, Any],
+) -> None:
+    n_splits = int(data_config.get("n_splits", 5))
+
+    print(f"Training with {n_splits}-fold cross-validation...")
+
+    for fold in range(n_splits):
+        print("=" * 80)
+        print(f"FOLD {fold + 1}/{n_splits}")
+        print("=" * 80)
+
+        fold_model_config = deepcopy(model_config)
+        fold_training_config = deepcopy(training_config)
+        fold_training_config["ckpt_dir"] = str(
+            Path(training_config.get("ckpt_dir", "checkpoints")) / f"fold_{fold}"
+        )
+
+        model = build_model(fold_model_config, device)
+
+        train_loader, val_loader, val_tta_loader, test_loader, test_tta_loader = get_loaders(
+            **data_config,
+            test=False,
+            n_splits=n_splits,
+            fold_index=fold,
+        )
+
+        dataloaders = {
+            "train": train_loader,
+            "val": val_loader,
+            "val_tta": val_tta_loader,
+            "test": test_loader,
+            "test_tta": test_tta_loader,
         }
 
+        print_dataset_sizes(train_loader, val_loader, test_loader)
+        print(f"Validation set distribution: {get_val_distribution(val_loader)}")
+        print(f"Checkpoint directory: {fold_training_config['ckpt_dir']}")
+
+        trainer = Trainer(
+            model=model,
+            dataloaders=dataloaders,
+            config=fold_training_config,
+            evaluation=False,
+        )
+        trainer.train()
 
 
-        # model = Model(**model_config).to(device)
-        # dataloader = get_loaders(**data_config, test=True)
-        # dataloaders = {"train": None, "val": None, "test": dataloader}
-        # print(f"Succesfully loaded test data with size: {len(dataloaders['test'].dataset) if dataloaders['test'] else 'N/A'}")
-        # trainer = Trainer(model=model, dataloaders=dataloaders, config=training_config, evaluation=evaluation)
-        # print(f"Trainer initialized with config: {training_config}")
-        # preds = trainer.evaluate()
+def run_single_eval(
+    device: torch.device,
+    model_config: Dict[str, Any],
+    data_config: Dict[str, Any],
+    training_config: Dict[str, Any],
+) -> Dict[str, int]:
+    model = build_model(model_config, device)
+
+    train_loader, val_loader, val_tta_loader, test_loader, test_tta_loader = get_loaders(
+        **data_config,
+        test=True,
+    )
+
+    dataloaders = {
+        "train": train_loader,
+        "val": val_loader,
+        "val_tta": val_tta_loader,
+        "test": test_loader,
+        "test_tta": test_tta_loader,
+    }
+
+    print_dataset_sizes(test_loader=test_loader)
+
+    trainer = Trainer(
+        model=model,
+        dataloaders=dataloaders,
+        config=training_config,
+        evaluation=True,
+    )
+    preds = trainer.evaluate()
+    return preds
 
 
-        create_submission_file(preds, Path("/home/infres/yrothlin-24/CHAL_IM05/submissions/submission9.csv"))
+def run_kfold_eval(
+    device: torch.device,
+    model_config: Dict[str, Any],
+    data_config: Dict[str, Any],
+    training_config: Dict[str, Any],
+) -> Dict[str, int]:
+    n_splits = int(data_config.get("n_splits", 5))
+    logits_sum: Dict[str, torch.Tensor] = {}
 
-        for i, (k, v) in enumerate(preds.items()):
-            if i >= 50:
+    train_loader, val_loader, val_tta_loader, test_loader, test_tta_loader = get_loaders(
+        **data_config,
+        test=True,
+    )
+
+    dataloaders = {
+        "train": train_loader,
+        "val": val_loader,
+        "val_tta": val_tta_loader,
+        "test": test_loader,
+        "test_tta": test_tta_loader,
+    }
+
+    print_dataset_sizes(test_loader=test_loader)
+
+    for fold in range(n_splits):
+        print("=" * 80)
+        print(f"EVAL FOLD {fold + 1}/{n_splits}")
+        print("=" * 80)
+
+        fold_model_config = deepcopy(model_config)
+        fold_training_config = deepcopy(training_config)
+        fold_training_config["resume_from"] = str(
+            Path(training_config.get("ckpt_dir", "checkpoints")) / f"fold_{fold}" / "best.pt"
+        )
+
+        model = build_model(fold_model_config, device)
+
+        trainer = Trainer(
+            model=model,
+            dataloaders=dataloaders,
+            config=fold_training_config,
+            evaluation=True,
+        )
+
+        preds_logits = trainer.evaluate(return_logits=True)
+
+        for filename, logits in preds_logits.items():
+            logits_t = torch.as_tensor(logits).detach().cpu()
+            if filename in logits_sum:
+                logits_sum[filename] += logits_t
+            else:
+                logits_sum[filename] = logits_t.clone()
+
+    preds = {
+        filename: int(torch.argmax(logits / n_splits).item())
+        for filename, logits in logits_sum.items()
+    }
+    return preds
+
+
+def main(config: Dict[str, Any]) -> None:
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    data_config = deepcopy(config["data"])
+    model_config = deepcopy(config["model"])
+    training_config = deepcopy(config["training"])
+
+    evaluation = bool(config.get("evaluation", False))
+    n_splits = int(data_config.get("n_splits", 1))
+
+    print("-" * 80)
+    print(f"BACKBONE: {model_config.get('backbone_name', 'N/A')}")
+    print(f"MODE: {'evaluation' if evaluation else 'training'}")
+    print(f"DEVICE: {device}")
+    print("-" * 80)
+
+    if evaluation:
+        if n_splits > 1:
+            preds = run_kfold_eval(device, model_config, data_config, training_config)
+        else:
+            preds = run_single_eval(device, model_config, data_config, training_config)
+
+        output_path = Path(config.get("submission_path", "submissions/submission.csv"))
+        create_submission_file(preds, output_path)
+        print(f"Submission saved to: {output_path}")
+
+        for i, (k, v) in enumerate(sorted(preds.items())):
+            if i >= 20:
                 break
             print(k, v)
 
     else:
-        # for fold in range(5):
-        #     fold_config = deepcopy(training_config)
-        #     fold_config["ckpt_dir"] = str(Path(training_config.get("ckpt_dir", "checkpoints")) / f"fold_{fold}")
-        #     model = Model(**model_config).to(device)
-        #     train_loader, val_loader = get_loaders(**data_config, test=False, n_splits=5, fold_index=fold)
-        #     dataloaders = {"train": train_loader, "val": val_loader, "test": None}
-        #     val_distri = get_val_distribution(val_loader)
-        #     print(f"Validation set distribution: {val_distri}")
-        #     print(f"Succesfully loaded data with sizes : train={len(dataloaders['train'].dataset) if dataloaders['train'] else 'N/A'}, val={len(dataloaders['val'].dataset) if dataloaders['val'] else 'N/A'}, test={len(dataloaders['test'].dataset) if dataloaders['test'] else 'N/A'}")
-        #     print(f"!!!!!!! Checkpoint directory for fold {fold}: {fold_config['ckpt_dir']}")
-        #     trainer = Trainer(model=model, dataloaders=dataloaders, config=fold_config, evaluation=evaluation)
-        #     print(f"Trainer initialized with config: {fold_config}")
-        #     trainer.train()
-
-        model = Model(**model_config).to(device)
-        train_loader, val_loader = get_loaders(**data_config, test=False)
-        dataloaders = {"train": train_loader, "val": val_loader, "test": None}
-        print(f"Succesfully loaded data with sizes : train={len(dataloaders['train'].dataset) if dataloaders['train'] else 'N/A'}, val={len(dataloaders['val'].dataset) if dataloaders['val'] else 'N/A'}, test={len(dataloaders['test'].dataset) if dataloaders['test'] else 'N/A'}")
-        trainer = Trainer(model=model, dataloaders=dataloaders, config=training_config, evaluation=evaluation)
-        print(f"Trainer initialized with config: {training_config}")
-        trainer.train()
-
-
-
-
-    
+        if n_splits > 1:
+            run_kfold_train(device, model_config, data_config, training_config)
+        else:
+            run_single_train(device, model_config, data_config, training_config)
 
 
 if __name__ == "__main__":

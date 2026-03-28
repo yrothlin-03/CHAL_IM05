@@ -1,0 +1,38 @@
+data:
+  dataset_dir: "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train"
+  label_path: "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train_metadata.csv"
+  batch_size: 32
+  shuffle: true
+  num_workers: 4
+  pin_memory: true
+  drop_last: true
+  train_ratio: 0.9
+  seed: 42
+
+model:
+  backbone_name: "EFFICIENTNET_B4"
+  projection_dim: 128
+  projection_hidden_dim: 512
+  dropout: 0.1
+
+
+training:
+  optimizer: "adamw"
+  scheduler: "cosine"
+
+  lr: 0.001
+  weight_decay: 0.0001
+
+  num_epochs: 10
+  temperature: 0.2
+
+  use_amp: false
+  grad_clip: 1.0
+
+  log_step: 50
+
+  max_step_train: null
+  max_step_val: null
+
+  save_ckpt: true
+  ckpt_dir: "/home/infres/yrothlin-24/CHAL_IM05/checkpoints/contrastive_pretraining"

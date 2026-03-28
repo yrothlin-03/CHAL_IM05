@@ -1,0 +1,156 @@
+import torch
+import torch.nn as nn
+from typing import Literal
+
+from torchvision.models import (
+    resnet18, ResNet18_Weights,
+    resnet50, ResNet50_Weights,
+    resnet101, ResNet101_Weights,
+    efficientnet_b7, EfficientNet_B7_Weights,
+    efficientnet_b4, EfficientNet_B4_Weights,
+    efficientnet_v2_s, EfficientNet_V2_S_Weights,
+    efficientnet_v2_m, EfficientNet_V2_M_Weights,
+    regnet_y_16gf, RegNet_Y_16GF_Weights,
+    vit_b_16, ViT_B_16_Weights,
+    convnext_base, ConvNeXt_Base_Weights,
+    convnext_small, ConvNeXt_Small_Weights,
+    densenet169, DenseNet169_Weights,
+    swin_t, Swin_T_Weights,
+)
+
+
+BackboneName = Literal[
+    'RESNET_50',
+    'RESNET_18',
+    'RESNET_101',
+    'EFFICIENTNET_B4',
+    'EFFICIENTNET_B7',
+    'EFFICIENTNET_V2_S',
+    'EFFICIENTNET_V2_M',
+    'REGNET',
+    'VIT_B_16',
+    'CONVNEXT_BASE',
+    'CONVNEXT_SMALL',
+    'DENSENET_169',
+    'SWIN_T',
+]
+
+
+class Backbone(nn.Module):
+    def __init__(self, name: BackboneName, pretrained: bool = False):
+        super().__init__()
+        self.name = name
+        self.pretrained = pretrained
+        self.backbone = self._load_backbone(name)
+        self.features_shape = self._get_features_shape()
+
+    def _load_backbone(self, name: str) -> nn.Module:
+
+        if name == 'RESNET_18':
+            weights = ResNet18_Weights.DEFAULT if self.pretrained else None
+            model = resnet18(weights=weights)
+            return nn.Sequential(*list(model.children())[:-1])
+
+        elif name == 'RESNET_50':
+            weights = ResNet50_Weights.DEFAULT if self.pretrained else None
+            model = resnet50(weights=weights)
+            return nn.Sequential(*list(model.children())[:-1])
+
+        elif name == 'RESNET_101':
+            weights = ResNet101_Weights.DEFAULT if self.pretrained else None
+            model = resnet101(weights=weights)
+            return nn.Sequential(*list(model.children())[:-1])
+
+        elif name == 'EFFICIENTNET_B7':
+            weights = EfficientNet_B7_Weights.DEFAULT if self.pretrained else None
+            model = efficientnet_b7(weights=weights)
+            return nn.Sequential(
+                model.features,
+                model.avgpool,
+            )
+
+        elif name == 'EFFICIENTNET_B4':
+            weights = EfficientNet_B4_Weights.DEFAULT if self.pretrained else None
+            model = efficientnet_b4(weights=weights)
+            return nn.Sequential(
+                model.features,
+                model.avgpool,
+            )
+
+        elif name == 'EFFICIENTNET_V2_S':
+            weights = EfficientNet_V2_S_Weights.DEFAULT if self.pretrained else None
+            model = efficientnet_v2_s(weights=weights)
+            return nn.Sequential(
+                model.features,
+                model.avgpool,
+            )
+
+        elif name == 'EFFICIENTNET_V2_M':
+            weights = EfficientNet_V2_M_Weights.DEFAULT if self.pretrained else None
+            model = efficientnet_v2_m(weights=weights)
+            return nn.Sequential(
+                model.features,
+                model.avgpool,
+            )
+
+        elif name == 'REGNET':
+            weights = RegNet_Y_16GF_Weights.IMAGENET1K_SWAG_LINEAR_V1 if self.pretrained else None
+            model = regnet_y_16gf(weights=weights)
+            return nn.Sequential(
+                model.trunk_output,
+                model.avgpool,
+            )
+
+        elif name == 'VIT_B_16':
+            weights = ViT_B_16_Weights.IMAGENET1K_SWAG_E2E_V1 if self.pretrained else None
+            model = vit_b_16(weights=weights)
+            model.heads = nn.Identity()
+            return model
+
+        elif name == 'CONVNEXT_BASE':
+            weights = ConvNeXt_Base_Weights.DEFAULT if self.pretrained else None
+            model = convnext_base(weights=weights)
+            return nn.Sequential(
+                model.features,
+                model.avgpool,
+            )
+
+        elif name == 'CONVNEXT_SMALL':
+            weights = ConvNeXt_Small_Weights.DEFAULT if self.pretrained else None
+            model = convnext_small(weights=weights)
+            return nn.Sequential(
+                model.features,
+                model.avgpool,
+            )
+
+        elif name == 'DENSENET_169':
+            weights = DenseNet169_Weights.DEFAULT if self.pretrained else None
+            model = densenet169(weights=weights)
+            return nn.Sequential(
+                model.features,
+                nn.ReLU(inplace=True),
+                nn.AdaptiveAvgPool2d((1, 1)),
+            )
+
+        elif name == 'SWIN_T':
+            weights = Swin_T_Weights.IMAGENET1K_V1 if self.pretrained else None
+            model = swin_t(weights=weights)
+            model.head = nn.Identity()
+            return model
+
+        else:
+            raise ValueError(f"Backbone inconnu: {name}")
+
+    def _get_features_shape(self) -> int:
+        with torch.no_grad():
+            x = torch.zeros(1, 3, 224, 224)
+            y = self.backbone(x)
+            if y.dim() > 2:
+                y = torch.flatten(y, 1)
+        return y.shape[1]
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.backbone(x)
+        if x.dim() > 2:
+            x = torch.flatten(x, 1)
+        return x

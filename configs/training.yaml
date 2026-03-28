@@ -1,24 +1,46 @@
-evaluation: false
+evaluation: true
+submission_path: /home/infres/yrothlin-24/CHAL_IM05/submissions/submission.csv
+
 
 training:
   save_ckpt: true
   ckpt_dir: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/tests
   ckpt_every: 1
   resume_from: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/tests/best.pt
-  resume: True
+  resume: true
+  resume_from_pretrained: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/contrastive_pretraining/best.pt
+  resume_pretrained: false
   monitor: macro_f1
+
+  use_mixup: true
+  mixup_alpha: 0.2
+  use_cutmix: true
+  cutmix_alpha: 1.0
+  cutmix_prob: 0.5
+
   loss: focal
-  lr: 0.001
-  bb_lr: 0.0001
-  head_lr: 0.001
-  weight_decay: 0.01
-  num_epochs: 50
+  gamma: 2.0
+
+  bb_lr: 0.0003
+  head_lr: 0.0003
+  finetune_bb_lr: 0.0001
+  finetune_head_lr: 0.0001
+
+  weight_decay: 0.0001
+  num_epochs: 80
+  warmup_epochs: 0
+
   optimizer: adamw
-  scheduler: cosine
+  scheduler: cosine_restarts
+
   use_amp: false
-  grad_clip: null
+  grad_clip: 1.0
   log_step: 50
-  label_smoothing: 0.0
+
+  tta_rounds: 8
+  label_smoothing: 0.05
+
+  use_weights: false
   weights:
     - 0.131885
     - 0.167166
@@ -34,13 +56,27 @@ training:
     - 1.824578
     - 4.536496
 
+  plot_tsne: true
+  tsne_split: "val"
+  tsne_every: 5
+  tsne_max_samples: 1000
+  tsne_perplexity: 30
+  tsne_dir: "/home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE"
+
 data:
   train_ratio: 0.9
   seed: 42
   batch_size: 64
   shuffle: true
   num_workers: 4
-  pin_memory: True
+  pin_memory: true
+  n_splits: 1
+  use_weighted_sampler: true
+  sampler_power: 0.5
+  with_tta: true
 
 model:
   num_classes: 13
+  backbone_name: RESNET_50
+  freeze_backbone: false
+  pretrained: true
