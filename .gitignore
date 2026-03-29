@@ -3,3 +3,4 @@ data/
 logs/
 checkpoints/ 
 IMA205-challenge_resampled/
+stylegan_wbc/

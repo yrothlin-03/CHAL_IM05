@@ -1,4 +1,4 @@
-evaluation: true
+evaluation: evaluate
 submission_path: /home/infres/yrothlin-24/CHAL_IM05/submissions/submission.csv
 
 
@@ -27,7 +27,7 @@ training:
   finetune_head_lr: 0.0001
 
   weight_decay: 0.0001
-  num_epochs: 40
+  num_epochs: 10
   warmup_epochs: 0
 
   optimizer: adamw
@@ -91,7 +91,7 @@ data:
   shuffle: true
   num_workers: 4
   pin_memory: true
-  n_splits: 1
+  n_splits: 5
   use_weighted_sampler: true
   use_undersampling: false
   sampler_power: 0.5
