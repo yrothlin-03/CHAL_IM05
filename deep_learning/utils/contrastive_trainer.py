@@ -2,6 +2,14 @@ import os
 import time
 import torch
 import torch.nn as nn
+import numpy as np
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+from matplotlib.colors import BoundaryNorm
+from matplotlib.lines import Line2D
+from sklearn.manifold import TSNE
 
 
 class ContrastiveTrainer:
@@ -55,12 +63,24 @@ class ContrastiveTrainer:
             "val_loss": [],
         }
 
+        self.plot_tsne = bool(config.get("plot_tsne", False))
+        self.tsne_split = str(config.get("tsne_split", "val"))
+        self.tsne_every = int(config.get("tsne_every", 1))
+        self.tsne_max_samples = int(config.get("tsne_max_samples", 1000))
+        self.tsne_perplexity = float(config.get("tsne_perplexity", 30.0))
+        self.tsne_dir = str(config.get("tsne_dir", os.path.join(self.ckpt_dir, "tsne")))
+        self.class_names = config.get("class_names", [f"class {i}" for i in range(13)])
+
+        if self.plot_tsne:
+            os.makedirs(self.tsne_dir, exist_ok=True)
+            print(f"TSNE will be plotted every {self.tsne_every} epochs and saved to: {self.tsne_dir}")
+
         x1, x2, _ = next(iter(self.train_loader))
         x1 = x1.to(self.device, non_blocking=True)
         x2 = x2.to(self.device, non_blocking=True)
         with torch.no_grad():
-            _ = self.model(x1)
-            _ = self.model(x2)
+            _ = self.model(x1[:2])
+            _ = self.model(x2[:2])
 
         self.global_step = 0
         self.global_epoch = 0
@@ -275,6 +295,117 @@ class ContrastiveTrainer:
         print(f"[VAL] supcon_loss={val_loss:.4f}")
         return val_loss
 
+    @torch.no_grad()
+    def extract_features_for_tsne(self, loader, max_samples: int = 1000):
+        self.model.eval()
+
+        feats = []
+        labels = []
+
+        total = 0
+        for x1, _, y in loader:
+            x1 = x1.to(self.device, non_blocking=True)
+
+            with torch.autocast(device_type=self.device.type, enabled=self.use_amp):
+                z = self.model.backbone(x1)
+
+            feats.append(z.detach().cpu())
+            labels.append(y.detach().cpu())
+
+            total += x1.size(0)
+            if total >= max_samples:
+                break
+
+        feats = torch.cat(feats, dim=0)[:max_samples]
+        labels = torch.cat(labels, dim=0)[:max_samples]
+
+        return feats.numpy(), labels.numpy()
+
+    @torch.no_grad()
+    def save_tsne(self, split: str = "val", epoch: int | None = None):
+        if split == "train":
+            loader = self.train_loader
+        elif split == "val":
+            loader = self.val_loader
+        else:
+            raise ValueError(f"Unknown split: {split}")
+
+        if loader is None:
+            print(f"[TSNE] No loader available for split={split}")
+            return
+
+        features, labels = self.extract_features_for_tsne(
+            loader=loader,
+            max_samples=self.tsne_max_samples,
+        )
+
+        if len(features) < 2:
+            print("[TSNE] Not enough samples to compute t-SNE")
+            return
+
+        perplexity = min(self.tsne_perplexity, max(2, len(features) - 1))
+
+        tsne = TSNE(
+            n_components=2,
+            perplexity=perplexity,
+            init="pca",
+            learning_rate="auto",
+            random_state=42,
+        )
+        emb_2d = tsne.fit_transform(features)
+
+        plt.figure(figsize=(10, 8))
+
+        classes = np.unique(labels)
+        n_classes = len(self.class_names)
+
+        cmap = plt.get_cmap("tab20", n_classes)
+        norm = BoundaryNorm(np.arange(-0.5, n_classes + 0.5, 1), cmap.N)
+
+        plt.scatter(
+            emb_2d[:, 0],
+            emb_2d[:, 1],
+            c=labels,
+            cmap=cmap,
+            norm=norm,
+            s=12,
+            alpha=0.8,
+        )
+
+        legend_elements = [
+            Line2D(
+                [0], [0],
+                marker="o",
+                color="w",
+                label=self.class_names[int(cls)] if int(cls) < len(self.class_names) else f"class {int(cls)}",
+                markerfacecolor=cmap(int(cls)),
+                markersize=8,
+            )
+            for cls in classes
+        ]
+
+        plt.legend(
+            handles=legend_elements,
+            title="Classes",
+            bbox_to_anchor=(1.02, 1),
+            loc="upper left",
+            borderaxespad=0.0,
+        )
+
+        plt.title(f"Contrastive t-SNE ({split})" + (f" - epoch {epoch}" if epoch is not None else ""))
+        plt.tight_layout()
+
+        filename = f"tsne_{split}"
+        if epoch is not None:
+            filename += f"_epoch_{epoch:03d}"
+        filename += ".png"
+
+        out_path = os.path.join(self.tsne_dir, filename)
+        plt.savefig(out_path, dpi=200, bbox_inches="tight")
+        plt.close()
+
+        print(f"[TSNE] Saved to {out_path}")
+
     def train(self):
         best_epoch = None
 
@@ -283,6 +414,9 @@ class ContrastiveTrainer:
 
             train_loss = self.train_one_epoch()
             val_loss = self.validate_one_epoch()
+
+            if self.plot_tsne and (epoch % self.tsne_every == 0 or epoch == 1):
+                self.save_tsne(split=self.tsne_split, epoch=epoch)
 
             print(
                 f"[RESULTS] Epoch {epoch}/{self.num_epochs} | "

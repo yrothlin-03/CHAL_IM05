@@ -98,6 +98,12 @@ class Trainer:
         self.label_smoothing = config.get("label_smoothing", 0.1)
         self.weights = config.get("weights", None)
 
+        self.rare_classes_for_no_aug = torch.tensor(
+            config.get("rare_classes_for_no_aug", [12]),
+            device=self.device,
+            dtype=torch.long,
+        )
+
         self.save_ckpt = bool(config.get("save_ckpt", False))
         self.ckpt_dir = str(config.get("ckpt_dir", "checkpoints"))
         self.ckpt_every = int(config.get("ckpt_every", 1))
@@ -439,7 +445,10 @@ class Trainer:
 
             self.optimizer.zero_grad(set_to_none=True)
 
-            use_batch_aug = self.use_mixup or self.use_cutmix
+
+            contains_rare = torch.isin(targets,self.rare_classes_for_no_aug).any()
+            use_batch_aug = (self.use_mixup or self.use_cutmix) and not contains_rare
+
             if use_batch_aug:
                 inputs, targets_a, targets_b, lam = self._apply_batch_aug(inputs, targets)
 

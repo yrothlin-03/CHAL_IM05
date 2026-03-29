@@ -226,7 +226,7 @@ def undersample_files(
 
 def get_loaders(
     test: bool = False,
-    train_ratio: float = 0.8,
+    train_ratio: float = 0.9,
     seed: int = 42,
     batch_size: int = 32,
     shuffle: bool = True,
@@ -244,8 +244,10 @@ def get_loaders(
         dataset_dir = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/test"
         label_path = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/test_metadata.csv"
     else:
-        dataset_dir = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train"
-        label_path = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train_metadata.csv"
+        # dataset_dir = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train"
+        # label_path = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train_metadata.csv"
+        dataset_dir = "/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train"
+        label_path = "/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train_metadata.csv"
 
     files = get_filespath(dataset_dir)
 

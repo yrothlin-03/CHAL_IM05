@@ -8,6 +8,8 @@ from .models import ContrastiveModel
 from .dataloader import get_contrastive_loaders
 
 
+
+
 def get_config(config_path: Path) -> dict:
     with open(config_path, "r") as f:
         config = safe_load(f)

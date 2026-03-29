@@ -1,7 +1,7 @@
 data:
   dataset_dir: "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train"
   label_path: "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train_metadata.csv"
-  batch_size: 32
+  batch_size: 64
   shuffle: true
   num_workers: 4
   pin_memory: true
@@ -10,7 +10,7 @@ data:
   seed: 42
 
 model:
-  backbone_name: "EFFICIENTNET_B4"
+  backbone_name: "EFFICIENTNET_V2_S"
   projection_dim: 128
   projection_hidden_dim: 512
   dropout: 0.1
@@ -23,8 +23,8 @@ training:
   lr: 0.001
   weight_decay: 0.0001
 
-  num_epochs: 10
-  temperature: 0.2
+  num_epochs: 30
+  temperature: 0.1
 
   use_amp: false
   grad_clip: 1.0
@@ -36,3 +36,24 @@ training:
 
   save_ckpt: true
   ckpt_dir: "/home/infres/yrothlin-24/CHAL_IM05/checkpoints/contrastive_pretraining"
+
+  plot_tsne: true
+  tsne_split: "val"
+  tsne_every: 5
+  tsne_max_samples: 1000
+  tsne_perplexity: 30
+  tsne_dir: "/home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE_contrastive"
+  class_names:
+    - "SNE"
+    - "LY"
+    - "MO"
+    - "EO"
+    - "BA"
+    - "VLY"
+    - "BNE"
+    - "MMY"
+    - "MY"
+    - "PMY"
+    - "BL"
+    - "PC"
+    - "PLY"

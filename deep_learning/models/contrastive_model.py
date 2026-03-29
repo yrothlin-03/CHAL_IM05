@@ -30,7 +30,7 @@ class ContrastiveModel(nn.Module):
     ):
         super().__init__()
 
-        self.backbone = Backbone(name=backbone_name)
+        self.backbone = Backbone(name=backbone_name, pretrained=True)
         self.features_shape = self.backbone._get_features_shape()
 
         if freeze_backbone:
