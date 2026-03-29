@@ -27,7 +27,7 @@ training:
   finetune_head_lr: 0.0001
 
   weight_decay: 0.0001
-  num_epochs: 80
+  num_epochs: 40
   warmup_epochs: 0
 
   optimizer: adamw
@@ -37,7 +37,7 @@ training:
   grad_clip: 1.0
   log_step: 50
 
-  tta_rounds: 8
+  tta_rounds: 3
   label_smoothing: 0.05
 
   use_weights: false
@@ -63,20 +63,42 @@ training:
   tsne_perplexity: 30
   tsne_dir: "/home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE"
 
+  plot_confusion: true
+  confusion_split: "val"
+  confusion_every: 1
+  confusion_normalize: true 
+  confusion_dir: "/home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion"
+  class_names:
+    - "SNE"
+    - "LY"
+    - "MO"
+    - "EO"
+    - "BA"
+    - "VLY"
+    - "BNE"
+    - "MMY"
+    - "MY"
+    - "PMY"
+    - "BL"
+    - "PC"
+    - "PLY"
+
+
 data:
   train_ratio: 0.9
   seed: 42
-  batch_size: 64
+  batch_size: 64 
   shuffle: true
   num_workers: 4
   pin_memory: true
-  n_splits: 1
+  n_splits: 5
   use_weighted_sampler: true
+  use_undersampling: false
   sampler_power: 0.5
   with_tta: true
 
 model:
   num_classes: 13
-  backbone_name: RESNET_50
+  backbone_name: EFFICIENTNET_V2_S
   freeze_backbone: false
   pretrained: true

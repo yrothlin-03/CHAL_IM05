@@ -11,6 +11,7 @@ from matplotlib.lines import Line2D
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
+from sklearn.metrics import confusion_matrix
 
 
 class FocalLoss(nn.Module):
@@ -153,6 +154,18 @@ class Trainer:
         if self.plot_tsne:
             os.makedirs(self.tsne_dir, exist_ok=True)
             print(f"TSNE will be plotted every {self.tsne_every} epochs and saved to: {self.tsne_dir}")
+
+        self.plot_confusion = bool(config.get("plot_confusion", False))
+        self.confusion_split = str(config.get("confusion_split", "val"))
+        self.confusion_every = int(config.get("confusion_every", 1))
+        self.confusion_normalize = bool(config.get("confusion_normalize", False))
+        self.confusion_dir = str(config.get("confusion_dir", os.path.join(self.ckpt_dir, "confusion_matrix")))
+        self.class_names = config.get("class_names", [f"class {i}" for i in range(13)])
+
+        if self.plot_confusion:
+            os.makedirs(self.confusion_dir, exist_ok=True)
+            print(f"Confusion matrices will be plotted every {self.confusion_every} epochs and saved to: {self.confusion_dir}")
+
 
     def _load_checkpoint(self, path: str, resume: bool = True):
         ckpt = torch.load(path, map_location=self.device, weights_only=False)
@@ -550,7 +563,7 @@ class Trainer:
         print("[ VALIDATION METRICS TTA]:")
         print(f"Val dist: {dist}")
         print(self._format_metrics(m))
-        return total_loss / max(1, n_batch), m
+        return total_loss / max(1, n_batch), m, targets, preds
 
 
     @torch.no_grad()
@@ -563,6 +576,9 @@ class Trainer:
         metrics = Metrics()
         n_batch = len(self.val_loader) if self.max_step_val is None else min(len(self.val_loader), self.max_step_val)
         dist = {}
+
+        all_targets = []
+        all_preds = []
 
         for step, (inputs, targets) in enumerate(self.val_loader):
             if self.max_step_val is not None and step >= self.max_step_val:
@@ -578,17 +594,23 @@ class Trainer:
             total_loss += loss.item()
             preds = torch.argmax(outputs, dim=1).detach().cpu().numpy()
             t = targets.detach().cpu().numpy()
+
             metrics.update(t, preds)
+            all_targets.append(t)
+            all_preds.append(preds)
 
             for lab in t:
                 lab = int(lab)
                 dist[lab] = dist.get(lab, 0) + 1
 
+        all_targets = np.concatenate(all_targets, axis=0) if len(all_targets) > 0 else np.array([], dtype=np.int64)
+        all_preds = np.concatenate(all_preds, axis=0) if len(all_preds) > 0 else np.array([], dtype=np.int64)
+
         print("[ VALIDATION METRICS]:")
         print(f"Val dist: {dist}")
         m = metrics.compute()
         print(self._format_metrics(m))
-        return total_loss / max(1, n_batch), m
+        return total_loss / max(1, n_batch), m, all_targets, all_preds
     
 
     @torch.no_grad()
@@ -795,6 +817,73 @@ class Trainer:
         print(f"[TSNE] Saved to {out_path}")
 
 
+    def save_confusion_matrix(
+        self,
+        y_true: np.ndarray,
+        y_pred: np.ndarray,
+        split: str = "val",
+        epoch: int | None = None,
+    ):
+        if len(y_true) == 0 or len(y_pred) == 0:
+            print("[CONFUSION] Empty targets or predictions, skipping.")
+            return
+
+        labels = np.arange(len(self.class_names))
+        cm = confusion_matrix(y_true, y_pred, labels=labels)
+
+        if self.confusion_normalize:
+            cm = cm.astype(np.float32)
+            row_sums = cm.sum(axis=1, keepdims=True)
+            cm = np.divide(cm, row_sums, out=np.zeros_like(cm), where=row_sums != 0)
+
+        plt.figure(figsize=(10, 8))
+        im = plt.imshow(cm, interpolation="nearest", cmap="Blues")
+        plt.colorbar(im)
+
+        tick_marks = np.arange(len(self.class_names))
+        plt.xticks(tick_marks, self.class_names, rotation=45, ha="right")
+        plt.yticks(tick_marks, self.class_names)
+
+        fmt = ".2f" if self.confusion_normalize else "d"
+        thresh = cm.max() / 2.0 if cm.size > 0 else 0.0
+
+        for i in range(cm.shape[0]):
+            for j in range(cm.shape[1]):
+                value = format(cm[i, j], fmt)
+                plt.text(
+                    j,
+                    i,
+                    value,
+                    ha="center",
+                    va="center",
+                    color="white" if cm[i, j] > thresh else "black",
+                    fontsize=8,
+                )
+
+        title = f"Confusion Matrix ({split})"
+        if epoch is not None:
+            title += f" - epoch {epoch}"
+        if self.confusion_normalize:
+            title += " [normalized]"
+
+        plt.title(title)
+        plt.ylabel("True label")
+        plt.xlabel("Predicted label")
+        plt.tight_layout()
+
+        filename = f"confusion_{split}"
+        if epoch is not None:
+            filename += f"_epoch_{epoch:03d}"
+        if self.confusion_normalize:
+            filename += "_norm"
+        filename += ".png"
+
+        out_path = os.path.join(self.confusion_dir, filename)
+        plt.savefig(out_path, dpi=200, bbox_inches="tight")
+        plt.close()
+
+        print(f"[CONFUSION] Saved to {out_path}")
+
 
     def train(self):
         best_epoch = np.inf
@@ -817,11 +906,18 @@ class Trainer:
             if self.scheduler is not None and self.scheduler_name == "cosine_restarts":
                 self.scheduler.step()
 
-            val_loss, val_metrics = self.validate_one_epoch()
+            val_loss, val_metrics, val_targets, val_preds = self.validate_one_epoch()
 
             if self.plot_tsne and (epoch % self.tsne_every == 0):
                 self.save_backbone_tsne(split=self.tsne_split, epoch=epoch)
                 
+            if self.plot_confusion and (epoch % self.confusion_every == 0):
+                self.save_confusion_matrix(
+                    y_true=val_targets,
+                    y_pred=val_preds,
+                    split=self.confusion_split,
+                    epoch=epoch,
+                )
             print(f"[ RESULTS ] : Epoch {epoch}/{self.num_epochs} | train_loss={train_loss:.4f} val_loss={val_loss:.4f}")
             self.history["train_loss"].append(train_loss)
             self.history["val_loss"].append(val_loss)

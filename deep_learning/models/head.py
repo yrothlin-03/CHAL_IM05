@@ -122,3 +122,43 @@ class TRANSFORMER_HEAD(nn.Module):
         x = x.mean(dim=1)
 
         return self.cls(x)
+
+
+
+class QUERY_ATTENTION_HEAD(nn.Module):
+    def __init__(
+        self,
+        n_classes: int,
+        in_dim: int,
+        d_model: int = 256,
+        n_queries: int = 4,
+        n_heads: int = 8,
+        p: float = 0.1,
+    ):
+        super().__init__()
+        self.input_proj = nn.Linear(in_dim, d_model)
+        self.query = nn.Parameter(torch.randn(1, n_queries, d_model) * 0.02)
+        self.attn = nn.MultiheadAttention(
+            embed_dim=d_model,
+            num_heads=n_heads,
+            dropout=p,
+            batch_first=True,
+        )
+        self.norm1 = nn.LayerNorm(d_model)
+        self.norm2 = nn.LayerNorm(d_model)
+        self.mlp = nn.Sequential(
+            nn.Linear(d_model, d_model),
+            nn.GELU(),
+            nn.Dropout(p),
+            nn.Linear(d_model, d_model),
+            nn.Dropout(p),
+        )
+        self.out = nn.Linear(d_model, n_classes)
+
+    def forward(self, x):
+        x = self.input_proj(x).unsqueeze(1)
+        q = self.query.expand(x.size(0), -1, -1)
+        q = self.norm1(q + self.attn(q, x, x, need_weights=False)[0])
+        q = self.norm2(q + self.mlp(q))
+        q = q.mean(dim=1)
+        return self.out(q)

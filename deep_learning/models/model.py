@@ -7,6 +7,7 @@ from .head import (
     HEAD2,
     CNN_HEAD,
     TRANSFORMER_HEAD,
+    QUERY_ATTENTION_HEAD
 )
 
 
@@ -32,6 +33,15 @@ class Model(nn.Module):
         #     n_layers = 3,
         #     in_dim = self.features_shape,
         #     p = 0.3
+        # )
+
+        # self.head = QUERY_ATTENTION_HEAD(
+        #     n_classes=num_classes,
+        #     in_dim=self.features_shape,
+        #     d_model=256,
+        #     n_queries=20,
+        #     n_heads=4,
+        #     p=0.3,
         # )
 
         backbone_params = sum(p.numel() for p in self.backbone.parameters())

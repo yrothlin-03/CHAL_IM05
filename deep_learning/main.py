@@ -71,7 +71,7 @@ def print_dataset_sizes(
 
 
 def build_model(model_config: Dict[str, Any], device: torch.device):
-    model = Model_V2(**model_config).to(device)
+    model = Model(**model_config).to(device)
     return model
 
 
@@ -134,7 +134,6 @@ def run_kfold_train(
         train_loader, val_loader, val_tta_loader, test_loader, test_tta_loader = get_loaders(
             **data_config,
             test=False,
-            n_splits=n_splits,
             fold_index=fold,
         )
 
