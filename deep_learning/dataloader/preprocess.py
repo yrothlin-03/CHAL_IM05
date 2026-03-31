@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from PIL import Image
-
+import torch
 
 class CLAHETransform:
     def __init__(self, clip_limit=2.0, tile_grid_size=(8, 8), p=0.5):
@@ -28,6 +28,22 @@ class CLAHETransform:
         out = cv2.cvtColor(lab, cv2.COLOR_LAB2RGB)
 
         return Image.fromarray(out)
+
+
+
+class AddGaussianNoise(torch.nn.Module):
+    def __init__(self, p=0.3, std_range=(0.005, 0.02)):
+        super().__init__()
+        self.p = p
+        self.std_range = std_range
+
+    def forward(self, x):
+        if torch.rand(1).item() < self.p:
+            std = torch.empty(1).uniform_(*self.std_range).item()
+            noise = torch.randn_like(x) * std
+            x = torch.clamp(x + noise, 0.0, 1.0)
+        return x
+
 
 
 def extract_wbc_crop2(

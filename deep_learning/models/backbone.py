@@ -10,12 +10,15 @@ from torchvision.models import (
     efficientnet_b4, EfficientNet_B4_Weights,
     efficientnet_v2_s, EfficientNet_V2_S_Weights,
     efficientnet_v2_m, EfficientNet_V2_M_Weights,
+    efficientnet_v2_l, EfficientNet_V2_L_Weights,
     regnet_y_16gf, RegNet_Y_16GF_Weights,
     vit_b_16, ViT_B_16_Weights,
     convnext_base, ConvNeXt_Base_Weights,
     convnext_small, ConvNeXt_Small_Weights,
+    convnext_tiny, ConvNeXt_Tiny_Weights,
     densenet169, DenseNet169_Weights,
     swin_t, Swin_T_Weights,
+    swin_v2_t, Swin_V2_T_Weights,
 )
 
 
@@ -27,12 +30,16 @@ BackboneName = Literal[
     'EFFICIENTNET_B7',
     'EFFICIENTNET_V2_S',
     'EFFICIENTNET_V2_M',
+    'EFFICIENTNET_V2_L',
     'REGNET',
     'VIT_B_16',
     'CONVNEXT_BASE',
     'CONVNEXT_SMALL',
+    'CONVNEXT_TINY',
     'DENSENET_169',
     'SWIN_T',
+    'SWIN_V2_T',
+    'DINOV2_VITS14',
 ]
 
 
@@ -93,6 +100,14 @@ class Backbone(nn.Module):
                 model.avgpool,
             )
 
+        elif name == 'EFFICIENTNET_V2_L':
+            weights = EfficientNet_V2_L_Weights.DEFAULT if self.pretrained else None
+            model = efficientnet_v2_l(weights=weights)
+            return nn.Sequential(
+                model.features,
+                model.avgpool,
+            )
+
         elif name == 'REGNET':
             weights = RegNet_Y_16GF_Weights.IMAGENET1K_SWAG_LINEAR_V1 if self.pretrained else None
             model = regnet_y_16gf(weights=weights)
@@ -123,6 +138,14 @@ class Backbone(nn.Module):
                 model.avgpool,
             )
 
+        elif name == 'CONVNEXT_TINY':
+            weights = ConvNeXt_Tiny_Weights.DEFAULT if self.pretrained else None
+            model = convnext_tiny(weights=weights)
+            return nn.Sequential(
+                model.features,
+                model.avgpool,
+            )
+
         elif name == 'DENSENET_169':
             weights = DenseNet169_Weights.DEFAULT if self.pretrained else None
             model = densenet169(weights=weights)
@@ -138,6 +161,19 @@ class Backbone(nn.Module):
             model.head = nn.Identity()
             return model
 
+        elif name == 'SWIN_V2_T':
+            weights = Swin_V2_T_Weights.IMAGENET1K_V1 if self.pretrained else None
+            model = swin_v2_t(weights=weights)
+            model.head = nn.Identity()
+            return model
+
+        elif name == 'DINOV2_VITS14':
+            if not self.pretrained:
+                raise ValueError("DINOV2_VITS14 should be used with pretrained=True.")
+
+            model = torch.hub.load('facebookresearch/dinov2', 'dinov2_vits14')
+            return model
+
         else:
             raise ValueError(f"Backbone inconnu: {name}")
 
@@ -145,12 +181,33 @@ class Backbone(nn.Module):
         with torch.no_grad():
             x = torch.zeros(1, 3, 224, 224)
             y = self.backbone(x)
+            if isinstance(y, (tuple, list)):
+                y = y[0]
             if y.dim() > 2:
                 y = torch.flatten(y, 1)
         return y.shape[1]
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.backbone(x)
+        if isinstance(x, (tuple, list)):
+            x = x[0]
         if x.dim() > 2:
             x = torch.flatten(x, 1)
         return x
+
+
+if __name__ == "__main__":
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    print("Testing DINOV2_VITS14 instantiation...")
+    backbone = Backbone(name='DINOV2_VITS14', pretrained=True).to(device)
+    backbone.eval()
+
+    x = torch.randn(2, 3, 224, 224).to(device)
+    with torch.no_grad():
+        y = backbone(x)
+
+    print(f"Backbone name   : {backbone.name}")
+    print(f"Feature dim     : {backbone.features_shape}")
+    print(f"Output shape    : {tuple(y.shape)}")
+    print("DINOV2_VITS14 instantiation OK.")

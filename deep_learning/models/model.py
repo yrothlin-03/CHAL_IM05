@@ -21,19 +21,19 @@ class Model(nn.Module):
         if freeze_backbone:
             self.freeze_backbone()
 
-        self.head = HEAD2(
-            n_classes=num_classes,
-            in_dim=self.features_shape,
-            # n_layers=1,
-            p=0.3
-        )
-
-        # self.head = HEAD(
-        #     n_classes = num_classes,
-        #     n_layers = 3,
-        #     in_dim = self.features_shape,
-        #     p = 0.3
+        # self.head = HEAD2(
+        #     n_classes=num_classes,
+        #     in_dim=self.features_shape,
+        #     # n_layers=1,
+        #     p=0.3
         # )
+
+        self.head = HEAD(
+            n_classes = num_classes,
+            n_layers = 1,
+            in_dim = self.features_shape,
+            p = 0.3
+        )
 
         # self.head = QUERY_ATTENTION_HEAD(
         #     n_classes=num_classes,

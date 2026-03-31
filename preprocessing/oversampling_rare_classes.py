@@ -10,6 +10,11 @@ import sys
 import contextlib
 
 
+import shutil
+
+
+
+
 @contextlib.contextmanager
 def _filter_stderr(substr: str):
     r_fd, w_fd = os.pipe()
@@ -98,7 +103,12 @@ def resample_and_export(
     dst_train_dir = dst_root_dir / "train"
     dst_labels_csv = dst_root_dir / "train_metadata.csv"
 
+    if dst_train_dir.exists():
+        shutil.rmtree(dst_train_dir)
     dst_train_dir.mkdir(parents=True, exist_ok=True)
+
+    if dst_labels_csv.exists():
+        dst_labels_csv.unlink()
 
     df = pd.read_csv(src_labels_csv)
     if "ID" not in df.columns or "label" not in df.columns:
@@ -209,19 +219,19 @@ if __name__ == "__main__":
     DST_ROOT_DIR = "/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled"
 
     CLASS_TARGET_COUNTS = {
-        "SNE": 6000,
-        "LY": 5000,
-        "MO": 2500,
-        "EO": 800,
-        "BA": 400,
-        "VLY": 400,
-        "BNE": 400,
-        "MMY": 400,
-        "MY": 400,
-        "PMY": 300,
-        "BL": 1500,
-        "PC": 200,
-        "PLY": 200,
+        "SNE": 13015,
+        "LY": 8101,
+        "MO": 2746,
+        "EO": 861,
+        "BA": 415,
+        "VLY": 366,
+        "BNE": 391,
+        "MMY": 360,
+        "MY": 441,
+        "PMY": 114,
+        "BL": 2012,
+        "PC": 100,
+        "PLY": 50,
     }
 
     resample_and_export(

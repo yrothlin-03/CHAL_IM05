@@ -99,7 +99,7 @@ class Trainer:
         self.weights = config.get("weights", None)
 
         self.rare_classes_for_no_aug = torch.tensor(
-            config.get("rare_classes_for_no_aug", [12]),
+            config.get("rare_classes_for_no_aug", []),
             device=self.device,
             dtype=torch.long,
         )

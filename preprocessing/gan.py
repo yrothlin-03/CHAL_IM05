@@ -117,23 +117,38 @@ class Generator(nn.Module):
     def __init__(self, z_dim: int = 128, base_channels: int = 64, img_channels: int = 3):
         super().__init__()
         self.net = nn.Sequential(
-            nn.ConvTranspose2d(z_dim, base_channels * 8, 4, 1, 0, bias=False),
+            # 1x1 -> 4x4
+            nn.ConvTranspose2d(z_dim, base_channels * 16, 4, 1, 0, bias=False),
+            nn.BatchNorm2d(base_channels * 16),
+            nn.ReLU(True),
+
+            # 4x4 -> 8x8
+            nn.ConvTranspose2d(base_channels * 16, base_channels * 8, 4, 2, 1, bias=False),
             nn.BatchNorm2d(base_channels * 8),
             nn.ReLU(True),
 
+            # 8x8 -> 16x16
             nn.ConvTranspose2d(base_channels * 8, base_channels * 4, 4, 2, 1, bias=False),
             nn.BatchNorm2d(base_channels * 4),
             nn.ReLU(True),
 
+            # 16x16 -> 32x32
             nn.ConvTranspose2d(base_channels * 4, base_channels * 2, 4, 2, 1, bias=False),
             nn.BatchNorm2d(base_channels * 2),
             nn.ReLU(True),
 
+            # 32x32 -> 64x64
             nn.ConvTranspose2d(base_channels * 2, base_channels, 4, 2, 1, bias=False),
             nn.BatchNorm2d(base_channels),
             nn.ReLU(True),
 
-            nn.ConvTranspose2d(base_channels, img_channels, 4, 2, 1, bias=False),
+            # 64x64 -> 128x128
+            nn.ConvTranspose2d(base_channels, base_channels // 2, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(base_channels // 2),
+            nn.ReLU(True),
+
+            # 128x128 -> 256x256
+            nn.ConvTranspose2d(base_channels // 2, img_channels, 4, 2, 1, bias=False),
             nn.Tanh(),
         )
 
@@ -145,22 +160,37 @@ class Critic(nn.Module):
     def __init__(self, base_channels: int = 64, img_channels: int = 3):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Conv2d(img_channels, base_channels, 4, 2, 1, bias=False),
+            # 256x256 -> 128x128
+            nn.Conv2d(img_channels, base_channels // 2, 4, 2, 1, bias=False),
             nn.LeakyReLU(0.2, inplace=True),
 
+            # 128x128 -> 64x64
+            nn.Conv2d(base_channels // 2, base_channels, 4, 2, 1, bias=False),
+            nn.InstanceNorm2d(base_channels, affine=True),
+            nn.LeakyReLU(0.2, inplace=True),
+
+            # 64x64 -> 32x32
             nn.Conv2d(base_channels, base_channels * 2, 4, 2, 1, bias=False),
             nn.InstanceNorm2d(base_channels * 2, affine=True),
             nn.LeakyReLU(0.2, inplace=True),
 
+            # 32x32 -> 16x16
             nn.Conv2d(base_channels * 2, base_channels * 4, 4, 2, 1, bias=False),
             nn.InstanceNorm2d(base_channels * 4, affine=True),
             nn.LeakyReLU(0.2, inplace=True),
 
+            # 16x16 -> 8x8
             nn.Conv2d(base_channels * 4, base_channels * 8, 4, 2, 1, bias=False),
             nn.InstanceNorm2d(base_channels * 8, affine=True),
             nn.LeakyReLU(0.2, inplace=True),
 
-            nn.Conv2d(base_channels * 8, 1, 4, 1, 0, bias=False),
+            # 8x8 -> 4x4
+            nn.Conv2d(base_channels * 8, base_channels * 16, 4, 2, 1, bias=False),
+            nn.InstanceNorm2d(base_channels * 16, affine=True),
+            nn.LeakyReLU(0.2, inplace=True),
+
+            # 4x4 -> 1x1
+            nn.Conv2d(base_channels * 16, 1, 4, 1, 0, bias=False),
         )
 
     def forward(self, x):
@@ -337,9 +367,9 @@ if __name__ == "__main__":
         labels_csv="/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train_metadata.csv",
         target_class="PLY",
         output_dir="/home/infres/yrothlin-24/CHAL_IM05/gan_wbc_outputs",
-        image_size=64,
+        image_size=256,
         batch_size=16,
-        epochs=100,
+        epochs=1000,
         z_dim=128,
         lr=1e-4,
         critic_steps=5,

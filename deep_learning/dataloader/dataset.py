@@ -14,7 +14,7 @@ from sklearn.model_selection import StratifiedKFold
 import torchvision.transforms.functional as F
 
 
-from .preprocess import CLAHETransform, extract_wbc_crop2
+from .preprocess import CLAHETransform, extract_wbc_crop2, AddGaussianNoise
 
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
@@ -24,8 +24,40 @@ train_tfms = transforms.Compose([
     transforms.ToPILImage(),
     transforms.Resize((300, 300)),
 
-    CLAHETransform(p=0.5), 
+    # CLAHETransform(p=0.3), 
 
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.RandomVerticalFlip(p=0.5),
+    transforms.RandomRotation(degrees=180),
+    transforms.RandomAffine(
+        degrees=0,
+        translate=(0.10, 0.10),
+        scale=(0.85, 1.15),
+        shear=8,
+    ),
+    transforms.ColorJitter(
+        brightness=0.2,
+        contrast=0.2,
+        saturation=0.1,
+        hue=0.0,
+    ),
+    transforms.ToTensor(),
+
+    # AddGaussianNoise(p=0.25, std_range=(0.003, 0.015)),
+
+    # transforms.RandomErasing(
+    #     p=0.25,
+    #     scale=(0.02, 0.12),
+    #     ratio=(0.3, 3.3),
+    #     value="random",
+    # ),
+    transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
+])
+
+
+train_tfms = transforms.Compose([
+    transforms.ToPILImage(),
+    transforms.Resize((300, 300)),
     transforms.RandomHorizontalFlip(p=0.5),
     transforms.RandomVerticalFlip(p=0.5),
     transforms.RandomRotation(degrees=180),
@@ -50,6 +82,8 @@ train_tfms = transforms.Compose([
     ),
     transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
 ])
+
+
 
 val_tfms = transforms.Compose([
     transforms.ToPILImage(),

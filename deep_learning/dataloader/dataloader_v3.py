@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader, WeightedRandomSampler
-from sklearn.model_selection import train_test_split, StratifiedKFold
 
 from .dataset import (
     IM05_Dataset,
@@ -84,6 +83,11 @@ def _class_distribution(files: List[str], labels: Dict[str, int], num_classes: i
     return np.bincount(y, minlength=num_classes)
 
 
+def _group_distribution(base_ids: List[str], group_labels: Dict[str, int], num_classes: int = 13) -> np.ndarray:
+    y = np.array([group_labels[bid] for bid in base_ids], dtype=np.int64)
+    return np.bincount(y, minlength=num_classes)
+
+
 def _print_split_stats(
     train_files: List[str],
     val_files: List[str],
@@ -92,89 +96,94 @@ def _print_split_stats(
 ) -> None:
     tr = _class_distribution(train_files, labels, num_classes)
     va = _class_distribution(val_files, labels, num_classes)
-    print(f"[DATALOADER] Train distribution: {tr.tolist()}")
-    print(f"[DATALOADER] Val distribution  : {va.tolist()}")
+    print(f"[DATALOADER] Train distribution (files): {tr.tolist()}")
+    print(f"[DATALOADER] Val distribution   (files): {va.tolist()}")
 
 
-def split_grouped_stratified(
+def _print_group_split_stats(
+    train_base_ids: List[str],
+    val_base_ids: List[str],
+    group_labels: Dict[str, int],
+    num_classes: int = 13,
+) -> None:
+    tr = _group_distribution(train_base_ids, group_labels, num_classes)
+    va = _group_distribution(val_base_ids, group_labels, num_classes)
+    print(f"[DATALOADER] Train distribution (groups): {tr.tolist()}")
+    print(f"[DATALOADER] Val distribution   (groups): {va.tolist()}")
+
+
+def split_grouped_stratified_safe(
     files: List[str],
     labels: Dict[str, int],
-    train_ratio: float = 0.8,
+    val_ratio: float = 0.2,
     seed: int = 42,
+    num_classes: int = 13,
 ) -> Tuple[List[str], List[str]]:
+    """
+    Split grouped by base_id, stratified per class at group level.
+
+    Rules per class:
+    - 1 group  -> all in train
+    - 2 groups -> 1 train / 1 val
+    - >=3      -> roughly val_ratio in val, but:
+                 * at least 1 val
+                 * at least 1 train
+    """
+    if not (0.0 < val_ratio < 1.0):
+        raise ValueError(f"val_ratio must be in (0, 1), got {val_ratio}")
+
+    rng = np.random.default_rng(seed)
+
     groups = group_files_by_base_id(files)
     group_labels = get_group_labels(groups, labels)
 
-    base_ids = sorted(groups.keys())
-    y = np.array([group_labels[bid] for bid in base_ids], dtype=np.int64)
+    # base ids per class
+    class_to_base_ids: Dict[int, List[str]] = {c: [] for c in range(num_classes)}
+    for base_id, y in group_labels.items():
+        class_to_base_ids[y].append(base_id)
 
-    train_base_ids, val_base_ids = train_test_split(
-        base_ids,
-        train_size=train_ratio,
-        random_state=seed,
-        stratify=y,
-    )
+    train_base_ids: List[str] = []
+    val_base_ids: List[str] = []
 
-    train_files = []
-    val_files = []
+    print("[DATALOADER] Safe grouped stratified split")
+    for cls in range(num_classes):
+        cls_base_ids = sorted(class_to_base_ids[cls])
+        n = len(cls_base_ids)
 
-    for bid in train_base_ids:
-        train_files.extend(groups[bid])
-    for bid in val_base_ids:
-        val_files.extend(groups[bid])
+        if n == 0:
+            continue
 
-    return train_files, val_files
+        cls_base_ids = list(rng.permutation(cls_base_ids))
 
+        if n == 1:
+            n_val = 0
+        elif n == 2:
+            n_val = 1
+        else:
+            n_val = int(round(n * val_ratio))
+            n_val = max(1, n_val)
+            n_val = min(n_val, n - 1)
 
-def split_grouped_kfold(
-    files: List[str],
-    labels: Dict[str, int],
-    n_splits: int = 5,
-    fold_index: int = 0,
-    seed: int = 42,
-) -> Tuple[List[str], List[str]]:
-    groups = group_files_by_base_id(files)
-    group_labels = get_group_labels(groups, labels)
+        cls_val = cls_base_ids[:n_val]
+        cls_train = cls_base_ids[n_val:]
 
-    base_ids = sorted(groups.keys())
-    y = np.array([group_labels[bid] for bid in base_ids], dtype=np.int64)
+        train_base_ids.extend(cls_train)
+        val_base_ids.extend(cls_val)
 
-    counts = np.bincount(y)
-    positive_counts = counts[counts > 0]
-    if len(positive_counts) == 0:
-        raise ValueError("No labeled samples found.")
-
-    min_count = int(positive_counts.min())
-    safe_n_splits = max(2, min(n_splits, min_count))
-    if safe_n_splits != n_splits:
         print(
-            f"[DATALOADER]: Requested n_splits={n_splits} "
-            f"but rarest grouped class is too small. Using n_splits={safe_n_splits} instead."
+            f"  class={cls:2d} | total_groups={n:3d} | "
+            f"train_groups={len(cls_train):3d} | val_groups={len(cls_val):3d}"
         )
-        n_splits = safe_n_splits
 
-    if fold_index < 0 or fold_index >= n_splits:
-        raise ValueError(f"fold_index={fold_index} is invalid for n_splits={n_splits}")
-
-    skf = StratifiedKFold(
-        n_splits=n_splits,
-        shuffle=True,
-        random_state=seed,
-    )
-
-    splits = list(skf.split(base_ids, y))
-    train_idx, val_idx = splits[fold_index]
-
-    train_base_ids = [base_ids[i] for i in train_idx]
-    val_base_ids = [base_ids[i] for i in val_idx]
-
-    train_files = []
-    val_files = []
+    train_files: List[str] = []
+    val_files: List[str] = []
 
     for bid in train_base_ids:
         train_files.extend(groups[bid])
     for bid in val_base_ids:
         val_files.extend(groups[bid])
+
+    _print_group_split_stats(train_base_ids, val_base_ids, group_labels, num_classes=num_classes)
 
     return train_files, val_files
 
@@ -231,16 +240,14 @@ def get_loaders(
     use_undersampling: bool = False,
     num_classes: int = 13,
     sampler_power: float = 0.5,
-    n_splits: int = 5,
-    fold_index: int = 0,
+    n_splits: int = 1,          # <- on n'utilise plus le KFold par défaut
+    fold_index: int = 0,        # conservé pour compatibilité API
     with_tta: bool = False,
 ):
     if test:
         dataset_dir = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/test"
         label_path = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/test_metadata.csv"
     else:
-        # dataset_dir = "/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train"
-        # label_path = "/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train_metadata.csv"
         dataset_dir = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train"
         label_path = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train_metadata.csv"
 
@@ -252,27 +259,24 @@ def get_loaders(
             raise ValueError("Training labels could not be loaded.")
 
         if n_splits > 1:
-            print("[DATALOADER]: Using grouped KFOLD")
-            train_files, val_files = split_grouped_kfold(
-                files,
-                labels,
-                n_splits=n_splits,
-                fold_index=fold_index,
-                seed=seed,
+            print(
+                "[DATALOADER] Warning: n_splits > 1 requested, "
+                "but for ultra-rare classes a single safe grouped split is recommended. "
+                "Using safe grouped split anyway."
             )
-        else:
-            print("[DATALOADER]: Using grouped single split")
-            train_files, val_files = split_grouped_stratified(
-                files,
-                labels,
-                train_ratio=train_ratio,
-                seed=seed,
-            )
+
+        train_files, val_files = split_grouped_stratified_safe(
+            files=files,
+            labels=labels,
+            val_ratio=1.0 - train_ratio,
+            seed=seed,
+            num_classes=num_classes,
+        )
 
         _print_split_stats(train_files, val_files, labels, num_classes=num_classes)
 
         if use_undersampling and not use_weighted_sampler:
-            print("[DATALOADER]: Using undersampling")
+            print("[DATALOADER] Using undersampling")
             train_files = undersample_files(
                 train_files,
                 labels,
@@ -281,7 +285,7 @@ def get_loaders(
                 target_count=None,
                 seed=seed,
             )
-            print("[DATALOADER]: Train distribution after undersampling:")
+            print("[DATALOADER] Train distribution after undersampling:")
             print(_class_distribution(train_files, labels, num_classes).tolist())
 
         train_dataset = IM05_Dataset(
@@ -301,12 +305,11 @@ def get_loaders(
 
         sampler = None
         if use_weighted_sampler and not use_undersampling:
-            print("[DATALOADER]: Using weighted sampling")
+            print("[DATALOADER] Using weighted sampling")
             y_train = _labels_from_files(train_files, labels)
             counts = np.bincount(y_train, minlength=num_classes).astype(np.float32)
             class_w = 1.0 / np.power(counts + 1e-6, sampler_power)
             class_w = class_w / class_w.mean()
-            # class_w = np.clip(class_w, None, 3.0)
             sample_w = class_w[y_train]
             sampler = WeightedRandomSampler(
                 weights=torch.tensor(sample_w, dtype=torch.double),
@@ -332,7 +335,7 @@ def get_loaders(
         )
 
         if with_tta:
-            print("[DATALOADER]: Using TTA")
+            print("[DATALOADER] Using TTA")
             val_tta_dataset = IM05_Dataset(
                 val_files,
                 labels=labels,
@@ -367,7 +370,7 @@ def get_loaders(
     )
 
     if with_tta:
-        print("[DATALOADER]: Using TTA")
+        print("[DATALOADER] Using TTA")
         test_tta_dataset = IM05_Dataset(
             files,
             labels=None,
