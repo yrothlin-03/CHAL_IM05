@@ -108,7 +108,15 @@ class Trainer:
         self.ckpt_dir = str(config.get("ckpt_dir", "checkpoints"))
         self.ckpt_every = int(config.get("ckpt_every", 1))
         self.monitor = str(config.get("monitor", "macro_f1"))
-        self.best_score = float("-inf")
+
+        self.early_stopping = bool(config.get("early_stopping", False))
+        self.early_stopping_patience = int(config.get("early_stopping_patience", 10))
+        self.early_stopping_mode = str(config.get("early_stopping_mode", "max")).lower()
+        self.early_stopping_counter = 0
+        if self.early_stopping:
+            print(f"Early stopping enabled with patience={self.early_stopping_patience} and mode={self.early_stopping_mode}")
+
+        self.best_score = float("-inf") if self.early_stopping_mode == "max" else float("inf")
 
         if self.save_ckpt:
             os.makedirs(self.ckpt_dir, exist_ok=True)
@@ -171,6 +179,15 @@ class Trainer:
         if self.plot_confusion:
             os.makedirs(self.confusion_dir, exist_ok=True)
             print(f"Confusion matrices will be plotted every {self.confusion_every} epochs and saved to: {self.confusion_dir}")
+
+
+
+    def _is_improvement(self, score: float) -> bool:
+        if self.early_stopping_mode == "max":
+            return score > self.best_score
+        if self.early_stopping_mode == "min":
+            return score < self.best_score
+        raise ValueError(f"Unsupported early_stopping_mode: {self.early_stopping_mode}")
 
 
     def _load_checkpoint(self, path: str, resume: bool = True):
@@ -895,19 +912,26 @@ class Trainer:
 
 
     def train(self):
-        best_epoch = np.inf
+        best_epoch = -1
+
         for epoch in range(1, self.num_epochs + 1):
             if epoch == 1:
                 self._freeze_backbone()
                 self.optimizer = self._build_optimizer(phase="warmup")
                 self.scheduler = self._build_scheduler(phase="warmup")
-                print(f"Backbone frozen at epoch {epoch}. Trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad)}")
+                print(
+                    f"Backbone frozen at epoch {epoch}. "
+                    f"Trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad)}"
+                )
 
             if epoch == self.warmup_epochs + 1:
                 self._unfreeze_backbone()
                 self.optimizer = self._build_optimizer(phase="finetune")
                 self.scheduler = self._build_scheduler(phase="finetune")
-                print(f"Backbone unfrozen at epoch {epoch}. Trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad)}")
+                print(
+                    f"Backbone unfrozen at epoch {epoch}. "
+                    f"Trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad)}"
+                )
 
             self.global_epoch = epoch
             train_loss, train_metrics = self.train_one_epoch()
@@ -919,7 +943,7 @@ class Trainer:
 
             if self.plot_tsne and (epoch % self.tsne_every == 0):
                 self.save_backbone_tsne(split=self.tsne_split, epoch=epoch)
-                
+
             if self.plot_confusion and (epoch % self.confusion_every == 0):
                 self.save_confusion_matrix(
                     y_true=val_targets,
@@ -927,7 +951,12 @@ class Trainer:
                     split=self.confusion_split,
                     epoch=epoch,
                 )
-            print(f"[ RESULTS ] : Epoch {epoch}/{self.num_epochs} | train_loss={train_loss:.4f} val_loss={val_loss:.4f}")
+
+            print(
+                f"[ RESULTS ] : Epoch {epoch}/{self.num_epochs} | "
+                f"train_loss={train_loss:.4f} val_loss={val_loss:.4f}"
+            )
+
             self.history["train_loss"].append(train_loss)
             self.history["val_loss"].append(val_loss)
             self.history["val_metrics"].append(val_metrics)
@@ -935,13 +964,45 @@ class Trainer:
             if self.save_ckpt and (self.global_epoch == self.num_epochs):
                 self._save_checkpoint("last.pt", val_metrics)
 
-            score = float(val_metrics.get(self.monitor, float("-inf")))
-            if self.save_ckpt and score > self.best_score:
+            if self.monitor == "val_loss":
+                score = float(val_loss)
+            else:
+                score = float(val_metrics.get(self.monitor, float("-inf")))
+
+            improved = self._is_improvement(score)
+
+            if improved:
                 best_epoch = epoch
                 self.best_score = score
-                print(f"New best {self.monitor}: {self.best_score:.4f} at epoch {epoch}. Saving checkpoint.")
-                self._save_checkpoint("best.pt", val_metrics)
+                self.early_stopping_counter = 0
 
+                print(
+                    f"New best {self.monitor}: {self.best_score:.4f} "
+                    f"at epoch {epoch}."
+                )
 
-            
-        print(f"[FINAL]: Best score achieved at epoch {best_epoch} with score : {self.best_score}")
+                if self.save_ckpt:
+                    print("Saving best checkpoint.")
+                    self._save_checkpoint("best.pt", val_metrics)
+
+            else:
+                if self.early_stopping:
+                    self.early_stopping_counter += 1
+                    print(
+                        f"No improvement on {self.monitor}. "
+                        f"Early stopping counter: "
+                        f"{self.early_stopping_counter}/{self.early_stopping_patience}"
+                    )
+
+                    if self.early_stopping_counter >= self.early_stopping_patience:
+                        print(
+                            f"Early stopping triggered at epoch {epoch}. "
+                            f"Best epoch was {best_epoch} with "
+                            f"{self.monitor}={self.best_score:.4f}"
+                        )
+                        break
+
+        print(
+            f"[FINAL]: Best score achieved at epoch {best_epoch} "
+            f"with score: {self.best_score}"
+        )

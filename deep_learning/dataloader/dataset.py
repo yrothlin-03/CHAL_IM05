@@ -22,8 +22,8 @@ IMAGENET_STD = (0.229, 0.224, 0.225)
 
 train_tfms = transforms.Compose([
     transforms.ToPILImage(),
-    transforms.Resize((300, 300)),
-
+    # transforms.Resize((300, 300)),
+    transforms.Resize((294, 294)),
     # CLAHETransform(p=0.3), 
 
     transforms.RandomHorizontalFlip(p=0.5),
@@ -57,7 +57,8 @@ train_tfms = transforms.Compose([
 
 train_tfms = transforms.Compose([
     transforms.ToPILImage(),
-    transforms.Resize((300, 300)),
+    # transforms.Resize((300, 300)),
+    transforms.Resize((294, 294)),
     transforms.RandomHorizontalFlip(p=0.5),
     transforms.RandomVerticalFlip(p=0.5),
     transforms.RandomRotation(degrees=180),
@@ -87,14 +88,16 @@ train_tfms = transforms.Compose([
 
 val_tfms = transforms.Compose([
     transforms.ToPILImage(),
-    transforms.Resize((300, 300)),
+    # transforms.Resize((300, 300)),
+    transforms.Resize((294, 294)),
     transforms.ToTensor(),
     transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
 ])
 
 tta_tfms = transforms.Compose([
     transforms.ToPILImage(),
-    transforms.Resize((300, 300)),
+    # transforms.Resize((300, 300)),
+    transforms.Resize((294, 294)),
     transforms.RandomHorizontalFlip(p=0.5),
     transforms.RandomVerticalFlip(p=0.5),
     transforms.RandomRotation(20),

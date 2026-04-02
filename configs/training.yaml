@@ -1,4 +1,4 @@
-evaluation: false
+evaluation: true
 submission_path: /home/infres/yrothlin-24/CHAL_IM05/submissions/submission.csv
 
 
@@ -11,6 +11,9 @@ training:
   resume_from_pretrained: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/contrastive_pretraining/best.pt
   resume_pretrained: false
   monitor: macro_f1
+  early_stopping: true
+  early_stopping_patience: 15
+  early_stopping_mode: max
 
   use_mixup: true
   mixup_alpha: 0.2
@@ -29,7 +32,7 @@ training:
   finetune_head_lr: 0.0001
 
   weight_decay: 0.0001
-  num_epochs: 30
+  num_epochs: 60
   warmup_epochs: 0
 
   optimizer: adamw
@@ -39,7 +42,7 @@ training:
   grad_clip: 1.0
   log_step: 50
 
-  tta_rounds: 3
+  tta_rounds: 5
   label_smoothing: 0.05
 
   use_weights: false
@@ -67,7 +70,7 @@ training:
 
   plot_confusion: true
   confusion_split: "val"
-  confusion_every: 1
+  confusion_every: 5
   confusion_normalize: true 
   confusion_dir: "/home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion"
   class_names:
@@ -101,7 +104,7 @@ data:
 
 model:
   num_classes: 13
-  backbone_name: EFFICIENTNET_V2_S
+  backbone_name: EFFICIENTNET_V2_M
   freeze_backbone: false
   pretrained: true
 

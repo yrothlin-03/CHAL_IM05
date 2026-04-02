@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH -p A40
+#SBATCH -p H100
 #SBATCH -N 1
 #SBATCH -n 1
 #SBATCH -c 12
 #SBATCH --mem=48G
 #SBATCH --gres=gpu:1
 #SBATCH --time=20:00:00
-#SBATCH --job-name=test_best_score
+#SBATCH --job-name=test_best
 #SBATCH --output=logs/IM05/%x_%j.out
 #SBATCH --error=logs/IM05/%x_%j.err
 
@@ -22,4 +22,4 @@ micromamba activate IM05
 
 cd /home/infres/yrothlin-24/CHAL_IM05
 
-python -m deep_learning.tests
+python -m deep_learning.main
