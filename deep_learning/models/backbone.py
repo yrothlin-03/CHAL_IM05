@@ -21,6 +21,8 @@ from torchvision.models import (
     swin_v2_t, Swin_V2_T_Weights,
 )
 
+from transformers import AutoModel
+
 
 BackboneName = Literal[
     'RESNET_50',
@@ -40,7 +42,24 @@ BackboneName = Literal[
     'SWIN_T',
     'SWIN_V2_T',
     'DINOV2_VITS14',
+    'DINOV3_VITS16',
 ]
+
+
+class DinoV3Wrapper(nn.Module):
+    def __init__(self, model_name: str):
+        super().__init__()
+        self.model = AutoModel.from_pretrained(model_name)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        outputs = self.model(pixel_values=x)
+
+        if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None:
+            return outputs.pooler_output
+        if hasattr(outputs, "last_hidden_state") and outputs.last_hidden_state is not None:
+            return outputs.last_hidden_state[:, 0]
+
+        raise RuntimeError("DINOv3 model output does not contain pooler_output or last_hidden_state.")
 
 
 class Backbone(nn.Module):
@@ -170,9 +189,15 @@ class Backbone(nn.Module):
         elif name == 'DINOV2_VITS14':
             if not self.pretrained:
                 raise ValueError("DINOV2_VITS14 should be used with pretrained=True.")
-
             model = torch.hub.load('facebookresearch/dinov2', 'dinov2_vits14')
             return model
+
+        elif name == 'DINOV3_VITS16':
+            if not self.pretrained:
+                raise ValueError("DINOV3_VITS16 should be used with pretrained=True.")
+
+            model_name = "facebook/dinov3-vits16-pretrain-lvd1689m"
+            return DinoV3Wrapper(model_name)
 
         else:
             raise ValueError(f"Backbone inconnu: {name}")
@@ -199,8 +224,8 @@ class Backbone(nn.Module):
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    print("Testing DINOV2_VITS14 instantiation...")
-    backbone = Backbone(name='DINOV2_VITS14', pretrained=True).to(device)
+    print("Testing DINOV3_VITS16 instantiation...")
+    backbone = Backbone(name='DINOV3_VITS16', pretrained=True).to(device)
     backbone.eval()
 
     x = torch.randn(2, 3, 224, 224).to(device)
@@ -210,4 +235,4 @@ if __name__ == "__main__":
     print(f"Backbone name   : {backbone.name}")
     print(f"Feature dim     : {backbone.features_shape}")
     print(f"Output shape    : {tuple(y.shape)}")
-    print("DINOV2_VITS14 instantiation OK.")
+    print("DINOV3_VITS16 instantiation OK.")
