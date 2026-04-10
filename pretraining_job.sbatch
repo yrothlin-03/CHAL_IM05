@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH -p A100
+#SBATCH -p H100
 #SBATCH -N 1
 #SBATCH -n 1
 #SBATCH -c 12
 #SBATCH --mem=48G
 #SBATCH --gres=gpu:1
 #SBATCH --time=20:00:00
-#SBATCH --job-name=training
+#SBATCH --job-name=eval
 #SBATCH --output=logs/IM05/%x_%j.out
 #SBATCH --error=logs/IM05/%x_%j.err
 

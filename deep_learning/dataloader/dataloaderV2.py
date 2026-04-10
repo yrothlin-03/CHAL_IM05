@@ -16,8 +16,7 @@ from .dataset import (
 )
 
 label2id = {
-    "SNE": 0, "LY": 1, "MO": 2, "EO": 3, "BA": 4, "VLY": 5, "BNE": 6,
-    "MMY": 7, "MY": 8, "PMY": 9, "BL": 10, "PC": 11, "PLY": 12,
+    "SNE": 0, "LY": 1, "MO": 2, "EO": 3, "BA": 4, "VLY": 5, "BNE": 6, "MMY": 7, "MY": 8, "PMY": 9, "BL": 10, "PC": 11, "PLY": 12,
 }
 
 
@@ -239,10 +238,10 @@ def get_loaders(
         dataset_dir = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/test"
         label_path = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/test_metadata.csv"
     else:
-        # dataset_dir = "/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train"
-        # label_path = "/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train_metadata.csv"
-        dataset_dir = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train"
-        label_path = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train_metadata.csv"
+        dataset_dir = "/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train"
+        label_path = "/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train_metadata.csv"
+        # dataset_dir = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train"
+        # label_path = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train_metadata.csv"
 
     files = get_filespath(dataset_dir)
 

@@ -9,6 +9,7 @@ from torchvision import transforms
 import numpy as np
 import cv2
 import contextlib
+import sys
 
 
 
@@ -306,7 +307,43 @@ def augment_data_classical(
                 cv2.imwrite(out_path, aug_bgr)
     
 
+def copie_classes(
+    classes_a_copier: List[str],
+    dataset_dir: str,
+    label_path: str,
+    out_dir: str,
+    clear_existing_class_dirs: bool = False,
+) -> None:
+    os.makedirs(out_dir, exist_ok=True)
 
+    classes_invalides = [cls for cls in classes_a_copier if cls not in label2id]
+    if classes_invalides:
+        raise ValueError(f"Classes inconnues: {classes_invalides}")
+
+    classes_ids = {label2id[cls] for cls in classes_a_copier}
+    labels = get_labels(label_path)
+
+    if clear_existing_class_dirs:
+        for cls in classes_a_copier:
+            cls_dir = os.path.join(out_dir, cls)
+            if os.path.exists(cls_dir):
+                shutil.rmtree(cls_dir)
+
+    for filename, label_id in labels.items():
+        if label_id not in classes_ids:
+            continue
+
+        class_name = id2label[label_id]
+        src_path = filename if os.path.isabs(filename) else os.path.join(dataset_dir, filename)
+
+        if not os.path.exists(src_path):
+            continue
+
+        class_dir = os.path.join(out_dir, class_name)
+        os.makedirs(class_dir, exist_ok=True)
+
+        dst_path = os.path.join(class_dir, os.path.basename(filename))
+        shutil.copy2(src_path, dst_path)
     
 
 if __name__ == "__main__":
@@ -314,10 +351,19 @@ if __name__ == "__main__":
     label_path = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train_metadata.csv"
     out_dir = "/home/infres/yrothlin-24/CHAL_IM05/data/my_augmented_data"
 
-    files = get_filespath(dataset_dir)
-    labels = get_labels(label_path)
+    # files = get_filespath(dataset_dir)
+    # labels = get_labels(label_path)
+
+    copie_classes(
+        classes_a_copier=['PLY', 'PC', 'PMY'],
+        dataset_dir=dataset_dir,
+        label_path=label_path,
+        out_dir=out_dir,
+        clear_existing_class_dirs=False,
+    )
+
     # distribution = get_class_distribution()
     # print("Class distribution:", {id2label[i]: len(files) for i, files in distribution.items()})
     # class_initial_images(dataset_dir, label_path, out_dir)
     # preprocess_original_data(dataset_dir, out_dir, label_path)
-    augment_data_classical(out_dir, num_augmented_per_image=5, class_to_augment=['PC', 'PMY'])
+    # augment_data_classical(out_dir, num_augmented_per_image=5, class_to_augment=['PLY'])

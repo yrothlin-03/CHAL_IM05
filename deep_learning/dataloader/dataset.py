@@ -24,7 +24,8 @@ train_tfms = transforms.Compose([
     transforms.ToPILImage(),
     # transforms.Resize((300, 300)),
     transforms.Resize((294, 294)),
-    # CLAHETransform(p=0.3), 
+
+    # CLAHETransform(p=0.5), 
 
     transforms.RandomHorizontalFlip(p=0.5),
     transforms.RandomVerticalFlip(p=0.5),
@@ -171,7 +172,7 @@ class IM05_Dataset(Dataset):
 
     def _preprocess_image(self, img: np.ndarray) -> torch.Tensor:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        # img = extract_wbc_crop2(img)
+        # img = extract_wbc_crop2(img, resize_mode="resize", output_size=(294, 294))
         img = self.transform(img)
         return img.contiguous()
 

@@ -379,7 +379,6 @@ if __name__ == "__main__":
         unique_base_only=False,
     )
 
-    # Example:
     # generate_images(
     #     checkpoint_path="/home/infres/yrothlin-24/CHAL_IM05/gan_wbc_outputs/PLY/generator_epoch_0300.pt",
     #     output_dir="/home/infres/yrothlin-24/CHAL_IM05/generated_wbc/PLY",

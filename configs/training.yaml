@@ -1,4 +1,4 @@
-evaluation: evaluation
+evaluation: true
 submission_path: /home/infres/yrothlin-24/CHAL_IM05/submissions/submission.csv
 
 

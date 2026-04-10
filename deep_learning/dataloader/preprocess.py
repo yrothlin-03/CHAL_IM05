@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 from PIL import Image
 import torch
+from typing import Dict, List, Tuple
+
 
 class CLAHETransform:
     def __init__(self, clip_limit=2.0, tile_grid_size=(8, 8), p=0.5):
@@ -51,7 +53,42 @@ def extract_wbc_crop2(
     pad: int = 20,
     min_area_frac: float = 0.0005,
     q: float = 0.92,
+    resize_mode: str = "resize",
+    output_size: Tuple[int, int] = (224, 224),
 ) -> np.ndarray:
+    def apply_resize(img: np.ndarray) -> np.ndarray:
+        if resize_mode == "none":
+            return img
+
+        if resize_mode == "resize":
+            return cv2.resize(img, output_size, interpolation=cv2.INTER_LINEAR)
+
+        if resize_mode == "pad":
+            target_h, target_w = output_size
+            h, w = img.shape[:2]
+            scale = min(target_w / w, target_h / h)
+            new_w = max(1, int(round(w * scale)))
+            new_h = max(1, int(round(h * scale)))
+
+            img_resized = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
+
+            pad_top = (target_h - new_h) // 2
+            pad_bottom = target_h - new_h - pad_top
+            pad_left = (target_w - new_w) // 2
+            pad_right = target_w - new_w - pad_left
+
+            return cv2.copyMakeBorder(
+                img_resized,
+                pad_top,
+                pad_bottom,
+                pad_left,
+                pad_right,
+                borderType=cv2.BORDER_CONSTANT,
+                value=[0, 0, 0],
+            )
+
+        raise ValueError(f"Unsupported resize_mode: {resize_mode}")
+
     hsv = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2HSV).astype(np.float32)
     H = hsv[:, :, 0]
     S = hsv[:, :, 1]
@@ -75,7 +112,7 @@ def extract_wbc_crop2(
 
     num, lab, stats, _ = cv2.connectedComponentsWithStats(nuc.astype(np.uint8), connectivity=8)
     if num <= 1:
-        return img_rgb
+        return apply_resize(img_rgb)
 
     h, w = nuc.shape
     min_area = int(min_area_frac * h * w)
@@ -96,7 +133,7 @@ def extract_wbc_crop2(
             best_i = i
 
     if best_i is None:
-        return img_rgb
+        return apply_resize(img_rgb)
 
     nuc = (lab == best_i).astype(np.uint8)
 
@@ -105,7 +142,7 @@ def extract_wbc_crop2(
 
     ys, xs = np.where(mask > 0)
     if xs.size == 0:
-        return img_rgb
+        return apply_resize(img_rgb)
 
     x1, x2 = int(xs.min()), int(xs.max())
     y1, y2 = int(ys.min()), int(ys.max())
@@ -116,6 +153,7 @@ def extract_wbc_crop2(
     y2 = min(img_rgb.shape[0], y2 + pad)
 
     if (x2 - x1) < 10 or (y2 - y1) < 10:
-        return img_rgb
+        return apply_resize(img_rgb)
 
-    return img_rgb[y1:y2, x1:x2]
+    crop = img_rgb[y1:y2, x1:x2]
+    return apply_resize(crop)
