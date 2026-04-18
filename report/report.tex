@@ -1,4 +1,4 @@
- \documentclass[journal,onecolumn]{IEEEtran}
+\documentclass[journal,twocolumn]{IEEEtran}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -14,12 +14,10 @@
 
 \begin{document}
 
-\title{Report on IM05 Challenge : \\ \textit{“WBC Image classification”}}
+\title{Report : IM05 Challenge : \\ \textit{“White Blood Cell Images classification”}}
 
 \author{
   Yanic ROTHLINGSHOFER,~\IEEEmembership{TELECOM PARIS}
-  % Si plusieurs auteurs :
-  % \and Autre Auteur,~\IEEEmembership{Membre IEEE}
 }
 
 \maketitle
@@ -35,6 +33,165 @@
 
 \section{Introduction}
 
+Les globules blancs (White Blood Cells, WBC) jouent un rôle essentiel dans le système immunitaire en assurant la défense de l’organisme contre les infections et les agents pathogènes. Ils se déclinent en plusieurs types principaux (neutrophiles, éosinophiles, lymphocytes, monocytes et basophiles), dont la proportion et la morphologie peuvent révéler des anomalies médicales, notamment certaines infections ou maladies comme la leucémie \cite{TOGACAR2020106810,healthcare10112230}. Ainsi, leur identification à partir d’images de frottis sanguins constitue une étape importante du diagnostic médical.
 
+Traditionnellement, cette analyse est réalisée manuellement par des spécialistes à l’aide de microscopes. Ce processus est toutefois long, coûteux et sujet à des erreurs humaines \cite{a16110525}. Avec l’essor de la vision par ordinateur, de nombreuses approches automatiques ont été développées afin d’assister ou d’automatiser cette tâche, notamment à l’aide de techniques de machine learning et de deep learning.
+
+Dans ce contexte, le challenge proposé dans le cadre du cours IM05 vise à développer un modèle capable de classifier différents types de globules blancs à partir d’images. Ce problème présente plusieurs difficultés typiques des applications réelles : un nombre limité de données annotées, un déséquilibre entre les classes, ainsi qu’une variabilité importante des images (bruit, qualité, conditions d’acquisition).
+
+L’objectif de ce projet est d’explorer différentes approches pour résoudre ce problème de classification. Nous étudions dans un premier temps des méthodes classiques basées sur l’extraction de caractéristiques (features) et des modèles de machine learning. Dans un second temps, nous analysons les performances de modèles de deep learning, en particulier via des techniques de transfer learning utilisant des architectures pré-entraînées.
+
+Une attention particulière est portée à la gestion du déséquilibre des classes, qui peut fortement impacter les performances des modèles \cite{Gao_2026}. Pour cela, différentes stratégies sont explorées, notamment des techniques de rééchantillonnage et d’augmentation de données.
+
+Ce rapport présente les différentes étapes du projet, depuis l’analyse des données jusqu’à l’évaluation des modèles, en mettant en évidence les choix méthodologiques effectués et les résultats obtenus.
+
+
+\section{Evaluation metrics}
+
+L’évaluation des modèles de classification ne peut pas reposer uniquement sur l’accuracy, en particulier dans un contexte où les classes sont déséquilibrées. En effet, un modèle peut obtenir une accuracy élevée tout en ayant de mauvaises performances sur les classes minoritaires. Pour cette raison, plusieurs métriques complémentaires sont utilisées dans ce projet afin d’obtenir une vision plus fidèle des performances des modèles.
+
+Cependant, cette métrique peut être trompeuse lorsque certaines classes dominent le jeu de données. Nous utilisons donc également la \textbf{balanced accuracy} (BAcc), qui correspond à la moyenne des rappels obtenus sur chaque classe. Si l’on note $C$ le nombre de classes et $Recall_c$ le rappel de la classe $c$, alors :
+\begin{equation}
+\mathrm{BAcc} = \frac{1}{C}\sum_{c=1}^{C} Recall_c
+\end{equation}
+
+Cette métrique permet de donner la même importance à toutes les classes, indépendamment de leur fréquence.
+
+L’\textbf{accuracy} mesure la proportion totale de prédictions correctes parmi l’ensemble des échantillons. Si l’on note $N$ le nombre total d’exemples, elle s’écrit :
+\begin{equation}
+\mathrm{Accuracy} = \frac{\text{nombre de prédictions correctes}}{N}
+\end{equation}
+
+La \textbf{precision} mesure, pour une classe donnée, la proportion d’exemples correctement prédits parmi tous ceux prédits dans cette classe :
+\begin{equation}
+\mathrm{Precision} = \frac{TP}{TP + FP}
+\end{equation}
+
+Le \textbf{recall} (ou sensibilité) mesure la proportion d’exemples correctement détectés parmi tous les exemples réellement appartenant à la classe :
+\begin{equation}
+\mathrm{Recall} = \frac{TP}{TP + FN}
+\end{equation}
+
+Le \textbf{F1-score} combine la précision et le recall en une seule mesure harmonique :
+\begin{equation}
+\mathrm{F1} = 2 \times \frac{\mathrm{Precision} \times \mathrm{Recall}}{\mathrm{Precision} + \mathrm{Recall}}
+\end{equation}
+
+Dans le cas multiclasse, nous utilisons en particulier le \textbf{macro-F1}, qui correspond à la moyenne arithmétique des F1-scores calculés indépendamment sur chaque classe :
+\begin{equation}
+\mathrm{Macro\text{-}F1} = \frac{1}{C}\sum_{c=1}^{C} F1_c
+\end{equation}
+
+Dans le cadre de ce projet, la balanced accuracy et le macro-F1 sont particulièrement importantes, car elles sont mieux adaptées qu’une simple accuracy à un problème de classification multiclasse déséquilibré. Enfin, les \textbf{matrices de confusion} sont utilisées pour compléter l’analyse quantitative. Elles permettent d’identifier précisément les confusions entre classes et d’interpréter plus finement les limites des modèles.
+
+
+\section{Related work}
+
+La classification automatique des globules blancs a fait l’objet de nombreux travaux, allant des approches classiques de traitement d’images aux méthodes modernes de deep learning.
+
+Les premières approches reposent sur des pipelines structurés comprenant plusieurs étapes : prétraitement, segmentation des cellules, extraction de caractéristiques, puis classification. Par exemple, \cite{REZATOFIGHI2011333} propose de segmenter séparément le noyau et le cytoplasme, puis d’extraire des caractéristiques morphologiques et texturales avant d’appliquer des classifieurs tels que les réseaux de neurones artificiels ou les SVM. Ces méthodes reposent fortement sur la qualité des features extraites, ce qui limite leur capacité de généralisation lorsque les conditions d’acquisition varient.
+
+Pour améliorer ces approches, certains travaux ont introduit des techniques de sélection de caractéristiques afin de ne conserver que les plus discriminantes. Par exemple, \cite{TOGACAR2020106810} combine des descripteurs issus de réseaux convolutionnels (CNN) avec des méthodes de sélection comme le Maximal Information Coefficient ou la régression Ridge. Cette approche hybride permet d’exploiter la richesse des représentations profondes tout en réduisant la dimensionnalité, ce qui améliore la performance et la robustesse des modèles.
+
+Avec l’essor du deep learning, les réseaux convolutionnels se sont imposés comme une solution dominante pour la classification d’images médicales. Contrairement aux approches classiques, ils apprennent automatiquement des représentations hiérarchiques à partir des images brutes. Des architectures comme VGG, ResNet ou DenseNet ont montré d’excellentes performances sur des tâches de classification de WBC \cite{https://doi.org/10.1155/2020/6490479}. Ces modèles peuvent être entraînés de bout en bout ou utilisés via du transfer learning, ce qui est particulièrement utile lorsque les jeux de données sont de taille limitée.
+
+Cependant, ces méthodes sont fortement dépendantes de la quantité et de la qualité des données disponibles. Le manque de données annotées et le déséquilibre entre les classes constituent des problèmes majeurs. Pour y remédier, plusieurs travaux proposent des techniques d’augmentation de données, notamment via des transformations géométriques ou l’utilisation de modèles génératifs. Par exemple, \cite{https://doi.org/10.1155/2020/6490479} exploite des Generative Adversarial Networks (GAN) pour générer de nouvelles images réalistes, améliorant ainsi la diversité du jeu de données et la performance des modèles.
+
+Plus récemment, de nouvelles architectures basées sur les mécanismes d’attention, comme les Vision Transformers (ViT), ont été proposées. Contrairement aux CNN, qui capturent principalement des motifs locaux via des convolutions, les ViT modélisent directement les relations globales dans l’image grâce au self-attention. Cela leur permet de mieux gérer le bruit et les variations globales des images, comme le montre \cite{a16110525}, qui met en évidence leur robustesse sur des données de qualité variable.
+
+Enfin, le problème du déséquilibre des classes reste central dans ce domaine. Les travaux récents soulignent l’importance d’adapter les stratégies d’apprentissage et les métriques d’évaluation à ce contexte, afin d’éviter un biais en faveur des classes majoritaires \cite{Gao_2026,healthcare10112230}.
+
+Dans ce projet, nous nous inscrivons dans cette continuité en comparant des approches basées sur des caractéristiques construites manuellement et des modèles de deep learning, tout en portant une attention particulière à la gestion du déséquilibre des données et à l’impact des techniques d’augmentation et de sélection de features.
+
+
+\section{Data analysis}
+- explication des différentes classes et analyse du déséquilibre. Explication que les classes rares sont au final plus faciles à apprendre et qu'il est beaucoup plus difficile d'apprendre à discriminer correctement des sous-classes d'une classe de wbc. 
+- parler du fait que les données sont aussi de qualité variable, bruit, flou, … 
+- expliquer que l'essentiel de l'information se trouve dans la forme et la couleur des cellules ainsi et surtout que dans les noyaux 
+
+\subsection{Mask extraction method}
+
+
+\section{Machine learning based approaches}
+
+Avant d’entraîner des modèles de machine learning classiques, il est nécessaire de représenter chaque image par un vecteur de caractéristiques explicites. Contrairement aux approches de deep learning, où les représentations sont apprises automatiquement, les méthodes classiques reposent entièrement sur la qualité des descripteurs construits à la main. Cette idée est cohérente avec les travaux historiques sur la classification de globules blancs, qui s’appuient sur une chaîne de traitement composée d’une segmentation, d’une extraction de caractéristiques morphologiques, colorimétriques ou texturales, puis d’un classifieur supervisé \cite{REZATOFIGHI2011333}. Elle reste également présente dans des approches plus récentes, où des représentations riches sont ensuite filtrées par des méthodes de sélection de variables afin de ne conserver que les dimensions les plus discriminantes \cite{TOGACAR2020106810,healthcare10112230}.
+
+Dans cette partie, nous étudions donc plusieurs familles de \textit{handcrafted features} extraites à partir des images et des masques de cellules. L’objectif est double : d’une part, mesurer dans quelle mesure ces descripteurs permettent déjà de séparer les différentes classes de WBC ; d’autre part, analyser l’effet de la sélection de variables sur la qualité de cette représentation et, en conséquence, sur les performances des modèles.
+
+\subsection{Handcrafted features}
+
+Les descripteurs construits manuellement utilisés dans ce projet suivent une logique proche de celle des approches classiques de la littérature : exploiter des propriétés géométriques, colorimétriques et texturales des cellules, supposées porteuses d’information discriminante entre les différentes classes. Ce choix est motivé par le fait que, dans les images de globules blancs, la forme de la cellule et du noyau, la répartition des intensités, ainsi que les motifs de texture du cytoplasme et du noyau varient selon le type cellulaire \cite{REZATOFIGHI2011333,healthcare10112230}.
+
+La première famille de descripteurs regroupe les \textbf{caractéristiques morphologiques}. À partir du masque de cellule, nous extrayons notamment l’aire, le périmètre, la circularité, le rapport d’aspect, l’extent, l’aire convexe, la solidité, les axes principal et secondaire, l’excentricité, l’orientation, le diamètre équivalent, ainsi que des mesures de régularité du contour comme la moyenne et la variance de la distance au centroïde. Lorsque le masque du noyau est disponible, nous ajoutons également des \textbf{features de rapport} entre noyau et cellule, comme le ratio d’aire noyau/cellule ou le ratio de périmètre. Ce type de variables est classique en hématologie computationnelle, car certaines classes se distinguent précisément par la taille relative du noyau, la compacité de la cellule ou la régularité de son contour \cite{REZATOFIGHI2011333}.
+
+La seconde famille correspond aux \textbf{caractéristiques de couleur et d’intensité}. Nous calculons des statistiques d’ordre faible sur plusieurs espaces colorimétriques (BGR, RGB, HSV et LAB), en incluant moyenne, écart-type, asymétrie et kurtosis pour chaque canal. Ce choix permet de capturer à la fois l’intensité moyenne de coloration et la dispersion des teintes dans la cellule segmentée. Nous ajoutons à cela des histogrammes normalisés sur plusieurs espaces de couleur ainsi que des statistiques globales en niveaux de gris. Ces descripteurs sont pertinents dans notre contexte, car les procédés de coloration des frottis sanguins produisent des différences visuelles marquées entre types cellulaires, notamment au niveau du noyau et du cytoplasme \cite{healthcare10112230}.
+
+La troisième famille regroupe les \textbf{descripteurs de texture}. Nous utilisons plusieurs représentations complémentaires. Les matrices de cooccurrence de niveaux de gris (GLCM) permettent de calculer des mesures telles que le contraste, la dissimilarité, l’homogénéité, l’énergie ou la corrélation, qui décrivent l’organisation locale des niveaux de gris. Nous ajoutons aussi des descripteurs de type Haralick simplifiés, des histogrammes de \textit{Local Binary Patterns} (LBP), ainsi que des caractéristiques issues d’une décomposition en ondelettes. Ces différentes représentations visent à capturer la granularité, l’hétérogénéité et les variations d’intensité à plusieurs échelles, propriétés souvent utilisées dans la littérature pour distinguer les sous-types de WBC \cite{REZATOFIGHI2011333,healthcare10112230}.
+
+Les features extraits sont ensuite normalisés et regroupés dans un vecteur de caractéristiques de dimension fixe pour chaque image, qui servira d’entrée aux modèles de machine learning classiques.
+
+\subsection{Features selection and t-SNE visualization}
+
+Comme évoqué précédemment, les descripteurs construits manuellement produisent des vecteurs de grande dimension, souvent redondants. Dans ce contexte, la \textbf{sélection de variables} est une étape essentielle afin d’améliorer la capacité de généralisation des modèles et de réduire le bruit dans les données. En effet, conserver un trop grand nombre de features peu informatives peut dégrader les performances, en particulier lorsque le nombre d’échantillons est limité, ce qui est fréquent dans les applications biomédicales.
+
+Plusieurs approches classiques existent pour effectuer cette sélection. Les méthodes de filtrage univariées, comme le test du $\chi^2$ ou l’ANOVA, évaluent indépendamment chaque variable en mesurant sa corrélation avec la variable cible. Bien que simples et rapides, ces méthodes présentent une limitation importante : elles ne prennent pas en compte les interactions entre les variables, ce qui peut conduire à conserver des features redondantes ou à en éliminer certaines qui ne sont pertinentes qu’en combinaison avec d’autres.
+
+Afin de pallier cette limitation, nous avons retenu une approche de \textbf{sélection embarquée} basée sur une pénalisation $L_1$. Concrètement, nous utilisons un modèle de régression logistique avec régularisation $L_1$, entraîné sur les données normalisées. Cette pénalisation favorise la parcimonie en contraignant certains coefficients du modèle à devenir nuls. Les features associées à ces coefficients sont alors automatiquement éliminées. Cette méthode présente l’avantage de prendre en compte les dépendances entre variables tout en étant directement optimisée pour la tâche de classification.
+
+Dans notre implémentation, les features sont d’abord standardisées à l’aide d’un \textit{StandardScaler}, puis un modèle de régression logistique avec pénalité $L_1$ (optimisé avec l’algorithme \textit{saga}) est entraîné. La sélection est ensuite réalisée via \textit{SelectFromModel}, ce qui permet de réduire significativement la dimension du vecteur de caractéristiques tout en conservant les dimensions les plus discriminantes. En pratique, cette étape permet d’obtenir une représentation plus compacte, ce qui améliore la stabilité et les performances des modèles en aval.
+
+Afin d’analyser l’impact de cette sélection de variables sur la structure des données, nous utilisons une projection \textbf{t-SNE} (t-distributed Stochastic Neighbor Embedding). Cette méthode permet de projeter les données de grande dimension dans un espace de dimension réduite (généralement 2D) tout en préservant les relations locales entre points. Avant l’application du t-SNE, une réduction de dimension par PCA est effectuée afin de stabiliser la projection et de réduire le bruit.
+
+Les visualisations obtenues montrent que, sans sélection de features, les différentes classes sont fortement entremêlées dans l’espace projeté, ce qui traduit une faible séparabilité. En revanche, après application de la sélection $L_1$, les clusters associés aux différentes classes deviennent plus distincts. Cela indique que les features conservées capturent mieux les propriétés discriminantes entre types de globules blancs. Cette observation qualitative est cohérente avec les améliorations de performance observées sur les modèles de classification.
+
+Ainsi, la combinaison d’une sélection de variables supervisée et d’une analyse visuelle via t-SNE constitue un outil pertinent pour comprendre et améliorer la qualité des représentations dans un cadre de machine learning classique.
+
+
+\subsection{Results and discussion}
+- Choix des modèles (RGB SVM, Random Forest, XGBoost, …) avec la motivation derrière chaque modèle et comparaison de leurs performances en fonction des features utilisées et des méthodes de sélection de features.
+- présentation des résultats obtenus et interprétation des matrices de confusion
+
+\subsection{Resampling methods}
+- explications générales des différentes méthodes de rééquilibrage mise en avant dans les articles. 
+- SMOTE explicatioin de la méthode (formule et intuition) et pourquoi est ce qu'elle peut être plus puissante par rapport à d'autres méthodes de rééquilibrage comme de l'oversampling classique 
+- analyse des résultats avec et sans smote.
+
+
+\section{Deep learning based approaches}
+
+- courte introduction sur le méthode de deep learning pour la classification d'images, 
+- la data augmentation joue un rôle crucial pour les modèles de deep (expliquer pourquoi, etc…)
+
+\subsection{Literature Models}
+- ResNet, DenseNet, EfficientNet, ConvNext, Swin, 
+
+\subsection{Transfer Learning and pretraining influence}
+
+\subsection{Classification Heads}
+
+
+
+
+
+
+\section{Unsuccesful / unfinished approaches}
+
+\subsection{Supervised Contrastive learning}
+
+\subsection{Data augmentation with GANs}
+
+\subsection{Interesting directions : JEPA}
+
+\section{Discussion and conclusion}
+
+\subsection{Difficulties encountered}
+
+\subsection{Conclusion of this work}
+
+
+\cite{TOGACAR2020106810}.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
 
 \end{document}
