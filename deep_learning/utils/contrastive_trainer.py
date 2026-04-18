@@ -25,6 +25,7 @@ class ContrastiveTrainer:
 
         self.use_amp = bool(config.get("use_amp", False))
         self.grad_clip = config.get("grad_clip", None)
+        self.amp_dtype = torch.bfloat16
 
         self.optimizer_name = str(config.get("optimizer", "adamw")).lower()
         self.scheduler_name = str(config.get("scheduler", "cosine")).lower()
@@ -55,7 +56,7 @@ class ContrastiveTrainer:
         self.scheduler = self._build_scheduler()
         self.scaler = torch.amp.GradScaler(
             "cuda" if self.device.type == "cuda" else "cpu",
-            enabled=self.use_amp,
+            enabled=False,
         )
 
         self.history = {
@@ -148,7 +149,8 @@ class ContrastiveTrainer:
         print(f"Checkpoint saved: {path}")
 
     def supcon_loss(self, features, labels):
-        features = nn.functional.normalize(features.float(), dim=1)
+        # print(f"Computing SupCon loss with features shape {features.shape} and labels shape {labels.shape}")
+        features = nn.functional.normalize(features.float(), dim=2)
         labels = labels.contiguous().view(-1, 1)
 
         batch_size = labels.shape[0]
@@ -222,7 +224,7 @@ class ContrastiveTrainer:
                 torch.cuda.synchronize()
             t1 = time.perf_counter()
 
-            with torch.autocast(device_type=self.device.type, enabled=self.use_amp):
+            with torch.autocast(device_type=self.device.type, dtype=self.amp_dtype, enabled=self.use_amp):
                 z1 = self.model(x1)
                 z2 = self.model(x2)
 
@@ -235,14 +237,12 @@ class ContrastiveTrainer:
             if step < 30:
                 infer_times.append(itime)
 
-            self.scaler.scale(loss).backward()
+            loss.backward()
 
             if self.grad_clip is not None:
-                self.scaler.unscale_(self.optimizer)
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.grad_clip)
 
-            self.scaler.step(self.optimizer)
-            self.scaler.update()
+            self.optimizer.step()
 
             if self.scheduler is not None:
                 self.scheduler.step()
@@ -283,7 +283,7 @@ class ContrastiveTrainer:
             x2 = x2.to(self.device, non_blocking=True)
             y = y.to(self.device, non_blocking=True)
 
-            with torch.autocast(device_type=self.device.type, enabled=self.use_amp):
+            with torch.autocast(device_type=self.device.type, dtype=self.amp_dtype, enabled=self.use_amp):
                 z1 = self.model(x1)
                 z2 = self.model(x2)
 
@@ -306,7 +306,7 @@ class ContrastiveTrainer:
         for x1, _, y in loader:
             x1 = x1.to(self.device, non_blocking=True)
 
-            with torch.autocast(device_type=self.device.type, enabled=self.use_amp):
+            with torch.autocast(device_type=self.device.type, dtype=self.amp_dtype, enabled=self.use_amp):
                 z = self.model.backbone(x1)
 
             feats.append(z.detach().cpu())

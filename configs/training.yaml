@@ -1,4 +1,4 @@
-evaluation: true
+evaluation: false
 submission_path: /home/infres/yrothlin-24/CHAL_IM05/submissions/submission.csv
 
 
@@ -42,7 +42,7 @@ training:
   grad_clip: 1.0
   log_step: 50
 
-  tta_rounds: 8
+  tta_rounds: 4
   label_smoothing: 0.05
 
   use_weights: false
@@ -96,7 +96,7 @@ data:
   shuffle: true
   num_workers: 4
   pin_memory: true
-  n_splits: 5
+  n_splits: 1
   use_weighted_sampler: true
   use_undersampling: false
   sampler_power: 0.5
@@ -104,7 +104,7 @@ data:
 
 model:
   num_classes: 13
-  backbone_name: CONVNEXT_BASE
+  backbone_name: CONVNEXT_TINY
   freeze_backbone: false
   pretrained: true
 
@@ -129,3 +129,8 @@ model:
     # 'SWIN_T',
     # 'SWIN_V2_T',
     # 'DINOV2_VITS14',
+
+    # MY_CNN
+    # MY_TRANSFORMER_TINY
+    # MY_TRANSFORMER_SMALL
+    # MY_TRANSFORMER_BASE

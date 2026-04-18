@@ -941,10 +941,10 @@ class Trainer:
 
             val_loss, val_metrics, val_targets, val_preds = self.validate_one_epoch()
 
-            if self.plot_tsne and (epoch % self.tsne_every == 0):
+            if self.plot_tsne and (epoch % self.tsne_every == 0 or epoch == 1):
                 self.save_backbone_tsne(split=self.tsne_split, epoch=epoch)
 
-            if self.plot_confusion and (epoch % self.confusion_every == 0):
+            if self.plot_confusion and (epoch % self.confusion_every == 0 or epoch == 1):
                 self.save_confusion_matrix(
                     y_true=val_targets,
                     y_pred=val_preds,

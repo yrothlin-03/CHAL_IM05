@@ -326,12 +326,13 @@ def train_gan(
         d_loss_epoch /= len(loader)
         g_loss_epoch /= len(loader)
 
-        print(f"Epoch [{epoch}/{epochs}] | D_loss: {d_loss_epoch:.4f} | G_loss: {g_loss_epoch:.4f}")
+        if epoch % 20 == 0 or epoch == 1:
+            print(f"Epoch [{epoch}/{epochs}]  D Loss: {d_loss_epoch:.4f}  G Loss: {g_loss_epoch:.4f}")
 
-        if epoch % 10 == 0 or epoch == 1:
+        if epoch % 100 == 0 or epoch == 1:
             save_samples(G, z_dim, device, output_dir, epoch)
 
-        if epoch % 50 == 0 or epoch == epochs:
+        if epoch % 100 == 0 or epoch == epochs:
             torch.save(G.state_dict(), output_dir / f"generator_epoch_{epoch:04d}.pt")
             torch.save(D.state_dict(), output_dir / f"critic_epoch_{epoch:04d}.pt")
 
@@ -369,8 +370,8 @@ if __name__ == "__main__":
         output_dir="/home/infres/yrothlin-24/CHAL_IM05/gan_wbc_outputs",
         image_size=256,
         batch_size=16,
-        epochs=1000,
-        z_dim=128,
+        epochs=2000,
+        z_dim=256,
         lr=1e-4,
         critic_steps=5,
         lambda_gp=10.0,
@@ -383,5 +384,5 @@ if __name__ == "__main__":
     #     checkpoint_path="/home/infres/yrothlin-24/CHAL_IM05/gan_wbc_outputs/PLY/generator_epoch_0300.pt",
     #     output_dir="/home/infres/yrothlin-24/CHAL_IM05/generated_wbc/PLY",
     #     n_images=200,
-    #     z_dim=128,
+    #     z_dim=256,
     # )

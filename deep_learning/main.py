@@ -10,6 +10,11 @@ from .utils import Trainer
 from .models import Model
 from .dataloader import get_loaders
 
+import argparse
+from typing import Any, Dict
+
+
+
 
 ID2LABEL = {
     0: "SNE",
@@ -35,6 +40,113 @@ def get_config(config_path: Path) -> Dict[str, Any]:
         raise ValueError(f"Config file {config_path} is empty or invalid YAML.")
     return config
 
+
+def str2bool(x: str) -> bool:
+    x = x.lower()
+    if x in {"true", "1", "yes", "y"}:
+        return True
+    if x in {"false", "0", "no", "n"}:
+        return False
+    raise argparse.ArgumentTypeError(f"Invalid bool: {x}")
+
+
+def set_nested(config: Dict[str, Any], key: str, value: Any) -> None:
+    keys = key.split(".")
+    d = config
+    for k in keys[:-1]:
+        if k not in d:
+            d[k] = {}
+        d = d[k]
+    d[keys[-1]] = value
+
+
+def parse_config() -> Dict[str, Any]:
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--evaluation", type=str2bool, required=True)
+    parser.add_argument("--submission_path", type=str, required=True)
+
+    parser.add_argument("--training.save_ckpt", type=str2bool, required=True)
+    parser.add_argument("--training.ckpt_dir", type=str, required=True)
+    parser.add_argument("--training.ckpt_every", type=int, required=True)
+    parser.add_argument("--training.resume_from", type=str, required=True)
+    parser.add_argument("--training.resume", type=str2bool, required=True)
+    parser.add_argument("--training.resume_from_pretrained", type=str, required=True)
+    parser.add_argument("--training.resume_pretrained", type=str2bool, required=True)
+    parser.add_argument("--training.monitor", type=str, required=True)
+    parser.add_argument("--training.early_stopping", type=str2bool, required=True)
+    parser.add_argument("--training.early_stopping_patience", type=int, required=True)
+    parser.add_argument("--training.early_stopping_mode", type=str, required=True)
+
+    parser.add_argument("--training.use_mixup", type=str2bool, required=True)
+    parser.add_argument("--training.mixup_alpha", type=float, required=True)
+    parser.add_argument("--training.use_cutmix", type=str2bool, required=True)
+    parser.add_argument("--training.cutmix_alpha", type=float, required=True)
+    parser.add_argument("--training.cutmix_prob", type=float, required=True)
+
+    parser.add_argument("--training.loss", type=str, required=True)
+    parser.add_argument("--training.gamma", type=float, required=True)
+
+    parser.add_argument("--training.bb_lr", type=float, required=True)
+    parser.add_argument("--training.head_lr", type=float, required=True)
+    parser.add_argument("--training.finetune_bb_lr", type=float, required=True)
+    parser.add_argument("--training.finetune_head_lr", type=float, required=True)
+
+    parser.add_argument("--training.weight_decay", type=float, required=True)
+    parser.add_argument("--training.num_epochs", type=int, required=True)
+    parser.add_argument("--training.warmup_epochs", type=int, required=True)
+
+    parser.add_argument("--training.optimizer", type=str, required=True)
+    parser.add_argument("--training.scheduler", type=str, required=True)
+
+    parser.add_argument("--training.use_amp", type=str2bool, required=True)
+    parser.add_argument("--training.grad_clip", type=float, required=True)
+    parser.add_argument("--training.log_step", type=int, required=True)
+
+    parser.add_argument("--training.tta_rounds", type=int, required=True)
+    parser.add_argument("--training.label_smoothing", type=float, required=True)
+
+    parser.add_argument("--training.use_weights", type=str2bool, required=True)
+    parser.add_argument("--training.weights", type=float, nargs="+", required=True)
+
+    parser.add_argument("--training.plot_tsne", type=str2bool, required=True)
+    parser.add_argument("--training.tsne_split", type=str, required=True)
+    parser.add_argument("--training.tsne_every", type=int, required=True)
+    parser.add_argument("--training.tsne_max_samples", type=int, required=True)
+    parser.add_argument("--training.tsne_perplexity", type=float, required=True)
+    parser.add_argument("--training.tsne_dir", type=str, required=True)
+
+    parser.add_argument("--training.plot_confusion", type=str2bool, required=True)
+    parser.add_argument("--training.confusion_split", type=str, required=True)
+    parser.add_argument("--training.confusion_every", type=int, required=True)
+    parser.add_argument("--training.confusion_normalize", type=str2bool, required=True)
+    parser.add_argument("--training.confusion_dir", type=str, required=True)
+    parser.add_argument("--training.class_names", type=str, nargs="+", required=True)
+
+    parser.add_argument("--data.train_ratio", type=float, required=True)
+    parser.add_argument("--data.seed", type=int, required=True)
+    parser.add_argument("--data.batch_size", type=int, required=True)
+    parser.add_argument("--data.shuffle", type=str2bool, required=True)
+    parser.add_argument("--data.num_workers", type=int, required=True)
+    parser.add_argument("--data.pin_memory", type=str2bool, required=True)
+    parser.add_argument("--data.n_splits", type=int, required=True)
+    parser.add_argument("--data.use_weighted_sampler", type=str2bool, required=True)
+    parser.add_argument("--data.use_undersampling", type=str2bool, required=True)
+    parser.add_argument("--data.sampler_power", type=float, required=True)
+    parser.add_argument("--data.with_tta", type=str2bool, required=True)
+
+    parser.add_argument("--model.num_classes", type=int, required=True)
+    parser.add_argument("--model.backbone_name", type=str, required=True)
+    parser.add_argument("--model.freeze_backbone", type=str2bool, required=True)
+    parser.add_argument("--model.pretrained", type=str2bool, required=True)
+
+    args = parser.parse_args()
+
+    config = {}
+    for key, value in vars(args).items():
+        set_nested(config, key, value)
+
+    return config
 
 def create_submission_file(preds: Dict[str, Any], output_path: Path) -> None:
     output_path = Path(output_path)
@@ -291,5 +403,6 @@ def main(config: Dict[str, Any]) -> None:
 
 if __name__ == "__main__":
     config_path = Path("/home/infres/yrothlin-24/CHAL_IM05/configs/training.yaml")
-    config = get_config(config_path)
+    # config = get_config(config_path)
+    config = parse_config()
     main(config)

@@ -238,10 +238,10 @@ def get_loaders(
         dataset_dir = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/test"
         label_path = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/test_metadata.csv"
     else:
-        dataset_dir = "/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train"
-        label_path = "/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train_metadata.csv"
-        # dataset_dir = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train"
-        # label_path = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train_metadata.csv"
+        # dataset_dir = "/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train"
+        # label_path = "/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train_metadata.csv"
+        dataset_dir = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train"
+        label_path = "/tsi/data_education/ChallengeIMA205/IMA205-challenge/train_metadata.csv"
 
     files = get_filespath(dataset_dir)
 

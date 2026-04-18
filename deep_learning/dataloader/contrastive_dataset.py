@@ -30,25 +30,36 @@ label2id = {
 }
 
 
-contrastive_tfms = transforms.Compose([
+contrastive_train_tfms = transforms.Compose([
     transforms.ToPILImage(),
-    transforms.Resize((300, 300)),
-    transforms.RandomResizedCrop(size=300, scale=(0.75, 1.0)),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomVerticalFlip(),
-    transforms.RandomRotation(degrees=45),
+    transforms.RandomResizedCrop(
+        size=294,
+        scale=(0.75, 1.0),
+        ratio=(0.9, 1.1),
+    ),
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.RandomVerticalFlip(p=0.5),
+    transforms.RandomRotation(degrees=180),
     transforms.RandomAffine(
         degrees=0,
-        translate=(0.08, 0.08),
-        scale=(0.9, 1.1),
-        shear=5
+        translate=(0.10, 0.10),
+        scale=(0.85, 1.15),
+        shear=8,
     ),
     transforms.ColorJitter(
-        brightness=0.15,
-        contrast=0.15,
-        saturation=0.15,
+        brightness=0.3,
+        contrast=0.3,
+        saturation=0.2,
         hue=0.0,
     ),
+    transforms.ToTensor(),
+    transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
+])
+
+
+contrastive_val_tfms = transforms.Compose([
+    transforms.ToPILImage(),
+    transforms.Resize((294, 294)),
     transforms.ToTensor(),
     transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
 ])
@@ -122,7 +133,7 @@ class IM05_ContrastiveDataset(Dataset):
     def __init__(self, files: List[str], labels: Dict[str, int], transform=None):
         self.files = files
         self.labels = labels
-        self.transform = transform if transform is not None else TwoCropsTransform(contrastive_tfms)
+        self.transform = transform if transform is not None else TwoCropsTransform(contrastive_train_tfms)
 
     def __len__(self):
         return len(self.files)
@@ -166,13 +177,13 @@ def get_contrastive_loaders(
     train_dataset = IM05_ContrastiveDataset(
         files=train_files,
         labels=labels,
-        transform=TwoCropsTransform(contrastive_tfms),
+        transform=TwoCropsTransform(contrastive_train_tfms),
     )
 
     val_dataset = IM05_ContrastiveDataset(
         files=val_files,
         labels=labels,
-        transform=TwoCropsTransform(contrastive_tfms),
+        transform=TwoCropsTransform(contrastive_val_tfms),
     )
 
     generator = torch.Generator()
@@ -194,7 +205,7 @@ def get_contrastive_loaders(
         shuffle=False,
         num_workers=num_workers,
         pin_memory=pin_memory,
-        drop_last=drop_last,
+        drop_last=False,
     )
 
     return train_loader, val_loader
