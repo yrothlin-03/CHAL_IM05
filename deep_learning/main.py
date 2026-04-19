@@ -404,6 +404,6 @@ def main(config: Dict[str, Any]) -> None:
 
 if __name__ == "__main__":
     config_path = Path("/home/infres/yrothlin-24/CHAL_IM05/configs/training.yaml")
-    # config = get_config(config_path)
-    config = parse_config() # for slurm jobs
+    config = get_config(config_path)
+    # config = parse_config() # for slurm jobs
     main(config)

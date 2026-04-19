@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.27)  19 APR 2026 16:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.27)  19 APR 2026 16:42
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -583,6 +583,16 @@ Overfull \hbox (4.3108pt too wide) in paragraph at lines 474--488
 
 
 [11]
+Underfull \hbox (badness 2608) in paragraph at lines 522--523
+\T1/ptm/m/n/10 straté-gies de \T1/ptm/b/n/10 co-sine an-neal-ing \T1/ptm/m/n/10 avec ou sans warmup.
+ []
+
+
+Underfull \hbox (badness 3838) in paragraph at lines 522--523
+\T1/ptm/m/n/10 Le warmup per-met de sta-biliser les pre-mières étapes
+ []
+
+
 
 <figures/contrastive_explain.png, id=267, 731.73375pt x 338.26375pt>
 File: figures/contrastive_explain.png Graphic file (type png)
@@ -686,7 +696,7 @@ LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
 Package rerunfilecheck Info: File `report.out' has not changed.
-(rerunfilecheck)             Checksum: 72FDD0E7C018C01B60F5BFFA03110D8E;4099.
+(rerunfilecheck)             Checksum: 84E2F0AB8BA2131C6ED9FB541FB9659E;4492.
  ) 
 Here is how much of TeX's memory you used:
  11765 strings out of 473190
@@ -697,7 +707,7 @@ Here is how much of TeX's memory you used:
  1141 hyphenation exceptions out of 8191
  75i,9n,79p,1198b,455s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on report.pdf (17 pages, 10157480 bytes).
+Output written on report.pdf (17 pages, 10157692 bytes).
 PDF statistics:
  439 PDF objects out of 1000 (max. 8388607)
  358 compressed objects within 4 object streams

@@ -1,14 +1,14 @@
 # Fdb version 4
-["bibtex report"] 1776609131.29807 "report.aux" "report.bbl" "report" 1776609225.54016 0
+["bibtex report"] 1776609735.08218 "report.aux" "report.bbl" "report" 1776609739.66875 0
   "./references.bib" 1776589194.25026 11895 ffde5dea84a2201aa60dd7715c4be017 ""
   "/usr/local/texlive/2025/texmf-dist/bibtex/bst/ieeetran/IEEEtran.bst" 1440712899 57748 7c8250ecf02814ce6ddc0cdbb63df1dd ""
-  "report.aux" 1776609225.12705 14031 96b28962230e660e34132b3b0d66174b "pdflatex"
+  "report.aux" 1776609739.39404 14117 45c07c74e64f9eee40f4fbf499a3797c "pdflatex"
   (generated)
   "report.bbl"
   "report.blg"
   (rewritten before read)
-["pdflatex"] 1776609218.0986 "/Users/yanicrothlingshofer/Desktop/Telecom Paris/2A/IMA/IM05/CHAL_IM05/report/report.tex" "report.pdf" "report" 1776609225.54041 0
-  "/Users/yanicrothlingshofer/Desktop/Telecom Paris/2A/IMA/IM05/CHAL_IM05/report/report.tex" 1776609217.57266 81866 80b62bdfcb4aa8c0c5e25705f4820573 ""
+["pdflatex"] 1776609735.1798 "/Users/yanicrothlingshofer/Desktop/Telecom Paris/2A/IMA/IM05/CHAL_IM05/report/report.tex" "report.pdf" "report" 1776609739.66891 0
+  "/Users/yanicrothlingshofer/Desktop/Telecom Paris/2A/IMA/IM05/CHAL_IM05/report/report.tex" 1776609730.45531 81952 c1144c9855ffc655bfa115651b283a28 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/courier/pcrr8r.tfm" 1136768653 1292 bd42be2f344128bff6d35d98474adfe3 ""
@@ -141,10 +141,10 @@
   "figures/t-sne-selected-features.png" 1776522404.58128 273954 47d29b711ba43fc10f2a2b8afd3a732e ""
   "figures/tsne_with_contrastive.png" 1776589294.71776 435774 20843226846eaea6a3b1ede43d57fc6f ""
   "figures/tsne_without_contrastive.png" 1776589285.80908 464774 7b0100ebac8a7cf4cb4e6a4b45b22e96 ""
-  "report.aux" 1776609225.12705 14031 96b28962230e660e34132b3b0d66174b "pdflatex"
-  "report.bbl" 1776609131.45736 4215 9e5b05bcebc0f768a3c94c9ae6406811 "bibtex report"
-  "report.out" 1776609225.12849 4099 72fdd0e7c018c01b60f5bffa03110d8e "pdflatex"
-  "report.tex" 1776609217.57266 81866 80b62bdfcb4aa8c0c5e25705f4820573 ""
+  "report.aux" 1776609739.39404 14117 45c07c74e64f9eee40f4fbf499a3797c "pdflatex"
+  "report.bbl" 1776609735.17735 4215 9e5b05bcebc0f768a3c94c9ae6406811 "bibtex report"
+  "report.out" 1776609739.39509 4492 84e2f0ab8ba2131c6ed9fb541fb9659e "pdflatex"
+  "report.tex" 1776609730.45531 81952 c1144c9855ffc655bfa115651b283a28 ""
   (generated)
   "report.aux"
   "report.log"
