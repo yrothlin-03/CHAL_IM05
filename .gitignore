@@ -6,4 +6,4 @@ stylegan_wbc/
 gan_wbc_outputs/
 artifacts/
 theo/
-
+.DS_Store
