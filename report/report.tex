@@ -10,26 +10,25 @@
 \usepackage{url}
 \usepackage{xcolor}
 \usepackage{setspace}
-\setstretch{1.2}   % très léger espace
+\setstretch{1.2}  
 
 \begin{document}
 
-\title{Report : IM05 Challenge : \\ \textit{“White Blood Cell Images classification”}}
-
+\title{Rapport du Challenge IM05 \\ \textit{Classification automatique d’images de globules blancs}}
 \author{
   Yanic ROTHLINGSHOFER,~\IEEEmembership{TELECOM PARIS}
 }
 
 \maketitle
 
-\begin{abstract}
-\end{abstract}
+% \begin{abstract}
+% \end{abstract}
 
-\begin{IEEEkeywords}
+% \begin{IEEEkeywords}
 
-\end{IEEEkeywords}
+% \end{IEEEkeywords}
 
-
+\textbf{CODE :} \url{https://github.com/yrothlin-03/CHAL_IM05}
 
 \section{Introduction}
 
@@ -105,13 +104,49 @@ Dans ce projet, nous nous inscrivons dans cette continuité en comparant des app
 
 
 \section{Data analysis}
-- explication des différentes classes et analyse du déséquilibre. Explication que les classes rares sont au final plus faciles à apprendre et qu'il est beaucoup plus difficile d'apprendre à discriminer correctement des sous-classes d'une classe de wbc. 
-- parler du fait que les données sont aussi de qualité variable, bruit, flou, … 
-- expliquer que l'essentiel de l'information se trouve dans la forme et la couleur des cellules ainsi et surtout que dans les noyaux 
+
+Avant de comparer différentes méthodes d’apprentissage, il est nécessaire d’analyser la structure du jeu de données et les difficultés qu’il pose. Comme dans de nombreux problèmes biomédicaux, la difficulté ne provient pas seulement du faible nombre d’exemples annotés, mais aussi d’une forte hétérogénéité visuelle entre classes et d’un déséquilibre marqué dans leur distribution. Les travaux récents sur l’apprentissage en contexte déséquilibré rappellent que ce type de configuration biaise facilement l’entraînement vers les classes majoritaires et peut rendre les métriques globales trompeuses si elles ne sont pas interprétées avec précaution \cite{Gao_2026}.
+
+Le jeu de données utilisé dans ce projet contient plusieurs catégories de leucocytes correspondant à différents stades de maturation ou sous-types cellulaires. On y retrouve notamment des classes abondantes telles que les neutrophiles segmentés (SNE) et les lymphocytes (LY), mais aussi des classes très rares comme PMY, PC ou PLY. La Figure~\ref{fig:data_distribution} met clairement en évidence ce déséquilibre : les classes majoritaires comptent plusieurs milliers d’exemples alors que certaines classes minoritaires ne sont représentées que par quelques dizaines d’images. Cette configuration rend l’apprentissage plus difficile, car un modèle entraîné naïvement tend à privilégier les classes fréquentes, qui dominent la fonction de coût.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/data_distri.png}
+    \caption{Distribution des classes dans l’ensemble d’entraînement.}
+    \label{fig:data_distribution}
+\end{figure}
+
+Cependant, le déséquilibre n’est pas la seule difficulté. En pratique, les classes les plus rares ne sont pas nécessairement les plus difficiles à apprendre. Plusieurs d’entre elles présentent en effet des signatures morphologiques très marquées, ce qui les rend relativement faciles à reconnaître malgré leur faible effectif. À l’inverse, la difficulté principale vient souvent de la discrimination entre \textbf{sous-classes proches d’une même famille leucocytaire}, par exemple entre différentes formes immatures ou entre classes partageant une organisation nucléaire similaire. Autrement dit, la rareté d’une classe n’implique pas automatiquement une faible séparabilité ; ce sont surtout les ressemblances intra-famille qui compliquent la décision. Cette observation est cohérente avec la littérature sur la classification de globules blancs, qui souligne que les variations de forme du noyau, de texture du cytoplasme et de stade de maturation créent des frontières de décision parfois très fines \cite{REZATOFIGHI2011333,a16110525}.
+
+La qualité des images constitue une autre source importante de variabilité. Certaines images sont nettes, bien contrastées et présentent une cellule isolée au centre du champ, tandis que d’autres sont plus difficiles à exploiter en raison du bruit, du flou, de différences de coloration, d’artefacts d’acquisition ou de la présence importante de globules rouges autour de la cellule cible. Les exemples fournis pour les classes BA, BNE, MMY, MY, PC et PLY illustrent bien cette hétérogénéité : certaines cellules sont bien définies, alors que d’autres apparaissent dans des conditions très dégradées, avec un bruit visuel élevé ou un contraste faible. Cette variabilité est un problème bien documenté dans la littérature, en particulier dans les travaux comparant des jeux de données de qualité inégale, où la robustesse des modèles dépend fortement de leur capacité à ignorer le fond et à se concentrer sur les structures cellulaires pertinentes \cite{a16110525}.
+
+D’un point de vue visuel, l’essentiel de l’information discriminante se situe dans la \textbf{forme}, la \textbf{couleur} et la \textbf{texture} de la cellule, et plus particulièrement dans le \textbf{noyau}. Les travaux classiques montrent déjà que la morphologie nucléaire, la taille relative noyau/cytoplasme, le nombre de lobes, la compacité ou encore la régularité du contour sont parmi les indices les plus utiles pour distinguer les différents types de WBC \cite{REZATOFIGHI2011333}. Les travaux plus récents confirment que, même lorsque des approches profondes sont utilisées, les indices décisifs restent liés à la structure globale de la cellule et à la coloration du noyau et du cytoplasme \cite{healthcare10112230,a16110525}. Cela justifie le choix méthodologique adopté dans ce projet : avant même la classification, il est crucial d’isoler la cellule d’intérêt et de limiter autant que possible l’influence du fond.
 
 \subsection{Mask extraction method}
 
+Une étape clé de notre pipeline consiste donc à extraire un masque de cellule suffisamment précis pour permettre le calcul de descripteurs morphologiques, colorimétriques et texturaux pertinents. Comme dans les approches classiques de la littérature, la qualité de cette segmentation conditionne directement la qualité des caractéristiques extraites \cite{REZATOFIGHI2011333}. Dans nos images, la difficulté vient du fait que la cellule d’intérêt est entourée de nombreux globules rouges, que le contraste varie d’une image à l’autre, et que certaines images sont bruitées ou légèrement floues.
 
+Dans un premier temps, une étape de \textbf{prétraitement} est appliquée. Les images sont redimensionnées à une taille fixe afin d’homogénéiser les traitements ultérieurs. Une égalisation d’histogramme est ensuite effectuée sur le canal de luminance dans l’espace LAB, ce qui améliore le contraste global sans altérer directement l’information colorimétrique. Enfin, un léger flou gaussien est appliqué pour atténuer le bruit haute fréquence. L’objectif de cette étape est de stabiliser la segmentation tout en conservant les structures importantes de la cellule.
+
+La segmentation repose ensuite sur une propriété visuelle simple mais très informative : le noyau des globules blancs présente généralement une \textbf{teinte violette soutenue}, plus sombre et plus saturée que le reste de l’image. Pour exploiter cette observation, nous travaillons dans l’espace HSV et construisons un score combinant trois composantes : la proximité de la teinte avec une zone violette de référence, un niveau de saturation élevé et une intensité relativement faible. Ce score permet d’obtenir une première estimation du noyau par seuillage adaptatif à partir d’un quantile. Cette stratégie est plus robuste qu’un seuil fixe, car elle s’adapte aux variations globales d’éclairage et de coloration entre images.
+
+Le masque nucléaire brut est ensuite raffiné à l’aide d’opérations morphologiques classiques. Une médiane permet d’éliminer une partie du bruit impulsionnel, puis des opérations d’ouverture et de fermeture avec des éléments structurants elliptiques suppriment les petites régions parasites et régularisent les contours. Une analyse en composantes connexes est alors effectuée afin de sélectionner la région la plus plausible. Le choix de la composante ne repose pas uniquement sur l’aire : un compromis est recherché entre \textbf{taille suffisante} et \textbf{proximité du centre de l’image}. Cette hypothèse est raisonnable ici, car la cellule d’intérêt est en général située près du centre du champ.
+
+Une fois le noyau isolé, celui-ci est dilaté pour produire une estimation plus large de la cellule entière. Cette expansion sert à définir une zone de premier plan probable, incluant le cytoplasme autour du noyau. Nous utilisons ensuite \textbf{GrabCut} pour affiner cette segmentation. Le noyau joue le rôle de premier plan certain, tandis que la région dilatée fournit un premier plan probable. GrabCut affine alors la séparation entre cellule et arrière-plan en exploitant à la fois des modèles statistiques de couleur et une régularisation spatiale. Cette étape est particulièrement utile pour récupérer le cytoplasme, dont les contours sont souvent moins marqués que ceux du noyau.
+
+Après GrabCut, un nettoyage morphologique supplémentaire est appliqué, puis une nouvelle sélection de composante connexe permet de ne conserver que la cellule principale. Le masque final est enfin reprojeté à la taille d’origine de l’image. La Figure~\ref{fig:mask_example} illustre un exemple de résultat obtenu : la cellule est correctement isolée du fond et des globules rouges voisins, ce qui rend possible une extraction plus fiable des descripteurs en aval.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/mask.png}
+    \caption{Exemple d’image originale et du masque de cellule extrait.}
+    \label{fig:mask_example}
+\end{figure}
+
+Cette méthode de segmentation reste volontairement simple et non supervisée. Elle ne nécessite pas d’annotation pixel à pixel et s’intègre donc facilement dans un pipeline de classification. En revanche, elle n’est pas parfaite : dans les cas les plus bruités ou pour certaines cellules atypiques, le masque obtenu peut être légèrement imprécis. Malgré cela, elle fournit dans la majorité des cas une localisation suffisamment bonne pour concentrer l’extraction de caractéristiques sur la région réellement informative de l’image, en particulier autour du noyau.
+
+
+\newpage
 \section{Machine learning based approaches}
 
 Avant d’entraîner des modèles de machine learning classiques, il est nécessaire de représenter chaque image par un vecteur de caractéristiques explicites. Contrairement aux approches de deep learning, où les représentations sont apprises automatiquement, les méthodes classiques reposent entièrement sur la qualité des descripteurs construits à la main. Cette idée est cohérente avec les travaux historiques sur la classification de globules blancs, qui s’appuient sur une chaîne de traitement composée d’une segmentation, d’une extraction de caractéristiques morphologiques, colorimétriques ou texturales, puis d’un classifieur supervisé \cite{REZATOFIGHI2011333}. Elle reste également présente dans des approches plus récentes, où des représentations riches sont ensuite filtrées par des méthodes de sélection de variables afin de ne conserver que les dimensions les plus discriminantes \cite{TOGACAR2020106810,healthcare10112230}.
@@ -122,74 +157,574 @@ Dans cette partie, nous étudions donc plusieurs familles de \textit{handcrafted
 
 Les descripteurs construits manuellement utilisés dans ce projet suivent une logique proche de celle des approches classiques de la littérature : exploiter des propriétés géométriques, colorimétriques et texturales des cellules, supposées porteuses d’information discriminante entre les différentes classes. Ce choix est motivé par le fait que, dans les images de globules blancs, la forme de la cellule et du noyau, la répartition des intensités, ainsi que les motifs de texture du cytoplasme et du noyau varient selon le type cellulaire \cite{REZATOFIGHI2011333,healthcare10112230}.
 
-La première famille de descripteurs regroupe les \textbf{caractéristiques morphologiques}. À partir du masque de cellule, nous extrayons notamment l’aire, le périmètre, la circularité, le rapport d’aspect, l’extent, l’aire convexe, la solidité, les axes principal et secondaire, l’excentricité, l’orientation, le diamètre équivalent, ainsi que des mesures de régularité du contour comme la moyenne et la variance de la distance au centroïde. Lorsque le masque du noyau est disponible, nous ajoutons également des \textbf{features de rapport} entre noyau et cellule, comme le ratio d’aire noyau/cellule ou le ratio de périmètre. Ce type de variables est classique en hématologie computationnelle, car certaines classes se distinguent précisément par la taille relative du noyau, la compacité de la cellule ou la régularité de son contour \cite{REZATOFIGHI2011333}.
+Les features extraits sont organisés en trois grandes familles :
 
-La seconde famille correspond aux \textbf{caractéristiques de couleur et d’intensité}. Nous calculons des statistiques d’ordre faible sur plusieurs espaces colorimétriques (BGR, RGB, HSV et LAB), en incluant moyenne, écart-type, asymétrie et kurtosis pour chaque canal. Ce choix permet de capturer à la fois l’intensité moyenne de coloration et la dispersion des teintes dans la cellule segmentée. Nous ajoutons à cela des histogrammes normalisés sur plusieurs espaces de couleur ainsi que des statistiques globales en niveaux de gris. Ces descripteurs sont pertinents dans notre contexte, car les procédés de coloration des frottis sanguins produisent des différences visuelles marquées entre types cellulaires, notamment au niveau du noyau et du cytoplasme \cite{healthcare10112230}.
+\begin{itemize}
 
-La troisième famille regroupe les \textbf{descripteurs de texture}. Nous utilisons plusieurs représentations complémentaires. Les matrices de cooccurrence de niveaux de gris (GLCM) permettent de calculer des mesures telles que le contraste, la dissimilarité, l’homogénéité, l’énergie ou la corrélation, qui décrivent l’organisation locale des niveaux de gris. Nous ajoutons aussi des descripteurs de type Haralick simplifiés, des histogrammes de \textit{Local Binary Patterns} (LBP), ainsi que des caractéristiques issues d’une décomposition en ondelettes. Ces différentes représentations visent à capturer la granularité, l’hétérogénéité et les variations d’intensité à plusieurs échelles, propriétés souvent utilisées dans la littérature pour distinguer les sous-types de WBC \cite{REZATOFIGHI2011333,healthcare10112230}.
+\item \textbf{Caractéristiques morphologiques :}
+À partir du masque de cellule, nous extrayons notamment : aire, périmètre, circularité, rapport d’aspect, extent, aire convexe, solidité, axes principal et secondaire, excentricité, orientation, diamètre équivalent, ainsi que des mesures de régularité du contour (moyenne et variance de la distance au centroïde). Lorsque le masque du noyau est disponible, nous ajoutons des \textbf{ratios noyau/cellule} (aire et périmètre). Ces variables sont particulièrement pertinentes car certaines classes se distinguent précisément par la taille relative du noyau, la compacité ou la régularité de la cellule \cite{REZATOFIGHI2011333}.
 
-Les features extraits sont ensuite normalisés et regroupés dans un vecteur de caractéristiques de dimension fixe pour chaque image, qui servira d’entrée aux modèles de machine learning classiques.
+\item \textbf{Caractéristiques de couleur et d’intensité :}
+Nous calculons des statistiques d’ordre faible (moyenne, écart-type, asymétrie, kurtosis) sur plusieurs espaces colorimétriques (BGR, RGB, HSV, LAB). Nous ajoutons également des histogrammes normalisés ainsi que des statistiques globales en niveaux de gris. Ces descripteurs capturent la distribution des teintes et des intensités, fortement liées aux procédés de coloration des frottis sanguins \cite{healthcare10112230}.
+
+\item \textbf{Descripteurs de texture :}
+Nous utilisons plusieurs représentations complémentaires :
+\begin{itemize}
+    \item matrices de cooccurrence (GLCM) : contraste, dissimilarité, homogénéité, énergie, corrélation,
+    \item descripteurs de type Haralick simplifiés,
+    \item histogrammes de \textit{Local Binary Patterns} (LBP),
+    \item caractéristiques issues d’une décomposition en ondelettes.
+\end{itemize}
+Ces descripteurs permettent de capturer la granularité, l’hétérogénéité et les variations d’intensité à différentes échelles \cite{REZATOFIGHI2011333,healthcare10112230}.
+
+\end{itemize}
+
+Les features extraits sont ensuite normalisés et regroupés dans un vecteur de dimension fixe pour chaque image, qui servira d’entrée aux modèles de machine learning classiques.
 
 \subsection{Features selection and t-SNE visualization}
 
-Comme évoqué précédemment, les descripteurs construits manuellement produisent des vecteurs de grande dimension, souvent redondants. Dans ce contexte, la \textbf{sélection de variables} est une étape essentielle afin d’améliorer la capacité de généralisation des modèles et de réduire le bruit dans les données. En effet, conserver un trop grand nombre de features peu informatives peut dégrader les performances, en particulier lorsque le nombre d’échantillons est limité, ce qui est fréquent dans les applications biomédicales.
+Les descripteurs handcrafted forment un espace de grande dimension, souvent redondant. Une étape de \textbf{sélection de variables} est donc nécessaire pour réduire le bruit, limiter le surapprentissage et améliorer la généralisation. Les méthodes de filtrage univariées comme le $\chi^2$ ou l’ANOVA sont simples à mettre en œuvre, mais elles évaluent chaque variable indépendamment et ne prennent pas en compte les dépendances entre features.
 
-Plusieurs approches classiques existent pour effectuer cette sélection. Les méthodes de filtrage univariées, comme le test du $\chi^2$ ou l’ANOVA, évaluent indépendamment chaque variable en mesurant sa corrélation avec la variable cible. Bien que simples et rapides, ces méthodes présentent une limitation importante : elles ne prennent pas en compte les interactions entre les variables, ce qui peut conduire à conserver des features redondantes ou à en éliminer certaines qui ne sont pertinentes qu’en combinaison avec d’autres.
+Nous avons donc retenu une approche \textbf{embarquée} basée sur une régression logistique pénalisée en $L_1$. Après standardisation des données, la pénalisation force une partie des coefficients à zéro et ne conserve que les dimensions les plus utiles pour la classification. Cette stratégie produit une représentation plus compacte et, dans nos expériences, plus stable que les méthodes de filtrage classiques.
 
-Afin de pallier cette limitation, nous avons retenu une approche de \textbf{sélection embarquée} basée sur une pénalisation $L_1$. Concrètement, nous utilisons un modèle de régression logistique avec régularisation $L_1$, entraîné sur les données normalisées. Cette pénalisation favorise la parcimonie en contraignant certains coefficients du modèle à devenir nuls. Les features associées à ces coefficients sont alors automatiquement éliminées. Cette méthode présente l’avantage de prendre en compte les dépendances entre variables tout en étant directement optimisée pour la tâche de classification.
+Pour visualiser l’effet de cette sélection, nous projetons les données dans un espace 2D à l’aide de \textbf{t-SNE}, après une réduction préalable par PCA. Les Figures~\ref{fig:tsne_raw_features} et~\ref{fig:tsne_selected_features} montrent respectivement la projection avant et après sélection. Avant sélection, plusieurs classes restent fortement entremêlées, en particulier autour des grandes familles cellulaires proches. Après sélection $L_1$, les groupes deviennent globalement plus compacts et certaines frontières de classe sont mieux marquées. Cette amélioration reste partielle, ce qui confirme que les handcrafted features capturent une partie de l’information discriminante, mais pas suffisamment pour séparer proprement toutes les sous-classes.
 
-Dans notre implémentation, les features sont d’abord standardisées à l’aide d’un \textit{StandardScaler}, puis un modèle de régression logistique avec pénalité $L_1$ (optimisé avec l’algorithme \textit{saga}) est entraîné. La sélection est ensuite réalisée via \textit{SelectFromModel}, ce qui permet de réduire significativement la dimension du vecteur de caractéristiques tout en conservant les dimensions les plus discriminantes. En pratique, cette étape permet d’obtenir une représentation plus compacte, ce qui améliore la stabilité et les performances des modèles en aval.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/t-sne-raw-features.png}
+    \caption{Projection t-SNE des handcrafted features avant sélection. (310 features)}
+    \label{fig:tsne_raw_features}
+\end{figure}
 
-Afin d’analyser l’impact de cette sélection de variables sur la structure des données, nous utilisons une projection \textbf{t-SNE} (t-distributed Stochastic Neighbor Embedding). Cette méthode permet de projeter les données de grande dimension dans un espace de dimension réduite (généralement 2D) tout en préservant les relations locales entre points. Avant l’application du t-SNE, une réduction de dimension par PCA est effectuée afin de stabiliser la projection et de réduire le bruit.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/t-sne-selected-features.png}
+    \caption{Projection t-SNE des handcrafted features après sélection par pénalisation $L_1$. (237 features)}
+    \label{fig:tsne_selected_features}
+\end{figure}
 
-Les visualisations obtenues montrent que, sans sélection de features, les différentes classes sont fortement entremêlées dans l’espace projeté, ce qui traduit une faible séparabilité. En revanche, après application de la sélection $L_1$, les clusters associés aux différentes classes deviennent plus distincts. Cela indique que les features conservées capturent mieux les propriétés discriminantes entre types de globules blancs. Cette observation qualitative est cohérente avec les améliorations de performance observées sur les modèles de classification.
+Ainsi la feature selection aura permis de réduire la dimensionnalité de l'espace de représentation d'environ 80 toutefois les projections de ces espaces avec TSNE ne permettent pas d'observer de changements. Ceci était prévisible car les features sélectionnées sont redondantes avec les autres et que la pénalisation $L_1$ ne fait que supprimer les dimensions les moins utiles, sans forcément améliorer la séparabilité globale des classes dans l’espace de représentation.
 
-Ainsi, la combinaison d’une sélection de variables supervisée et d’une analyse visuelle via t-SNE constitue un outil pertinent pour comprendre et améliorer la qualité des représentations dans un cadre de machine learning classique.
+Nous avons oublié de noter les features qui avaient été supprimées mais il s'agissant essentiellement de features de couleurs.
+
+
+\subsection{Resampling methods}
+
+Le déséquilibre des classes constitue une difficulté majeure de ce projet. Comme le montrent les travaux récents en \textit{imbalanced learning}, un apprentissage sur une distribution déséquilibrée favorise les classes majoritaires et dégrade le rappel des classes rares \cite{Gao_2026}. Pour y remédier, plusieurs stratégies existent : sous-échantillonnage, sur-échantillonnage et approches hybrides. Dans le cas des WBC, le rééquilibrage est souvent bénéfique pour les modèles classiques \cite{healthcare10112230}.
+
+Le sur-échantillonnage naïf (duplication) est limité car il n’apporte pas de nouvelle information et favorise le surapprentissage. Nous utilisons donc \textbf{SMOTE}, qui génère des exemples synthétiques par interpolation entre voisins d’une même classe. Si $x_i$ est un point minoritaire et $x_j$ un voisin, alors :
+\begin{equation}
+ x_{new} = x_i + \lambda (x_j - x_i), \quad \lambda \sim \mathcal{U}(0,1)
+\end{equation}
+
+Cette approche densifie localement les régions minoritaires et permet d’apprendre des frontières de décision moins biaisées \cite{Gao_2026}. Dans notre implémentation, SMOTE est appliqué uniquement sur l’ensemble d’entraînement (\texttt{k\_neighbors=5}), afin d’éviter tout biais d’évaluation.
+
+Empiriquement, SMOTE améliore surtout les métriques sensibles au déséquilibre, comme la \textbf{balanced accuracy} et le \textbf{macro-F1}, en augmentant le rappel des classes rares. L’impact sur l’accuracy globale reste limité, ce qui est attendu. Bien que cette méthode ne supprime pas toutes les confusions entre sous-classes proches, elle permet de rendre l’apprentissage plus équilibré et d’améliorer globalement les performances.
+
 
 
 \subsection{Results and discussion}
-- Choix des modèles (RGB SVM, Random Forest, XGBoost, …) avec la motivation derrière chaque modèle et comparaison de leurs performances en fonction des features utilisées et des méthodes de sélection de features.
-- présentation des résultats obtenus et interprétation des matrices de confusion
 
-\subsection{Resampling methods}
-- explications générales des différentes méthodes de rééquilibrage mise en avant dans les articles. 
-- SMOTE explicatioin de la méthode (formule et intuition) et pourquoi est ce qu'elle peut être plus puissante par rapport à d'autres méthodes de rééquilibrage comme de l'oversampling classique 
-- analyse des résultats avec et sans smote.
+Nous avons évalué plusieurs classifieurs classiques (régression logistique, random forest, SVM RBF, XGBoost) sur les handcrafted features sélectionnées, couvrant des hypothèses linéaires et non linéaires.
+
+Les résultats de validation sont résumés dans le Tableau~\ref{tab:ml_results}. L’utilisation de \textbf{SMOTE} améliore globalement la \textbf{balanced accuracy}, en particulier pour le SVM RBF ($0.4174 \rightarrow 0.5513$), XGBoost ($0.4601 \rightarrow 0.5865$) et le random forest ($0.3908 \rightarrow 0.4926$), ce qui traduit un meilleur rappel des classes minoritaires. Le \textbf{macro-F1} met en évidence un compromis différent : il peut diminuer si l’amélioration du rappel s’accompagne d’une baisse de précision.
+
+C’est notamment le cas de la \textbf{régression logistique}, où la BAcc augmente fortement ($0.5071 \rightarrow 0.6551$) mais le macro-F1 diminue légèrement ($0.5402 \rightarrow 0.5165$), suggérant une augmentation des faux positifs. À l’inverse, SVM, random forest et XGBoost bénéficient d’un gain plus équilibré.
+
+\begin{table}[h]
+\centering
+\caption{Performances de validation des modèles de machine learning sur les handcrafted features sélectionnées.}
+\label{tab:ml_results}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Model} & \textbf{SMOTE} & \textbf{BAcc} & \textbf{Macro-F1} \\
+\hline
+Logistic Regression & No  & 0.5071 & 0.5402 \\
+Logistic Regression & Yes & 0.6551 & 0.5165 \\
+Random Forest       & No  & 0.3908 & 0.4191 \\
+Random Forest       & Yes & 0.4926 & 0.5086 \\
+SVM RBF             & No  & 0.4174 & 0.4455 \\
+SVM RBF             & Yes & 0.5513 & 0.5388 \\
+XGBoost             & No  & 0.4601 & 0.4973 \\
+XGBoost             & Yes & 0.5865 & 0.5923 \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{XGBoost avec SMOTE} obtient le meilleur compromis global (BAcc $0.5865$, macro-F1 $0.5923$). Malgré un nombre similaire d’estimateurs (600), il surpasse le random forest, suggérant que le boosting exploite mieux l’hétérogénéité des features.
+
+La Figure~\ref{fig:cm_ml} montre que les classes bien distinctes (\texttt{SNE}, \texttt{LY}, \texttt{MO}, \texttt{BL}) sont correctement reconnues, tandis que les erreurs se concentrent entre sous-classes proches (\texttt{BNE}/\texttt{SNE}, \texttt{MMY}/\texttt{MY}/\texttt{PMY}). Cela confirme que la difficulté principale provient de la faible séparabilité morphologique.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/cm.png}
+    \caption{Matrice de confusion normalisée sur l’ensemble de validation pour le meilleur modèle de machine learning.}
+    \label{fig:cm_ml}
+\end{figure}
+
+Enfin, la sélection de variables réduit fortement la dimension sans impact majeur sur les performances (\textasciitilde 1 point pour XGBoost), tout en accélérant l’entraînement. Ces résultats montrent que les modèles classiques atteignent des performances correctes, mais restent limités pour séparer finement toutes les sous-classes, ce qui motive l’usage de méthodes deep learning.
 
 
+\paragraph{Deep features without fine-tuning}
+
+Afin d’évaluer directement la qualité des représentations apprises par un backbone profond, nous avons appliqué les mêmes classifieurs classiques (régression logistique, random forest, SVM RBF et XGBoost) sur les \textbf{features extraites par ConvNeXt-Tiny pré-entraîné sur ImageNet}, sans fine-tuning.
+
+\begin{table}[h]
+\centering
+\caption{Performances des classifieurs sur les features ConvNeXt-Tiny (sans fine-tuning).}
+\label{tab:deep_features_results}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Model} & \textbf{BAcc} & \textbf{Macro-F1} \\
+\hline
+Logistic Regression & 0.5443 & 0.4997 \\
+Random Forest       & 0.4016 & 0.4315 \\
+SVM RBF             & 0.5371 & 0.5480 \\
+XGBoost             & 0.5300 & 0.5668 \\
+\hline
+\end{tabular}
+\end{table}
+
+Ces résultats sont globalement comparables à ceux obtenus avec les handcrafted features, avec un léger avantage pour XGBoost et le SVM. Cela confirme que les représentations pré-entraînées sur ImageNet capturent déjà des informations visuelles riches (textures, formes globales), mais restent génériques.
+
+La structure de l’espace latent peut être analysée via la projection t-SNE du backbone (Figure~\ref{fig:tsne_backbone_imagenet}). On observe que les points s’organisent en grands amas correspondant à des similarités visuelles globales (forme, texture, couleur), mais sans séparation nette entre toutes les classes. Certaines régions sont relativement compactes, tandis que d’autres présentent un fort chevauchement, en particulier entre sous-classes proches.
+
+Cette organisation est typique d’un modèle pré-entraîné sur ImageNet : les features sont optimisées pour discriminer des catégories d’objets naturelles, et non des sous-types cellulaires fins. L’espace latent encode donc des invariances génériques (bords, motifs, structures globales), mais pas les variations morphologiques spécifiques aux globules blancs (stades de maturation, structure nucléaire). En conséquence, les classes restent partiellement entremêlées, ce qui limite la séparabilité par des classifieurs classiques.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/tsne_without_contrastive.png}
+    \caption{Projection t-SNE des features du backbone ConvNeXt-Tiny pré-entraîné sur ImageNet, sans fine-tuning.}
+    \label{fig:tsne_backbone_imagenet}
+\end{figure}
+ 
+Ainsi, même si les features sont informatives, leur organisation n’est pas alignée avec la tâche de classification des WBC. Cela justifie directement le recours au \textbf{fine-tuning}, qui permet de restructurer l’espace latent pour rapprocher les exemples d’une même classe et mieux séparer les classes proches.
+
+
+\newpage
 \section{Deep learning based approaches}
 
-- courte introduction sur le méthode de deep learning pour la classification d'images, 
-- la data augmentation joue un rôle crucial pour les modèles de deep (expliquer pourquoi, etc…)
+Les approches de \textbf{deep learning} reposent sur l’apprentissage automatique de représentations hiérarchiques directement à partir des images, sans nécessiter d’extraction de caractéristiques manuelle. Contrairement aux méthodes classiques, un modèle profond apprend simultanément des descripteurs visuels (forme, texture, couleur) et une fonction de classification. Dans le cas de la classification d’images biomédicales, cette capacité est particulièrement importante, car les indices discriminants sont souvent complexes, locaux et fortement corrélés.
+
+Le pipeline général utilisé est illustré en Figure~\ref{fig:dl_pipeline}. Une image d’entrée est d’abord transformée en une représentation intermédiaire par un \textbf{backbone} (extracteur de features). Ces features sont ensuite passées à un \textbf{classifieur} (ici une tête MLP) qui produit la prédiction finale. Ce découplage entre extraction de features et classification est au cœur du \textbf{transfer learning}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/pipeline.png}
+    \caption{Pipeline général d’un modèle de classification d’images : extraction de features par un backbone convolutionnel puis classification via une tête MLP.}
+    \label{fig:dl_pipeline}
+\end{figure}
+
+Dans ce projet, tous les modèles sont initialisés avec des poids \textbf{pré-entraînés sur ImageNet}. L’idée est de réutiliser des représentations visuelles déjà apprises sur un très grand jeu de données naturel. Bien que les images médicales diffèrent des images naturelles, les premières couches capturent des motifs génériques (bords, textures, formes) qui restent pertinents. Nous appliquons ensuite un \textbf{fine-tuning} complet du modèle : une tête de classification MLP est ajoutée, puis l’ensemble des poids (backbone + tête) est optimisé sur notre tâche.
+
+Cette stratégie présente plusieurs avantages : elle accélère la convergence, améliore la généralisation lorsque les données sont limitées, et permet d’exploiter des architectures profondes sans nécessiter un entraînement depuis zéro. En revanche, elle présente aussi des limites : les représentations apprises sur ImageNet ne sont pas parfaitement adaptées au domaine médical, et le fine-tuning peut être sensible au surapprentissage si le dataset est petit ou déséquilibré.
 
 \subsection{Literature Models}
-- ResNet, DenseNet, EfficientNet, ConvNext, Swin, 
 
-\subsection{Transfer Learning and pretraining influence}
+Nous avons évalué plusieurs architectures issues de la littérature, couvrant différentes familles de modèles. Sans entrer volontairement dans les détails architecturaux, on peut distinguer trois grandes catégories :
+
+\begin{itemize}
+    \item \textbf{CNN classiques} (ResNet, DenseNet, EfficientNet) : ils reposent sur des convolutions locales et exploitent fortement les structures spatiales. ResNet introduit des connexions résiduelles, DenseNet favorise la réutilisation des features, et EfficientNet optimise le compromis profondeur/largeur/résolution.
+    
+    \item \textbf{Transformers visuels} (ViT, Swin) : ils utilisent des mécanismes d’attention pour modéliser des interactions globales. ViT traite l’image comme une séquence de patches, tandis que Swin introduit une attention locale hiérarchique plus efficace.
+    
+    \item \textbf{Architectures hybrides modernes} (ConvNeXt) : elles reprennent des idées des Transformers tout en conservant une structure convolutionnelle optimisée.
+\end{itemize}
+
+Le choix d’un modèle est motivé par un compromis entre \textbf{capacité de représentation}, \textbf{coût computationnel} et \textbf{adaptation au type de données}. Nous ne détaillons pas davantage ces architectures, car l’objectif ici est de comparer empiriquement leur comportement dans notre contexte plutôt que d’analyser finement leur design interne.
+
+Les performances obtenues sont résumées ci-dessous :
+
+\begin{table}[h]
+\centering
+\caption{Comparaison des backbones pré-entraînés (ImageNet) avec fine-tuning complet.}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Model} & \textbf{Params} & \textbf{Best score} \\
+\hline
+RESNET\_101        & 42M & 0.7716 \\
+SWIN\_V2\_T        & 27M & 0.7606 \\
+VIT\_B\_16         & 86M & 0.6684 \\
+EFFICIENT\_V2\_S   & 20M & \textbf{\textbf{0.7829}} \\
+DENSENET\_169      & 12M & \textbf{0.7801} \\
+CONVNEXT\_TINY     & 27M & 0.7764 \\
+EFFICIENTNET\_V2\_M& 52M & \textbf{\textbf{\textbf{0.7861}}} \\
+CONVNEXT\_BASE     & 87M & 0.7708 \\
+RESNET\_50         & 23M & 0.7749 \\
+\hline
+\end{tabular}
+\end{table}
+
+On observe que les modèles \textbf{EfficientNet-V2} dominent globalement, en particulier \textbf{EFFICIENTNET\_V2\_M} (meilleur score), suivi de \textbf{EFFICIENT\_V2\_S} et \textbf{DENSENET\_169}. À l’inverse, les modèles purement Transformer comme ViT sont moins performants dans ce contexte, probablement en raison de la taille limitée du dataset et de leur besoin en données.
+
+Ces résultats confirment que, pour ce type de données biomédicales, les architectures convolutionnelles ou hybrides restent souvent plus robustes que les Transformers purs, notamment lorsque la quantité de données est limitée.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/exemple_cm_deep.png}
+    \caption{Matrice de confusion normalisée (validation) obtenue avec ConvNeXt-Base.}
+    \label{fig:cm_convnext_base}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/exemple_tsne_deep.png}
+    \caption{Projection t-SNE des features du backbone ConvNeXt-Base (validation).}
+    \label{fig:tsne_convnext_base}
+\end{figure}
+
+Ces figures, issues de l’entraînement d’un modèle \textbf{ConvNeXt-Base}, confirment qualitativement les observations précédentes. La matrice de confusion met en évidence de bonnes performances globales, avec un \textbf{macro-F1 d’environ 0.79}, tout en montrant que les principales erreurs restent concentrées entre sous-classes morphologiquement proches. La projection t-SNE illustre quant à elle une structuration claire de l’espace latent, avec des amas bien définis pour plusieurs classes, bien que certaines zones de chevauchement persistent, reflétant la difficulté intrinsèque de la tâche.
+
 
 \subsection{Classification Heads}
 
+Une fois le backbone pré-entraîné fixé, la question n’est plus seulement de savoir si les features extraites sont informatives, mais aussi \textbf{comment elles sont organisées dans l’espace latent}. En effet, deux backbones peuvent produire des vecteurs de features de grande qualité tout en induisant des géométries très différentes : dans un cas, les classes peuvent être presque linéairement séparables, tandis que dans un autre, l’information discriminante peut être distribuée de façon plus locale ou plus entremêlée. Cette distinction est importante, car elle conditionne directement le choix d’une tête de classification plus ou moins expressive. Les travaux sur la classification de WBC montrent déjà que la qualité des représentations profondes dépend fortement de l’architecture utilisée et du type d’indices capturés, entre morphologie locale, texture et structure globale \cite{a16110525,TOGACAR2020106810,https://doi.org/10.1155/2020/6490479}.
+
+Dans notre cadre, les backbones sont initialisés avec des poids \textbf{pré-entraînés sur ImageNet}, puis leurs features latentes sont utilisées comme entrée d’une tête légère de classification. Si l’on note $x \in \mathbb{R}^{d}$ le vecteur latent extrait par le backbone, la tête la plus simple consiste à apprendre une projection affine
+\begin{equation}
+\hat{y} = W x + b,
+\end{equation}
+qui suppose implicitement que les classes sont déjà bien séparées dans l’espace des features. Ajouter de la profondeur revient à apprendre une fonction plus générale $f_\theta : \mathbb{R}^{d} \rightarrow \mathbb{R}^{C}$, capable de corriger partiellement une géométrie latente moins favorable. En pratique, nous avons comparé plusieurs niveaux d’expressivité : des têtes \textbf{MLP} peu profondes (\texttt{LINEAR}, \texttt{LINEAR2}), une tête plus non linéaire de type \textbf{CNN/MLP}, une tête \textbf{Transformer} appliquée sur un token unique projeté, et enfin une tête à \textbf{queries apprises}.
+
+Cette dernière s’inspire de l’idée de \textit{learned queries}, utilisée pour remplacer des requêtes dépendantes de l’entrée par un petit ensemble de vecteurs appris, spécialisés dans l’agrégation de sous-espaces pertinents \cite{arar2022learnedqueriesefficientlocal}. Dans un Transformer standard, on a typiquement $Q = XW^Q$, alors que dans notre cas la tête \texttt{QUERY} apprend directement un ensemble de requêtes $Q_{\mathrm{learned}} \in \mathbb{R}^{m \times d}$, indépendantes de l’exemple courant. L’interaction prend alors la forme d’une attention croisée entre ces requêtes et la représentation projetée du backbone. En notant $x' \in \mathbb{R}^{1 \times d}$ la feature projetée et $Q \in \mathbb{R}^{m \times d}$ les requêtes apprises, on obtient schématiquement :
+\begin{equation}
+\mathrm{Attn}(Q, x', x') = \mathrm{softmax}\left(\frac{Q {x'}^{\top}}{\sqrt{d}}\right)x'.
+\end{equation}
+L’intérêt de cette formulation est que les requêtes peuvent agir comme des \textit{probes} apprises, chacune cherchant une composante discriminante particulière de l’espace latent. La Figure~\ref{fig:query_explain} illustre cette intuition : contrairement à une attention standard où les requêtes proviennent directement des tokens d’entrée, les \textit{learned queries} permettent une agrégation plus structurée et potentiellement plus spécialisée \cite{arar2022learnedqueriesefficientlocal}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/query_explain.png}
+    \caption{Principe des \textit{learned queries} et du module QnA, adapté de \cite{arar2022learnedqueriesefficientlocal}.}
+    \label{fig:query_explain}
+\end{figure}
+
+Les résultats obtenus avec les features de \textbf{ConvNeXt-Tiny} (dimension 768) sont résumés dans le Tableau~\ref{tab:head_results}. Deux faits ressortent. D’une part, les écarts entre têtes restent relativement faibles, ce qui suggère que le backbone ImageNet fournit déjà un espace latent assez bien structuré. D’autre part, la meilleure performance n’est pas obtenue par la tête la plus complexe : la tête \texttt{CNN}, avec seulement 247,949 paramètres, atteint le meilleur score ($0.7883$), devant les têtes linéaires et largement devant la tête \texttt{ATTENTION}, pourtant la plus coûteuse (2,830,349 paramètres). Cela indique qu’une expressivité supplémentaire n’est utile que si elle correspond réellement à la structure du latent ; sinon, elle peut au contraire compliquer l’optimisation ou sur-paramétrer le problème.
+
+\begin{table}[h]
+\centering
+\caption{Comparaison des têtes de classification sur les features de ConvNeXt-Tiny pré-entraîné sur ImageNet (dimension 768).}
+\label{tab:head_results}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Head} & \textbf{Params} & \textbf{Best score} \\
+\hline
+LINEAR    & 371,725   & 0.7759 \\
+LINEAR2   & 529,933   & 0.7765 \\
+CNN       & 247,949   & 0.7883 \\
+ATTENTION & 2,830,349 & 0.7675 \\
+QUERY     & 597,005   & 0.7778 \\
+\hline
+\end{tabular}
+\end{table}
+
+La tête \texttt{QUERY} obtient un résultat intermédiaire ($0.7778$). Ce résultat est intéressant : il montre que les requêtes apprises peuvent effectivement agréger l’information latente de manière pertinente, mais sans dépasser ici une tête plus simple de type \texttt{CNN}. Autrement dit, la structure du latent issue de ConvNeXt-Tiny semble déjà suffisamment favorable pour qu’une agrégation non linéaire modérée suffise, sans qu’il soit nécessaire d’introduire un mécanisme d’attention plus sophistiqué.
+
+Le point le plus important est que cette conclusion \textbf{ne se généralise pas automatiquement à tous les backbones}. Lorsque nous avons appliqué la tête \texttt{CNN} à \textbf{EfficientNet-V2-S} (features de dimension 1280, toujours avec des poids ImageNet), le comportement s’est inversé : le score passe de $0.7829$ avec une tête linéaire à $0.7707$ avec la tête \texttt{CNN}. Cela suggère que l’espace latent d’EfficientNet-V2-S est probablement plus directement exploitable par une séparation simple, alors qu’ajouter une tête plus expressive perturbe ici l’exploitation de la représentation plutôt que de l’améliorer.
+
+Au final, ces expériences montrent que le choix de la tête ne doit pas être pensé indépendamment du backbone. Une tête expressive n’est pas systématiquement meilleure ; son utilité dépend de la \textbf{géométrie du latent} produit en amont. Lorsque les features sont déjà presque linéairement séparables, une tête simple est souvent suffisante. À l’inverse, lorsqu’une partie de l’information discriminante est encodée de manière plus locale ou plus distribuée, une tête un peu plus riche peut apporter un gain. Dans notre cas, la meilleure combinaison repose sur \textbf{ConvNeXt-Tiny + tête CNN}, tandis que l’exemple d’EfficientNet-V2-S montre que cette conclusion reste fortement dépendante de la structure propre de l’espace latent du backbone.
+
+\textbf{Note :} Le détail architectural des têtes est disponible dans le code source, l'architecture finale des différentes têtes résulte de tests empiriques.
+
+\subsection{Data split, seed influence and K-fold cross validation}
+
+Dans ce type de problème, les performances observées peuvent varier de manière non négligeable en fonction du \textbf{split des données} et de la \textbf{seed aléatoire} utilisée. En effet, la répartition des classes dans les ensembles d’entraînement et de validation peut modifier la difficulté de la tâche, en particulier dans un contexte déséquilibré où certaines classes rares peuvent être sous-représentées dans un split donné. De même, l’initialisation des poids et l’ordre des batchs influencent la dynamique d’apprentissage, ce qui peut conduire à des variations de performance d’un entraînement à l’autre.
+
+Pour atténuer cette variabilité, nous utilisons une stratégie de \textbf{validation croisée de type K-fold}. Le principe consiste à partitionner le jeu de données en $K$ sous-ensembles, puis à entraîner $K$ modèles différents, chacun utilisant $K-1$ folds pour l’entraînement et le fold restant pour la validation. Cette approche permet d’exploiter l’ensemble des données pour l’évaluation tout en réduisant la dépendance à un unique split.
+
+Dans notre cas, nous utilisons le K-fold principalement comme une méthode d’\textbf{agrégation de modèles}. Concrètement, les $K$ modèles entraînés sont ensuite utilisés conjointement au moment de l’inférence : pour chaque exemple de test, nous récupérons les prédictions des $K$ modèles et appliquons un \textbf{vote majoritaire}. Cette stratégie permet de lisser les erreurs spécifiques à un modèle donné et d’obtenir des prédictions plus robustes.
+
+Au final, la combinaison \textbf{K-fold + vote majoritaire} permet de limiter l’impact des fluctuations dues au split et à la seed, et de produire des résultats plus robustes et reproductibles, en particulier dans un contexte de données limitées et déséquilibrées.
+
+
+\subsection{In practice}
+
+En pratique l'amélioration des performances relevait surtout d'un équilibre subtile entre ces différents aspects :
+
+\paragraph{Loss function}
+
+Dans un contexte fortement déséquilibré, le choix de la fonction de coût joue un rôle clé. Nous avons principalement utilisé une \textbf{Focal Loss}, qui modifie la cross-entropy classique en pondérant davantage les exemples difficiles. Pour un exemple correctement classé avec une probabilité $p_t$, la contribution à la loss est réduite via un facteur $(1 - p_t)^\gamma$, ce qui permet de concentrer l’apprentissage sur les erreurs :
+\begin{equation}
+\mathcal{L}_{\text{focal}} = (1 - p_t)^\gamma \cdot \text{CE}(p_t).
+\end{equation}
+
+En pratique, cette loss s’est révélée plus efficace que la cross-entropy standard dans notre cadre, notamment pour améliorer le rappel des classes minoritaires. L’ajout d’un léger \textbf{label smoothing} permet également de stabiliser l’apprentissage et de limiter la surconfiance du modèle.
+
+\paragraph{Oversampling}
+
+Nous avons également exploré des stratégies d’\textbf{oversampling} afin de compenser le déséquilibre des classes. L’approche consiste à augmenter la probabilité d’échantillonnage des classes rares via un \textbf{WeightedRandomSampler}, ce qui force le modèle à voir plus fréquemment ces exemples durant l’entraînement.
+
+Cependant, en pratique, cette stratégie s’est avérée moins efficace que les approches basées sur la loss. L’oversampling tend à introduire du \textbf{surapprentissage} sur les classes minoritaires, en particulier lorsque celles-ci contiennent peu d’exemples distincts. De plus, il perturbe la distribution naturelle des données, ce qui peut dégrader la calibration du modèle. 
+
+Empiriquement, la combinaison \textbf{focal loss + data augmentation} s’est révélée moins performante et la meilleure stratégie (de ce que j'ai pu observer) consistait à conserver une loss cross-entropy classique combinée avec le \textbf{WeightedRandomSampler}. 
+
+
+Il est difficile d’améliorer davantage les performances, car certaines classes restent intrinsèquement complexes à apprendre. En effet, si certaines classes très minoritaires comme PC ou PLY sont relativement faciles à distinguer — et peuvent être bien traitées via des stratégies d’oversampling ou de data augmentation — d’autres posent des problèmes bien plus subtils. Dans ces cas, une amélioration nécessiterait probablement de combiner les représentations apprises par les modèles de deep learning avec des features handcrafted capturant des statistiques morphologiques spécifiques aux cellules. Cette approche n’a toutefois pas pu être explorée faute de temps.
 
 
 
+\paragraph{Data augmentation}
+
+Les images d'entraînement sont augmentées afin d'améliorer la robustesse du modèle face aux variations visuelles (orientation, échelle, illumination). Les transformations appliquées sont résumées dans le Tableau~\ref{tab:data_aug}.
+
+\begin{table}[h]
+\centering
+\caption{Transformations de data augmentation utilisées à l'entraînement.}
+\label{tab:data_aug}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Transformation} & \textbf{Description} \\
+\hline
+Resize & Redimensionnement à $294 \times 294$ \\
+Horizontal Flip & Symétrie horizontale ($p=0.5$) \\
+Vertical Flip & Symétrie verticale ($p=0.5$) \\
+Rotation & Rotation aléatoire jusqu'à $180^\circ$ \\
+Affine & Translation, scale (0.85–1.15), shear \\
+ColorJitter & Variations luminosité/contraste/satu\\
+Random Erasing & Suppression aléa. de régions ($p=0.25$) \\
+Normalization & Normalisation ImageNet \\
+\hline
+\end{tabular}
+\end{table}
+
+Nous avons testé l'ajout de bruit gaussien comme augmentation mais cela à dégradé les performances considérablement donc nous n'avons pas exploré davantage cette piste.
+
+\paragraph{CutMix - MixUp}
+
+Afin d'améliorer la généralisation du modèle et de limiter le surapprentissage, nous utilisons deux techniques d'augmentation au niveau du batch : \textbf{MixUp} et \textbf{CutMix}. Ces méthodes consistent à générer des exemples synthétiques en combinant deux images et leurs labels associés.
+
+Le \textbf{MixUp} réalise une interpolation linéaire entre deux images $x_i$ et $x_j$ :
+\begin{equation}
+\tilde{x} = \lambda x_i + (1 - \lambda) x_j, \quad 
+\tilde{y} = \lambda y_i + (1 - \lambda) y_j,
+\end{equation}
+où $\lambda \sim \text{Beta}(\alpha, \alpha)$. Cette approche encourage le modèle à apprendre des frontières de décision plus lisses.
+
+Le \textbf{CutMix} consiste quant à lui à remplacer une région rectangulaire d'une image par un patch provenant d'une autre image. Le label est ajusté proportionnellement à la surface remplacée :
+\begin{equation}
+\tilde{y} = \lambda y_i + (1 - \lambda) y_j,
+\end{equation}
+où $\lambda$ correspond ici à la proportion de pixels conservés de l'image originale.
+
+En pratique, ces deux techniques sont appliquées de manière probabiliste au cours de l'entraînement. Elles permettent d'améliorer la robustesse du modèle, notamment face au déséquilibre des classes, en augmentant artificiellement la diversité des données et en régularisant l'apprentissage.
+
+\paragraph{TTA (Test-Time Augmentation)}
+
+Le \textbf{Test-Time Augmentation (TTA)} consiste à appliquer plusieurs transformations (rotations, flips, variations légères de contraste, etc.) à une même image au moment de l’inférence, puis à agréger les prédictions obtenues sur ces différentes versions. Si l’on note $f(x)$ la prédiction du modèle pour une image $x$, le TTA revient à estimer une prédiction moyenne
+\begin{equation}
+\hat{y} = \frac{1}{M} \sum_{m=1}^{M} f(T_m(x)),
+\end{equation}
+où $T_m$ désigne une transformation. Cette technique permet de réduire la sensibilité du modèle à de petites variations de l’entrée et d’améliorer la stabilité des prédictions, en complément des stratégies d’ensemble comme le K-fold.
 
 
+\paragraph{Scheduling}
+
+Nous utilisons principalement des stratégies de \textbf{cosine annealing} avec ou sans warmup. Le warmup permet de stabiliser les premières étapes d’entraînement, tandis que la décroissance cosinus favorise une convergence progressive. Ce choix s’est avéré empirically efficace, avec des gains de l’ordre de 1 à 2 points sur les métriques de validation.
+
+
+
+\newpage
 \section{Unsuccesful / unfinished approaches}
+
+Certaines pistes explorées pendant le projet n’ont pas été retenues dans la version finale du pipeline. Dans certains cas, comme le \textbf{supervised contrastive learning} ou l’augmentation de données par \textbf{GANs}, une implémentation complète a bien été réalisée, mais les gains obtenus n’ont pas été suffisants au regard du coût expérimental. Dans d’autres cas, comme les approches de type \textbf{JEPA}, le temps disponible n’a pas permis une investigation suffisamment approfondie.
 
 \subsection{Supervised Contrastive learning}
 
+Le \textbf{supervised contrastive learning} (SupCon) constitue une alternative intéressante à l’apprentissage supervisé standard par cross-entropy. Introduite par \cite{khosla2021supervisedcontrastivelearning}, cette approche vise à apprendre un espace latent dans lequel les exemples d’une même classe sont rapprochés, tandis que ceux de classes différentes sont repoussés. Contrairement à une loss de classification classique, qui agit directement sur la sortie finale du classifieur, la loss contrastive structure d’abord les représentations internes. Cette idée est particulièrement attractive dans notre cas, car plusieurs sous-classes leucocytaires sont visuellement proches et pourraient bénéficier d’un espace de représentation mieux organisé.
+
+La Figure~\ref{fig:supcon_explain} rappelle l’idée générale de la méthode. En apprentissage contrastif auto-supervisé, chaque ancre n’est rapprochée que d’une autre vue du même exemple, tandis que tous les autres exemples du batch jouent le rôle de négatifs. En version supervisée, tous les exemples de la même classe présents dans le batch deviennent des positifs pour l’ancre, ce qui enrichit le signal d’apprentissage et favorise une compacité intra-classe plus forte \cite{khosla2021supervisedcontrastivelearning}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/contrastive_explain.png}
+    \caption{Principe du supervised contrastive learning, adapté de \cite{khosla2021supervisedcontrastivelearning}.}
+    \label{fig:supcon_explain}
+\end{figure}
+
+Dans notre implémentation, nous utilisons deux vues augmentées de chaque image, passées dans un \textbf{ConvNeXt-Tiny} initialisé avec des poids pré-entraînés sur \textbf{ImageNet}. Les représentations obtenues sont normalisées avant le calcul de la loss contrastive. La formulation employée suit directement celle de \cite{khosla2021supervisedcontrastivelearning} : pour une ancre $i$, tous les exemples de même classe présents dans le batch constituent l’ensemble des positifs $P(i)$. Si $\mathbf{z}_i$ désigne la représentation normalisée d’un exemple et $\tau$ la température, la loss s’écrit
+\begin{equation}
+\mathcal{L}_{\mathrm{SupCon}} = \sum_i - \frac{1}{|P(i)|} \sum_{p \in P(i)}
+\log \frac{\exp(\mathbf{z}_i \cdot \mathbf{z}_p / \tau)}{\sum_{a \neq i} \exp(\mathbf{z}_i \cdot \mathbf{z}_a / \tau)}
+\end{equation}
+
+Cette formulation encourage simultanément la \textbf{compacité intra-classe} et la \textbf{séparation inter-classe}. Théoriquement, elle est plus riche que des losses contrastives plus anciennes de type triplet, car elle exploite plusieurs positifs et plusieurs négatifs par ancre au sein d’un même batch \cite{khosla2021supervisedcontrastivelearning}. Dans un problème aussi fin que la classification de leucocytes immatures, cette propriété semblait particulièrement prometteuse.
+
+Nous avons comparé qualitativement les représentations du backbone ConvNeXt-Tiny \textbf{avant tout entraînement spécifique au jeu de données}, dans deux cas : avec les seuls poids ImageNet, et après un pré-entraînement contrastif supervisé, toujours à partir de ces mêmes poids ImageNet. Les Figures~\ref{fig:tsne_no_contrastive} et~\ref{fig:tsne_with_contrastive} montrent les projections t-SNE correspondantes des features latentes. Sans pré-entraînement contrastif, la structure globale reste dominée par les classes majoritaires et l’espace apparaît relativement entremêlé. Après pré-entraînement contrastif, les groupes deviennent nettement plus compacts et plusieurs classes se séparent visuellement beaucoup mieux. On observe notamment une structuration plus claire des amas et une réduction du chevauchement entre certaines classes.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/tsne_without_contrastive.png}
+    \caption{Projection t-SNE des features latentes du backbone ConvNeXt-Tiny pré-entraîné sur ImageNet, sans pré-entraînement contrastif supervisé.}
+    \label{fig:tsne_no_contrastive}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/tsne_with_contrastive.png}
+    \caption{Projection t-SNE des features latentes du backbone ConvNeXt-Tiny après pré-entraînement contrastif supervisé, à partir des mêmes poids ImageNet.}
+    \label{fig:tsne_with_contrastive}
+\end{figure}
+
+Ces visualisations confirment donc que le supervised contrastive learning améliore bien la géométrie locale de l’espace latent. Cependant, cette amélioration qualitative ne s’est pas traduite par un gain suffisamment net sur la métrique suivie pendant l’entraînement. Le Tableau~\ref{tab:supcon_results} compare le meilleur score obtenu avec et sans pré-entraînement contrastif supervisé.
+
+\begin{table}[h]
+\centering
+\caption{Comparaison du meilleur score de validation avec et sans pré-entraînement contrastif supervisé.}
+\label{tab:supcon_results}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Setting} & \textbf{Best epoch} & \textbf{Best score} \\
+\hline
+Sans pretraining contrastif & 9  & 0.7742 \\
+Avec pretraining contrastif  & 20 & 0.7371 \\
+\hline
+\end{tabular}
+\end{table}
+
+On observe ainsi que le modèle pré-entraîné contrastivement atteint un score plus faible ($0.7371$ contre $0.7742$), malgré une structuration visuelle plus propre de l’espace latent. Autrement dit, le pré-entraînement contrastif semble améliorer la séparabilité locale des représentations, mais cet avantage géométrique ne se traduit pas automatiquement par une amélioration de la performance finale de classification dans notre cadre expérimental.
+
+Plusieurs facteurs peuvent expliquer cet écart. La première limitation concerne la \textbf{taille des batchs}. La qualité du signal contrastif dépend directement du nombre de positifs et de négatifs disponibles dans chaque batch. Or, avec 13 classes et une distribution fortement déséquilibrée, de nombreux batchs contiennent peu d’exemples pour certaines classes rares, voire aucun autre exemple de la même classe. Dans ce cas, la loss exploite mal ces catégories. Cette dépendance aux grands batchs est bien connue dans la littérature contrastive \cite{khosla2021supervisedcontrastivelearning}. Dans notre cas, elle est aggravée par le coût mémoire du schéma à deux vues par image et par le calcul de similarité sur l’ensemble des représentations du batch.
+
+La deuxième difficulté vient de la \textbf{sensibilité aux augmentations}. L’apprentissage contrastif suppose que deux vues d’un même exemple conservent bien l’identité sémantique de la classe. Sur des images naturelles, cette hypothèse est souvent raisonnable ; sur des images hématologiques, elle est plus fragile. Certaines transformations peuvent dégrader précisément les indices les plus utiles, comme la texture nucléaire, la granularité du cytoplasme ou les contrastes fins entre noyau et fond. Le choix des augmentations devient alors beaucoup plus critique que dans un apprentissage supervisé classique.
+
+Enfin, une meilleure structuration de l’espace latent ne garantit pas automatiquement une amélioration de la classification finale. Dans nos expériences, le backbone pré-entraîné contrastivement semblait produire des représentations plus propres, mais sans gain suffisamment net sur les métriques de validation pour justifier le coût expérimental supplémentaire. Pour ces raisons, le supervised contrastive learning n’a pas été retenu comme approche principale. Il reste néanmoins une direction intéressante, notamment avec des batchs plus grands, un sampling plus adapté au déséquilibre, ou des augmentations spécifiquement conçues pour l’imagerie hématologique.
+
+
 \subsection{Data augmentation with GANs}
+
+Afin de pallier le fort déséquilibre des classes, nous avons exploré une approche basée sur la génération de données synthétiques à l’aide de \textbf{Generative Adversarial Networks (GANs)}. Les GANs reposent sur un principe d’apprentissage antagoniste introduit dans la littérature : un \textbf{générateur} $G$ apprend à produire des images réalistes à partir d’un bruit aléatoire $z \sim \mathcal{N}(0, I)$, tandis qu’un \textbf{discriminateur} (ou critique) $D$ apprend à distinguer les images réelles des images générées. L’objectif global est un jeu à somme nulle où $G$ cherche à tromper $D$, et $D$ à détecter les faux échantillons.
+
+Dans notre implémentation, nous avons utilisé une variante de type \textbf{Wasserstein GAN avec pénalité de gradient (WGAN-GP)}. Contrairement aux GANs classiques basés sur une divergence de Jensen--Shannon, cette formulation repose sur une approximation de la distance de Wasserstein, généralement plus stable en pratique. La fonction objectif du critique s’écrit :
+\begin{equation}
+\mathcal{L}_D = -\mathbb{E}[D(x)] + \mathbb{E}[D(G(z))] + \lambda \, \mathbb{E}\left[(\|\nabla_{\hat{x}} D(\hat{x})\|_2 - 1)^2\right],
+\end{equation}
+où $\hat{x}$ est un point interpolé entre données réelles et générées, et $\lambda$ contrôle la pénalité de gradient. Le générateur est quant à lui entraîné à maximiser la sortie du critique :
+\begin{equation}
+\mathcal{L}_G = -\mathbb{E}[D(G(z))].
+\end{equation}
+
+L’architecture utilisée suit un schéma convolutionnel standard. Le \textbf{générateur} est composé d’une succession de couches de convolution transposée (\textit{ConvTranspose2d}) permettant de transformer un vecteur latent de dimension $z \in \mathbb{R}^{d}$ en une image RGB de taille $256 \times 256$. Chaque étape augmente progressivement la résolution spatiale (de $1\times1$ à $256\times256$), avec normalisation de type BatchNorm et activations ReLU, puis une activation finale \texttt{tanh}. 
+
+Le \textbf{critique} adopte une architecture symétrique descendante, basée sur des convolutions classiques (\textit{Conv2d}) qui réduisent progressivement la résolution de l’image jusqu’à un score scalaire. Contrairement à un discriminateur classique, il ne produit pas une probabilité mais une valeur réelle, cohérente avec la formulation Wasserstein. L’utilisation de \textbf{InstanceNorm} permet de stabiliser l’entraînement sur des images médicales relativement homogènes.
+
+Nous avons entraîné ce modèle spécifiquement sur une classe minoritaire (notamment \texttt{PLY}) afin de générer de nouveaux exemples et enrichir le dataset. La Figure~\ref{fig:gan_samples} illustre un ensemble d’images synthétiques produites par le générateur après entraînement.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/gan_samples.png}
+    \caption{Exemples d’images générées par le GAN pour une classe minoritaire.}
+    \label{fig:gan_samples}
+\end{figure}
+
+Malgré une structure globale cohérente (forme circulaire, présence d’un noyau), les images générées restent \textbf{visuellement peu réalistes}. On observe notamment un manque de détails fins dans la texture nucléaire, une faible variabilité morphologique et des artefacts dans le fond (globules rouges mal définis, bruit). Ces limitations sont probablement dues à la faible quantité de données disponibles pour certaines classes, ainsi qu’à la difficulté intrinsèque de modéliser des structures biologiques fines.
+
+En conséquence, les images synthétiques n’ont pas été intégrées dans le dataset final. Cette expérience montre que, bien que les GANs soient théoriquement adaptés à l’augmentation de données \cite{https://doi.org/10.1155/2020/6490479}, leur efficacité dépend fortement de la qualité et de la diversité des données d’entraînement. Dans notre cas, les contraintes du dataset rendent leur utilisation difficile sans techniques plus avancées (conditionnement, architectures plus complexes ou régularisation spécifique).
+
+
+\subsection{Offline oversampling}
+
+
+Nous avons également exploré une stratégie d’\textbf{offline oversampling}, qui consiste à générer un nouveau jeu de données en dupliquant et en augmentant les exemples des classes minoritaires \textit{avant} l’entraînement. Contrairement au sampling en ligne (par exemple via un \texttt{WeightedRandomSampler}), cette approche modifie directement la distribution du dataset en créant artificiellement davantage d’images pour les classes rares, souvent à l’aide d’augmentations (rotations, flips, etc.). L’objectif est de rendre l’apprentissage plus équilibré en exposant le modèle à un nombre comparable d’exemples par classe.
+
+Empiriquement, cette stratégie permet d’\textbf{améliorer artificiellement les performances en validation}. En particulier, avec une validation croisée de type K-fold, nous avons obtenu le score suivant :
+
+\begin{table}[h]
+\centering
+\caption{Résultat avec offline oversampling (validation).}
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Setting} & \textbf{Best score} \\
+\hline
+Offline oversampling & 0.8169 (epoch 16) \\
+\hline
+\end{tabular}
+\end{table}
+
+Cependant, cette amélioration ne se traduit pas en généralisation sur le jeu de test. En effet, lorsque le modèle est évalué sur les données de test, les performances diminuent légèrement par rapport à une approche sans offline oversampling :
+
+\begin{table}[h]
+\centering
+\caption{Comparaison des performances sur le test.}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Setting} & \textbf{Test score} \\
+\hline
+Sans offline oversampling & 0.8027 \\
+Avec offline oversampling & 0.7970 \\
+\hline
+\end{tabular}
+\end{table}
+
+Ce résultat suggère que l’offline oversampling introduit un \textbf{biais d’évaluation}, probablement lié à une forme de surapprentissage sur des exemples dupliqués ou trop similaires. Bien que la validation semble meilleure, la capacité de généralisation réelle du modèle est légèrement dégradée. Pour cette raison, cette approche n’a pas été retenue dans le pipeline final.
+
+
 
 \subsection{Interesting directions : JEPA}
 
+Une direction intéressante identifiée en fin de projet concerne les approches de type \textbf{Joint-Embedding Predictive Architectures (JEPA)} \cite{assran2023selfsupervisedlearningimagesjointembedding}. Faute de temps, cette méthode n’a pas pu être implémentée dans ce travail, mais les résultats récents obtenus dans la littérature en apprentissage auto-supervisé montrent qu’elle constitue une piste prometteuse pour améliorer la qualité des représentations visuelles. Par exemple, des approches comme SimCLR, BYOL ou plus récemment I-JEPA ont montré qu’il est possible d’apprendre des représentations sémantiques robustes sans supervision dense, avec de bonnes performances en transfert sur des tâches visuelles variées \cite{khosla2021supervisedcontrastivelearning,assran2023selfsupervisedlearningimagesjointembedding}.
+
+Le principe général, illustré en Figure~\ref{fig:jepa_explain}, consiste à apprendre un espace latent partagé entre différentes vues d’une même donnée, sans reconstruire explicitement l’image. Contrairement aux approches génératives classiques (Figure~\ref{fig:jepa_explain}b), qui cherchent à reconstruire directement $y$ à partir de $x$, les approches JEPA (Figures~\ref{fig:jepa_explain}a et \ref{fig:jepa_explain}c) apprennent à prédire une représentation cible $s_y$ à partir d’une représentation source $s_x$. Plus formellement, si $f_x$ et $f_y$ désignent deux encodeurs et $g_\theta$ un prédicteur, l’objectif est de minimiser une distance dans l’espace latent :
+\begin{equation}
+\mathcal{L} = D\big(g_\theta(f_x(x)), f_y(y)\big),
+\end{equation}
+où $D$ est typiquement une distance euclidienne ou cosinus.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/jepa.png}
+    \caption{Principe des Joint-Embedding Predictive Architectures (JEPA), adapté de \cite{assran2023selfsupervisedlearningimagesjointembedding}.}
+    \label{fig:jepa_explain}
+\end{figure}
+
+L’intérêt majeur de cette approche est de se concentrer directement sur les \textbf{représentations sémantiques} plutôt que sur les détails de reconstruction pixel à pixel. Dans notre contexte, cela est particulièrement pertinent : la classification des globules blancs repose sur des indices morphologiques fins (structure du noyau, texture, organisation globale), tandis que de nombreux détails de bas niveau (bruit, fond, globules rouges) sont non informatifs. Une approche JEPA permettrait donc, en théorie, d’apprendre un espace latent plus invariant et mieux aligné avec la tâche.
+
+De plus, ces méthodes sont particulièrement adaptées aux contextes où les données annotées sont limitées, ce qui correspond directement à notre problème. En exploitant des relations entre différentes vues d’une même image (par exemple des augmentations ou des régions partielles), il devient possible d’extraire des représentations riches sans supervision forte.
+
+Ainsi, bien que non explorée expérimentalement ici, l’intégration d’une approche de type JEPA constitue une piste naturelle pour améliorer la structuration de l’espace latent et potentiellement les performances de classification dans ce type de données biomédicales.
+
+
+
+
+\section{Difficulties and practical aspects}
+
+Ce projet a soulevé plusieurs difficultés pratiques, à la fois sur les aspects data, machine learning et deep learning.
+
+Tout d’abord, la \textbf{construction du pipeline de segmentation} s’est révélée particulièrement délicate. L’extraction de masques de cellules cohérents n’est pas triviale en raison de la variabilité des images (bruit, contraste, présence de globules rouges). La méthode proposée a été obtenue en grande partie de manière empirique, par essais successifs, ce qui reflète la difficulté de concevoir une approche robuste sans supervision pixel-wise.
+
+Sur la partie \textbf{machine learning}, la principale contrainte a été le \textbf{temps de calcul}. L’entraînement de plusieurs modèles sur des features de grande dimension a nécessité une parallélisation explicite des traitements afin d’obtenir des temps d’exécution raisonnables, ce qui a complexifié l’implémentation.
+
+Concernant le \textbf{deep learning}, plusieurs choix méthodologiques n’ont pas donné les résultats attendus. En particulier, l’extraction de \textbf{fenêtres centrées sur les WBC} à partir des masques n’a pas amélioré les performances, malgré un redimensionnement correct. Les résultats sont restés meilleurs sur les images complètes, ce qui suggère une \textbf{perte d’information contextuelle} ou une dégradation des détails utiles lors du recadrage.
+
+Un point particulièrement contre-intuitif concerne le \textbf{supervised contrastive learning}. Bien que les visualisations t-SNE montrent une \textbf{meilleure structuration de l’espace latent}, cela ne se traduit pas par une amélioration des performances finales. Cela peut s’expliquer par plusieurs facteurs : dépendance aux tailles de batch, déséquilibre des classes réduisant le nombre de positifs utiles, ou encore inadéquation entre l’objectif contrastif (géométrie globale) et la tâche de classification fine.
+
+La \textbf{génération de données via GANs} a également posé problème. Malgré l’utilisation d’un WGAN-GP et de tentatives d’oversampling (notamment pour la classe PLY avec seulement 11 exemples), les images générées restent peu réalistes. Des architectures plus avancées comme StyleGAN ont été testées sans succès, probablement en raison du \textbf{manque critique de données} et de la complexité des structures biologiques à modéliser.
+
+Sur l’optimisation des modèles profonds, les performances se sont avérées \textbf{très sensibles aux stratégies de learning rate scheduling}. Des gains de l’ordre de 1 à 2 points ont été observés en ajustant finement ces paramètres. De même, différentes stratégies de gestion du déséquilibre ont été testées : en pratique, l’utilisation de la \textbf{focal loss combinée à une cross-entropy classique} s’est révélée plus efficace que l’oversampling explicite.
+
+Enfin, la principale contrainte globale du projet reste le \textbf{temps de calcul}. L’entraînement des modèles sur GPU, bien que nécessaire, est resté très coûteux. Chaque erreur ou modification nécessitait de relancer des expériences longues, ce qui a fortement limité la capacité d’exploration et rendu le processus global très chronophage.
+
+
 \section{Discussion and conclusion}
 
-\subsection{Difficulties encountered}
+Ce projet avait pour objectif d’explorer différentes approches pour la classification de globules blancs dans un contexte réaliste caractérisé par un faible nombre de données annotées, un fort déséquilibre de classes et une variabilité visuelle importante. Les résultats obtenus mettent en évidence plusieurs enseignements clés.
 
-\subsection{Conclusion of this work}
+Tout d’abord, les approches de \textbf{machine learning basées sur des features handcrafted} permettent d’obtenir des performances correctes, en particulier lorsqu’elles sont combinées avec des techniques de sélection de variables et de rééquilibrage comme SMOTE. Cependant, elles restent limitées pour discriminer finement des sous-classes morphologiquement proches. Cette limite est directement liée à la difficulté de concevoir des descripteurs suffisamment expressifs pour capturer toute la complexité des structures cellulaires.
+
+Les approches de \textbf{deep learning} se sont révélées nettement plus performantes. Le recours au \textbf{transfer learning} avec des backbones pré-entraînés sur ImageNet permet d’exploiter efficacement des représentations visuelles riches, même avec un dataset relativement limité. Parmi les architectures testées, les modèles convolutionnels et hybrides modernes (notamment EfficientNet et ConvNeXt) offrent le meilleur compromis entre capacité de représentation et robustesse. À l’inverse, les Transformers purs apparaissent moins adaptés dans ce contexte, probablement en raison de leur forte dépendance à la quantité de données.
+
+Un point important concerne la \textbf{structure de l’espace latent}. Nos expériences montrent que les performances ne dépendent pas uniquement du backbone, mais aussi de la manière dont les features sont exploitées. Le choix de la tête de classification doit donc être adapté à la géométrie des représentations. Dans notre cas, une tête relativement simple de type CNN s’est révélée plus efficace que des architectures plus complexes, ce qui suggère que les features extraites sont déjà bien structurées.
+
+La gestion du \textbf{déséquilibre des classes} est un facteur déterminant. Contrairement aux approches classiques, l’oversampling explicite s’est avéré moins efficace en deep learning que des stratégies agissant directement sur l’apprentissage, comme la focal loss ou certaines formes de data augmentation. Cela souligne l’importance d’adapter la fonction de coût et les stratégies d’entraînement plutôt que de modifier uniquement la distribution des données.
+
+Les différentes tentatives exploratoires mettent également en évidence des limites importantes. Le \textbf{supervised contrastive learning}, bien qu’améliorant la structuration de l’espace latent, ne se traduit pas nécessairement par un gain en classification. De même, la \textbf{génération de données par GANs} reste difficile dans ce contexte, principalement en raison du manque de données et de la complexité des structures biologiques. Ces résultats illustrent le fait qu’une amélioration qualitative des représentations ne garantit pas automatiquement une amélioration des performances finales.
+
+Enfin, ce travail souligne l’importance des \textbf{aspects pratiques} : choix du scheduling, data augmentation, TTA ou encore validation croisée ont un impact significatif sur les performances. Dans un cadre contraint en données, ces éléments jouent un rôle aussi important que l’architecture elle-même.
+
+En conclusion, la combinaison la plus efficace repose sur un \textbf{backbone convolutionnel pré-entraîné, finement ajusté, associé à une tête simple et à des stratégies d’entraînement adaptées au déséquilibre}. Les résultats obtenus montrent qu’il est possible d’atteindre des performances solides malgré les contraintes du dataset.
+
+Plusieurs perspectives peuvent être envisagées pour améliorer ce travail. L’exploration plus approfondie d’approches \textbf{auto-supervisées} comme JEPA, mieux adaptées à l’apprentissage de représentations invariantes, constitue une piste prometteuse. De même, l’utilisation de techniques de \textbf{sampling plus sophistiquées} ou d’augmentations spécifiques à l’imagerie hématologique pourrait améliorer la prise en compte des classes rares. Enfin, l’accès à des jeux de données plus larges ou annotés plus finement permettrait probablement de tirer davantage parti des architectures modernes, en particulier des modèles basés sur l’attention.
 
 
-\cite{TOGACAR2020106810}.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}

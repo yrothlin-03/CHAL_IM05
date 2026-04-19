@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.27)  18 APR 2026 15:54
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.27)  19 APR 2026 16:33
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -393,21 +393,21 @@ Package hyperref Info: Link coloring OFF on input line 15.
 \@outlinefile=\write3
 \openout3 = `report.out'.
 
-
-Underfull \hbox (badness 1584) in paragraph at lines 44--45
+LaTeX Font Info:    Trying to load font information for U+msa on input line 31.
+ (/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 31.
+ (/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+Underfull \hbox (badness 1584) in paragraph at lines 43--44
 []\T1/ptm/m/n/10 Une at-ten-tion par-ti-c-ulière est portée à la ges-tion du
  []
 
 
 
-LaTeX Font Info:    Trying to load font information for U+msa on input line 53.
-(/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/umsa.fd
-File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-)
-LaTeX Font Info:    Trying to load font information for U+msb on input line 53.
- (/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/umsb.fd
-File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-)
+
 
 [1{/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc}
 
@@ -415,55 +415,292 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ]
 
 
-Underfull \hbox (badness 1852) in paragraph at lines 102--103
+Underfull \hbox (badness 1852) in paragraph at lines 101--102
 \T1/ptm/m/n/10 d'adapter les straté-gies d'apprentissage et les métriques
  []
 
 
 
 [2]
+<figures/data_distri.png, id=140, 715.473pt x 426.393pt>
+File: figures/data_distri.png Graphic file (type png)
+<use figures/data_distri.png>
+Package pdftex.def Info: figures/data_distri.png  used on input line 114.
+(pdftex.def)             Requested size: 247.6778pt x 147.6002pt.
 
 
 
-[3]
-Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[3 <./figures/data_distri.png>]
+<figures/mask.png, id=156, 653.3208pt x 281.853pt>
+File: figures/mask.png Graphic file (type png)
+<use figures/mask.png>
+Package pdftex.def Info: figures/mask.png  used on input line 141.
+(pdftex.def)             Requested size: 247.6778pt x 106.8515pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
 
 
 
 
-Underfull \hbox (badness 3049) in paragraph at lines 155--158
-[]\T1/ptm/m/n/10 - ex-pli-ca-tions générales des dif-férentes méth-odes de
+
+[4 <./figures/mask.png>]
+
+
+
+[5]
+<figures/t-sne-raw-features.png, id=182, 715.473pt x 570.933pt>
+File: figures/t-sne-raw-features.png Graphic file (type png)
+<use figures/t-sne-raw-features.png>
+Package pdftex.def Info: figures/t-sne-raw-features.png  used on input line 194.
+(pdftex.def)             Requested size: 247.6778pt x 197.63419pt.
+<figures/t-sne-selected-features.png, id=183, 715.473pt x 570.933pt>
+File: figures/t-sne-selected-features.png Graphic file (type png)
+<use figures/t-sne-selected-features.png>
+Package pdftex.def Info: figures/t-sne-selected-features.png  used on input line 201.
+(pdftex.def)             Requested size: 247.6778pt x 197.63419pt.
+
+
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 220.
+(/usr/local/texlive/2025/texmf-dist/tex/latex/psnfss/t1pcr.fd
+File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
+)
+Underfull \hbox (badness 1917) in paragraph at lines 220--221
+\T1/ptm/m/n/10 taires et per-met d'apprendre des fron-tières de dé-ci-sion
+ []
+
+
+Underfull \hbox (badness 3735) in paragraph at lines 220--221
+\T1/ptm/m/n/10 est ap-pliqué unique-ment sur l'ensemble d'entraînement
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+[6 <./figures/t-sne-raw-features.png> <./figures/t-sne-selected-features.png>]
+<figures/cm.png, id=200, 636.4578pt x 570.81255pt>
+File: figures/cm.png Graphic file (type png)
+<use figures/cm.png>
+Package pdftex.def Info: figures/cm.png  used on input line 260.
+(pdftex.def)             Requested size: 247.6778pt x 222.12823pt.
+
+
+<figures/tsne_without_contrastive.png, id=202, 715.83435pt x 570.2103pt>
+File: figures/tsne_without_contrastive.png Graphic file (type png)
+<use figures/tsne_without_contrastive.png>
+Package pdftex.def Info: figures/tsne_without_contrastive.png  used on input line 296.
+(pdftex.def)             Requested size: 247.6778pt x 197.2883pt.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+
+[7 <./figures/cm.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 307--308
+[]\T1/ptm/m/n/10 Les ap-proches de \T1/ptm/b/n/10 deep learn-ing \T1/ptm/m/n/10 re-posent sur
+ []
+
+<figures/pipeline.png, id=214, 794.97pt x 410.53375pt>
+File: figures/pipeline.png Graphic file (type png)
+<use figures/pipeline.png>
+Package pdftex.def Info: figures/pipeline.png  used on input line 313.
+(pdftex.def)             Requested size: 247.6778pt x 127.90309pt.
+
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 358--359
+\T1/ptm/m/n/10 glob-ale-ment, en par-ti-c-ulier \T1/ptm/b/n/10 EF-FI-CIENT-NET_V2_M
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 358--359
+\T1/ptm/m/n/10 (meilleur score), suivi de \T1/ptm/b/n/10 EF-FI-CIENT_V2_S \T1/ptm/m/n/10 et
+ []
+
+
+Underfull \hbox (badness 7558) in paragraph at lines 358--359
+\T1/ptm/b/n/10 DENSENET_169\T1/ptm/m/n/10 . À l'inverse, les mod-èles pure-ment
+ []
+
+
+
+[8 <./figures/tsne_without_contrastive.png> <./figures/pipeline.png>]
+<figures/exemple_cm_deep.png, id=222, 635.2533pt x 570.2103pt>
+File: figures/exemple_cm_deep.png Graphic file (type png)
+<use figures/exemple_cm_deep.png>
+Package pdftex.def Info: figures/exemple_cm_deep.png  used on input line 364.
+(pdftex.def)             Requested size: 247.6778pt x 222.31151pt.
+<figures/exemple_tsne_deep.png, id=223, 715.83435pt x 570.2103pt>
+File: figures/exemple_tsne_deep.png Graphic file (type png)
+<use figures/exemple_tsne_deep.png>
+Package pdftex.def Info: figures/exemple_tsne_deep.png  used on input line 371.
+(pdftex.def)             Requested size: 247.6778pt x 197.2883pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Underfull \hbox (badness 6859) in paragraph at lines 376--377
+[]\T1/ptm/m/n/10 Ces fig-ures, is-sues de l'entraînement d'un mod-èle
+ []
+
+
+
+
+
+[9 <./figures/exemple_cm_deep.png> <./figures/exemple_tsne_deep.png>]
+<figures/query_explain.png, id=241, 465.74pt x 250.9375pt>
+File: figures/query_explain.png Graphic file (type png)
+<use figures/query_explain.png>
+Package pdftex.def Info: figures/query_explain.png  used on input line 397.
+(pdftex.def)             Requested size: 247.6778pt x 133.44804pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+
+
+[10 <./figures/query_explain.png>]
+Underfull \hbox (badness 2856) in paragraph at lines 451--452
+\T1/ptm/m/n/10 la cross-entropy stan-dard dans notre cadre, no-tam-ment
+ []
+
+
+
+
+Overfull \hbox (4.3108pt too wide) in paragraph at lines 474--488
+ [][] 
+ []
+
+
+
+[11]
+
+<figures/contrastive_explain.png, id=267, 731.73375pt x 338.26375pt>
+File: figures/contrastive_explain.png Graphic file (type png)
+<use figures/contrastive_explain.png>
+Package pdftex.def Info: figures/contrastive_explain.png  used on input line 539.
+(pdftex.def)             Requested size: 247.6778pt x 114.49716pt.
+
+
+[12 <./figures/contrastive_explain.png>]
+File: figures/tsne_without_contrastive.png Graphic file (type png)
+<use figures/tsne_without_contrastive.png>
+Package pdftex.def Info: figures/tsne_without_contrastive.png  used on input line 556.
+(pdftex.def)             Requested size: 247.6778pt x 197.2883pt.
+<figures/tsne_with_contrastive.png, id=285, 715.83435pt x 570.2103pt>
+File: figures/tsne_with_contrastive.png Graphic file (type png)
+<use figures/tsne_with_contrastive.png>
+Package pdftex.def Info: figures/tsne_with_contrastive.png  used on input line 563.
+(pdftex.def)             Requested size: 247.6778pt x 197.2883pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+
+
+[13 <./figures/tsne_with_contrastive.png>]
+
+<figures/gan_samples.png, id=301, 2073.7475pt x 2073.7475pt>
+File: figures/gan_samples.png Graphic file (type png)
+<use figures/gan_samples.png>
+Package pdftex.def Info: figures/gan_samples.png  used on input line 614.
+(pdftex.def)             Requested size: 247.6778pt x 247.66818pt.
+
+
+[14 <./figures/gan_samples.png (PNG copy)>]
+
+<figures/jepa.png, id=317, 874.26625pt x 196.735pt>
+File: figures/jepa.png Graphic file (type png)
+<use figures/jepa.png>
+Package pdftex.def Info: figures/jepa.png  used on input line 674.
+(pdftex.def)             Requested size: 247.6778pt x 55.73383pt.
+
+
+[15 <./figures/jepa.png>]
+Underfull \hbox (badness 2662) in paragraph at lines 683--684
+[]\T1/ptm/m/n/10 Ainsi, bien que non ex-plorée ex-péri-men-tale-ment ici,
+ []
+
+
+Underfull \hbox (badness 1502) in paragraph at lines 694--695
+\T1/ptm/m/n/10 a été le \T1/ptm/b/n/10 temps de cal-cul\T1/ptm/m/n/10 . L'entraînement de plusieurs
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 696--697
+[]\T1/ptm/m/n/10 Concernant le \T1/ptm/b/n/10 deep learn-ing\T1/ptm/m/n/10 , plusieurs choix
+ []
+
+
+Underfull \hbox (badness 1655) in paragraph at lines 696--697
+\T1/ptm/m/n/10 méthodologiques n'ont pas donné les ré-sul-tats at-ten-dus.
+ []
+
+
+
+
+
+[16]
+Underfull \hbox (badness 1874) in paragraph at lines 717--718
+[]\T1/ptm/m/n/10 La ges-tion du \T1/ptm/b/n/10 déséquili-bre des classes \T1/ptm/m/n/10 est un fac-
+ []
+
+
+Underfull \hbox (badness 4467) in paragraph at lines 717--718
+\T1/ptm/m/n/10 l'oversampling ex-plicite s'est avéré moins ef-fi-cace en
+ []
+
+
+Underfull \hbox (badness 7081) in paragraph at lines 725--726
+[]\T1/ptm/m/n/10 Plusieurs per-spec-tives peu-vent être en-vis-agées pour
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 725--726
+\T1/ptm/m/n/10 améliorer ce tra-vail. L'exploration plus ap-pro-fondie
+ []
+
+
+Underfull \hbox (badness 1838) in paragraph at lines 725--726
+\T1/ptm/m/n/10 de tirer da-van-tage parti des ar-chi-tec-tures mod-ernes, en
  []
 
 (./report.bbl
 
-[4])
+)
 
-
-
-[5
-
-] (./report.aux)
+[17] (./report.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
 Package rerunfilecheck Info: File `report.out' has not changed.
-(rerunfilecheck)             Checksum: AD435CEA39D247B54CBE50C08F25982F;3898.
+(rerunfilecheck)             Checksum: 72FDD0E7C018C01B60F5BFFA03110D8E;4099.
  ) 
 Here is how much of TeX's memory you used:
- 11537 strings out of 473190
- 178046 string characters out of 5715800
- 591590 words of memory out of 5000000
- 34597 multiletter control sequences out of 15000+600000
- 669328 words of font info for 149 fonts, out of 8000000 for 9000
+ 11765 strings out of 473190
+ 183127 string characters out of 5715800
+ 594190 words of memory out of 5000000
+ 34759 multiletter control sequences out of 15000+600000
+ 674510 words of font info for 156 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,7n,79p,1083b,589s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on report.pdf (5 pages, 137390 bytes).
+ 75i,9n,79p,1198b,455s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on report.pdf (17 pages, 10157480 bytes).
 PDF statistics:
- 221 PDF objects out of 1000 (max. 8388607)
- 192 compressed objects within 2 object streams
- 40 named destinations out of 1000 (max. 500000)
- 177 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 439 PDF objects out of 1000 (max. 8388607)
+ 358 compressed objects within 4 object streams
+ 97 named destinations out of 1000 (max. 500000)
+ 255 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -50,4 +50,19 @@ S.~H. Rezatofighi and H.~Soltanian-Zadeh, ``Automatic recognition of five types 
 K.~Almezhghwi and S.~Serte, ``Improved classification of white blood cells with the generative adversarial network and deep convolutional neural network,'' \emph{Computational Intelligence and Neuroscience}, vol. 2020, no.~1, p. 6490479, 2020. [Online]. Available: \url{https://onlinelibrary.wiley.com/doi/abs/10.1155/2020/6490479}
 \BIBentrySTDinterwordspacing
 
+\bibitem{arar2022learnedqueriesefficientlocal}
+\BIBentryALTinterwordspacing
+M.~Arar, A.~Shamir, and A.~H. Bermano, ``Learned queries for efficient local attention,'' 2022. [Online]. Available: \url{https://arxiv.org/abs/2112.11435}
+\BIBentrySTDinterwordspacing
+
+\bibitem{khosla2021supervisedcontrastivelearning}
+\BIBentryALTinterwordspacing
+P.~Khosla, P.~Teterwak, C.~Wang, A.~Sarna, Y.~Tian, P.~Isola, A.~Maschinot, C.~Liu, and D.~Krishnan, ``Supervised contrastive learning,'' 2021. [Online]. Available: \url{https://arxiv.org/abs/2004.11362}
+\BIBentrySTDinterwordspacing
+
+\bibitem{assran2023selfsupervisedlearningimagesjointembedding}
+\BIBentryALTinterwordspacing
+M.~Assran, Q.~Duval, I.~Misra, P.~Bojanowski, P.~Vincent, M.~Rabbat, Y.~LeCun, and N.~Ballas, ``Self-supervised learning from images with a joint-embedding predictive architecture,'' 2023. [Online]. Available: \url{https://arxiv.org/abs/2301.08243}
+\BIBentrySTDinterwordspacing
+
 \end{thebibliography}
