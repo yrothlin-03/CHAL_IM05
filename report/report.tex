@@ -449,7 +449,12 @@ Afin de quantifier cet effet, nous avons entraîné le modèle avec plusieurs se
 \end{tabular}
 \end{table}
 
+
 On observe une variabilité non négligeable des performances, avec un score variant d’environ $0.74$ à $0.81$. La moyenne des scores est de $0.785$ avec un écart-type d’environ $0.028$, ce qui confirme que la seed a un impact significatif sur les résultats. Cette variance s’explique à la fois par l’initialisation des poids, la stochasticité de l’optimisation, et la sensibilité du modèle à la distribution exacte des données dans chaque split.
+
+\medskip
+
+Un exemple concret illustre cet écart entre validation et généralisation : pour la seed 3407, qui donne un score élevé en validation (macro-F1 $\approx 0.8126$), le score obtenu sur le jeu de test chute à $0.7665$. Cela met en évidence un phénomène de \textbf{sur-adaptation au split de validation}, où certaines configurations favorables (répartition des classes, exemples particuliers) permettent d’obtenir un score élevé sans pour autant garantir une bonne généralisation. Cette observation confirme que se baser sur une seule seed peut conduire à une estimation optimiste des performances, et justifie l’utilisation de stratégies comme le K-fold ou l’agrégation de modèles pour obtenir des résultats plus robustes.
 
 Pour atténuer cette variabilité, nous utilisons une stratégie de \textbf{validation croisée de type K-fold}. Le principe consiste à partitionner le jeu de données en $K$ sous-ensembles, puis à entraîner $K$ modèles différents, chacun utilisant $K-1$ folds pour l’entraînement et le fold restant pour la validation. Cette approche permet d’exploiter l’ensemble des données pour l’évaluation tout en réduisant la dépendance à un unique split.
 
