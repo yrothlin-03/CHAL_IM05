@@ -6,7 +6,7 @@
 #SBATCH --mem=48G
 #SBATCH --gres=gpu:1
 #SBATCH --time=20:00:00
-#SBATCH --job-name=FULL_RUN_CONVNEXT_TINY_CNN
+#SBATCH --job-name=evaluation
 #SBATCH --output=logs/IM05/%x_%j.out
 #SBATCH --error=logs/IM05/%x_%j.err
 
@@ -25,7 +25,7 @@ cd /home/infres/yrothlin-24/CHAL_IM05
 # python -m deep_learning.main
 
 python -m deep_learning.main \
-  --evaluation false \
+  --evaluation true \
   --submission_path /home/infres/yrothlin-24/CHAL_IM05/submissions/submission.csv \
   --training.save_ckpt true \
   --training.ckpt_dir /home/infres/yrothlin-24/CHAL_IM05/checkpoints/tests \
@@ -57,7 +57,7 @@ python -m deep_learning.main \
   --training.use_amp false \
   --training.grad_clip 1.0 \
   --training.log_step 50 \
-  --training.tta_rounds 4 \
+  --training.tta_rounds 5 \
   --training.label_smoothing 0.05 \
   --training.use_weights false \
   --training.weights 0.131885 0.167166 0.287122 0.512761 0.738572 0.786459 0.760902 0.792986 0.716469 1.409173 0.335431 1.824578 4.536496 \
@@ -74,18 +74,18 @@ python -m deep_learning.main \
   --training.confusion_dir /home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion \
   --training.class_names SNE LY MO EO BA VLY BNE MMY MY PMY BL PC PLY \
   --data.train_ratio 0.9 \
-  --data.seed 42 \
+  --data.seed 3407 \
   --data.batch_size 64 \
   --data.shuffle true \
   --data.num_workers 4 \
   --data.pin_memory true \
-  --data.n_splits 5 \
+  --data.n_splits 1 \
   --data.use_weighted_sampler true \
   --data.use_undersampling false \
   --data.sampler_power 0.5 \
   --data.with_tta true \
   --model.num_classes 13 \
-  --model.backbone_name CONVNEXT_TINY \
+  --model.backbone_name EFFICIENTNET_V2_S \
   --model.freeze_backbone false \
   --model.pretrained true \
-  --model.head_name CNN
+  --model.head_name LINEAR
