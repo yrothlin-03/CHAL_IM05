@@ -1,0 +1,36 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/main.py", line 295, in <module>
+    main(config)
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/main.py", line 272, in main
+    preds = run_kfold_eval(device, model_config, data_config, training_config)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/main.py", line 229, in run_kfold_eval
+    model = build_model(fold_model_config, device)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/main.py", line 74, in build_model
+    model = Model(**model_config).to(device)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1381, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 933, in _apply
+    module._apply(fn)
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 933, in _apply
+    module._apply(fn)
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 933, in _apply
+    module._apply(fn)
+  [Previous line repeated 2 more times]
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 964, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1367, in convert
+    return t.to(
+           ^^^^^
+torch.AcceleratorError: CUDA error: uncorrectable ECC error encountered
+Search for `cudaErrorECCUncorrectable' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+

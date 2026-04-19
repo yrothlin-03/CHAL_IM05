@@ -1,0 +1,702 @@
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+CONTRASTIVE PRETRAINING WITH BACKBONE: CONVNEXT_BASE
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+CONTRASTIVE MODEL INFORMATIONS
+Backbone         : CONVNEXT_BASE
+Feature dim      : 1024
+Projection dim   : 128
+Backbone params  : 87,564,416
+Projector params : 590,464
+Total params     : 88,154,880
+Trainable params : 88,154,880
+Frozen backbone  : False
+--------------------------------------------------------------------------------
+Successfully loaded contrastive data with sizes: train=26010, val=2891
+ContrastiveTrainer config: {'optimizer': 'adamw', 'scheduler': 'cosine', 'lr': 0.001, 'weight_decay': 0.0001, 'num_epochs': 60, 'temperature': 0.1, 'use_amp': False, 'grad_clip': 1.0, 'log_step': 50, 'max_step_train': None, 'max_step_val': None, 'save_ckpt': True, 'ckpt_dir': '/home/infres/yrothlin-24/CHAL_IM05/checkpoints/contrastive_pretraining', 'plot_tsne': True, 'tsne_split': 'val', 'tsne_every': 5, 'tsne_max_samples': 1000, 'tsne_perplexity': 30, 'tsne_dir': '/home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE_contrastive', 'class_names': ['SNE', 'LY', 'MO', 'EO', 'BA', 'VLY', 'BNE', 'MMY', 'MY', 'PMY', 'BL', 'PC', 'PLY']}
+TSNE will be plotted every 5 epochs and saved to: /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE_contrastive
+Step 50/406 | loss=84.7978 lr=0.001000
+Step 100/406 | loss=64.9841 lr=0.001000
+Step 150/406 | loss=56.2956 lr=0.001000
+Step 200/406 | loss=50.8495 lr=0.001000
+Step 250/406 | loss=47.6768 lr=0.001000
+Step 300/406 | loss=45.5743 lr=0.001000
+Step 350/406 | loss=43.7698 lr=0.000999
+Step 400/406 | loss=42.5055 lr=0.000999
+Timing (first 30 train batches) | data=0.045335s infer=0.305500s
+[VAL] supcon_loss=4.8442
+[TSNE] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE_contrastive/tsne_val_epoch_001.png
+[RESULTS] Epoch 1/60 | train_loss=42.3341 val_loss=4.8442
+New best supcon loss: 4.8442 at epoch 1. Saving checkpoint.
+Checkpoint saved: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/contrastive_pretraining/best.pt
+Step 50/406 | loss=33.8796 lr=0.000999
+Step 100/406 | loss=33.2050 lr=0.000999
+Step 150/406 | loss=32.9509 lr=0.000999
+Step 200/406 | loss=32.9569 lr=0.000998
+Step 250/406 | loss=32.6539 lr=0.000998
+Step 300/406 | loss=32.5437 lr=0.000998
+Step 350/406 | loss=32.3507 lr=0.000998
+Step 400/406 | loss=32.2579 lr=0.000997
+Timing (first 30 train batches) | data=0.041742s infer=0.252596s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 2/60 | train_loss=32.2640 val_loss=4.8442
+New best supcon loss: 4.8442 at epoch 2. Saving checkpoint.
+Checkpoint saved: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/contrastive_pretraining/best.pt
+Step 50/406 | loss=32.0828 lr=0.000997
+Step 100/406 | loss=32.2038 lr=0.000997
+Step 150/406 | loss=32.1529 lr=0.000996
+Step 200/406 | loss=31.9807 lr=0.000996
+Step 250/406 | loss=31.8669 lr=0.000995
+Step 300/406 | loss=32.5439 lr=0.000995
+Step 350/406 | loss=32.1337 lr=0.000994
+Step 400/406 | loss=32.2340 lr=0.000994
+Timing (first 30 train batches) | data=0.048098s infer=0.256671s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 3/60 | train_loss=32.2209 val_loss=4.8442
+Step 50/406 | loss=31.4874 lr=0.000993
+Step 100/406 | loss=30.7989 lr=0.000993
+Step 150/406 | loss=30.6422 lr=0.000992
+Step 200/406 | loss=30.5073 lr=0.000992
+Step 250/406 | loss=30.3232 lr=0.000991
+Step 300/406 | loss=30.2591 lr=0.000990
+Step 350/406 | loss=30.2433 lr=0.000990
+Step 400/406 | loss=30.2044 lr=0.000989
+Timing (first 30 train batches) | data=0.047342s infer=0.257705s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 4/60 | train_loss=30.2178 val_loss=4.8442
+Step 50/406 | loss=31.2004 lr=0.000988
+Step 100/406 | loss=30.8897 lr=0.000988
+Step 150/406 | loss=30.5926 lr=0.000987
+Step 200/406 | loss=30.2671 lr=0.000986
+Step 250/406 | loss=30.0411 lr=0.000985
+Step 300/406 | loss=30.2108 lr=0.000985
+Step 350/406 | loss=30.0583 lr=0.000984
+Step 400/406 | loss=30.2256 lr=0.000983
+Timing (first 30 train batches) | data=0.049034s infer=0.257437s
+[VAL] supcon_loss=4.8442
+[TSNE] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE_contrastive/tsne_val_epoch_005.png
+[RESULTS] Epoch 5/60 | train_loss=30.2378 val_loss=4.8442
+Step 50/406 | loss=30.2657 lr=0.000982
+Step 100/406 | loss=30.1518 lr=0.000981
+Step 150/406 | loss=30.2858 lr=0.000980
+Step 200/406 | loss=30.1076 lr=0.000979
+Step 250/406 | loss=30.0851 lr=0.000979
+Step 300/406 | loss=30.2588 lr=0.000978
+Step 350/406 | loss=30.3554 lr=0.000977
+Step 400/406 | loss=30.1919 lr=0.000976
+Timing (first 30 train batches) | data=0.050725s infer=0.255663s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 6/60 | train_loss=30.1857 val_loss=4.8442
+New best supcon loss: 4.8442 at epoch 6. Saving checkpoint.
+Checkpoint saved: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/contrastive_pretraining/best.pt
+Step 50/406 | loss=30.2507 lr=0.000975
+Step 100/406 | loss=30.2908 lr=0.000973
+Step 150/406 | loss=30.6704 lr=0.000972
+Step 200/406 | loss=30.4763 lr=0.000971
+Step 250/406 | loss=30.3762 lr=0.000970
+Step 300/406 | loss=30.3154 lr=0.000969
+Step 350/406 | loss=30.2697 lr=0.000968
+Step 400/406 | loss=30.2337 lr=0.000967
+Timing (first 30 train batches) | data=0.058424s infer=0.256535s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 7/60 | train_loss=30.2414 val_loss=4.8442
+Step 50/406 | loss=30.4789 lr=0.000966
+Step 100/406 | loss=30.8865 lr=0.000964
+Step 150/406 | loss=30.7017 lr=0.000963
+Step 200/406 | loss=30.4548 lr=0.000962
+Step 250/406 | loss=30.3669 lr=0.000961
+Step 300/406 | loss=30.2052 lr=0.000960
+Step 350/406 | loss=30.3499 lr=0.000958
+Step 400/406 | loss=30.2731 lr=0.000957
+Timing (first 30 train batches) | data=0.055245s infer=0.257053s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 8/60 | train_loss=30.2762 val_loss=4.8442
+Step 50/406 | loss=29.1606 lr=0.000955
+Step 100/406 | loss=28.6911 lr=0.000954
+Step 150/406 | loss=29.2145 lr=0.000953
+Step 200/406 | loss=29.5751 lr=0.000951
+Step 250/406 | loss=29.4400 lr=0.000950
+Step 300/406 | loss=29.5142 lr=0.000949
+Step 350/406 | loss=29.5889 lr=0.000947
+Step 400/406 | loss=29.7130 lr=0.000946
+Timing (first 30 train batches) | data=0.044330s infer=0.256822s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 9/60 | train_loss=29.7016 val_loss=4.8442
+Step 50/406 | loss=28.3780 lr=0.000944
+Step 100/406 | loss=29.1530 lr=0.000943
+Step 150/406 | loss=29.2810 lr=0.000941
+Step 200/406 | loss=29.1447 lr=0.000940
+Step 250/406 | loss=29.1133 lr=0.000938
+Step 300/406 | loss=29.3925 lr=0.000936
+Step 350/406 | loss=29.5160 lr=0.000935
+Step 400/406 | loss=29.5278 lr=0.000933
+Timing (first 30 train batches) | data=0.047480s infer=0.257393s
+[VAL] supcon_loss=4.8442
+[TSNE] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE_contrastive/tsne_val_epoch_010.png
+[RESULTS] Epoch 10/60 | train_loss=29.5371 val_loss=4.8442
+Step 50/406 | loss=30.3956 lr=0.000931
+Step 100/406 | loss=29.8931 lr=0.000930
+Step 150/406 | loss=30.0732 lr=0.000928
+Step 200/406 | loss=30.0387 lr=0.000926
+Step 250/406 | loss=29.7644 lr=0.000925
+Step 300/406 | loss=29.6955 lr=0.000923
+Step 350/406 | loss=29.6922 lr=0.000921
+Step 400/406 | loss=29.7785 lr=0.000920
+Timing (first 30 train batches) | data=0.049238s infer=0.254415s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 11/60 | train_loss=29.7993 val_loss=4.8442
+Step 50/406 | loss=29.0882 lr=0.000918
+Step 100/406 | loss=29.3084 lr=0.000916
+Step 150/406 | loss=29.0531 lr=0.000914
+Step 200/406 | loss=29.1562 lr=0.000912
+Step 250/406 | loss=29.2438 lr=0.000910
+Step 300/406 | loss=29.2619 lr=0.000908
+Step 350/406 | loss=29.4580 lr=0.000907
+Step 400/406 | loss=29.5532 lr=0.000905
+Timing (first 30 train batches) | data=0.045863s infer=0.257466s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 12/60 | train_loss=29.6018 val_loss=4.8442
+Step 50/406 | loss=29.8443 lr=0.000903
+Step 100/406 | loss=30.0931 lr=0.000901
+Step 150/406 | loss=30.0218 lr=0.000899
+Step 200/406 | loss=29.8826 lr=0.000897
+Step 250/406 | loss=29.6566 lr=0.000895
+Step 300/406 | loss=29.4643 lr=0.000893
+Step 350/406 | loss=29.3824 lr=0.000891
+Step 400/406 | loss=29.5186 lr=0.000889
+Timing (first 30 train batches) | data=0.047265s infer=0.256675s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 13/60 | train_loss=29.4940 val_loss=4.8442
+Step 50/406 | loss=28.9760 lr=0.000887
+Step 100/406 | loss=28.4934 lr=0.000884
+Step 150/406 | loss=28.4255 lr=0.000882
+Step 200/406 | loss=28.6875 lr=0.000880
+Step 250/406 | loss=28.6172 lr=0.000878
+Step 300/406 | loss=28.7236 lr=0.000876
+Step 350/406 | loss=29.0133 lr=0.000874
+Step 400/406 | loss=28.9289 lr=0.000872
+Timing (first 30 train batches) | data=0.043739s infer=0.256578s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 14/60 | train_loss=28.9541 val_loss=4.8442
+Step 50/406 | loss=30.3780 lr=0.000869
+Step 100/406 | loss=29.5190 lr=0.000867
+Step 150/406 | loss=29.6913 lr=0.000865
+Step 200/406 | loss=29.7957 lr=0.000863
+Step 250/406 | loss=29.8323 lr=0.000861
+Step 300/406 | loss=29.8832 lr=0.000858
+Step 350/406 | loss=29.7877 lr=0.000856
+Step 400/406 | loss=29.6318 lr=0.000854
+Timing (first 30 train batches) | data=0.048859s infer=0.257016s
+[VAL] supcon_loss=4.8442
+[TSNE] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE_contrastive/tsne_val_epoch_015.png
+[RESULTS] Epoch 15/60 | train_loss=29.6115 val_loss=4.8442
+Step 50/406 | loss=27.9758 lr=0.000851
+Step 100/406 | loss=28.3704 lr=0.000849
+Step 150/406 | loss=28.8266 lr=0.000847
+Step 200/406 | loss=29.1276 lr=0.000844
+Step 250/406 | loss=29.1456 lr=0.000842
+Step 300/406 | loss=29.4363 lr=0.000840
+Step 350/406 | loss=29.4214 lr=0.000837
+Step 400/406 | loss=29.4583 lr=0.000835
+Timing (first 30 train batches) | data=0.046385s infer=0.252053s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 16/60 | train_loss=29.4844 val_loss=4.8442
+Step 50/406 | loss=30.0528 lr=0.000832
+Step 100/406 | loss=29.7375 lr=0.000830
+Step 150/406 | loss=29.7235 lr=0.000827
+Step 200/406 | loss=29.5015 lr=0.000825
+Step 250/406 | loss=29.3967 lr=0.000822
+Step 300/406 | loss=29.4952 lr=0.000820
+Step 350/406 | loss=29.4964 lr=0.000817
+Step 400/406 | loss=29.5438 lr=0.000815
+Timing (first 30 train batches) | data=0.050182s infer=0.255106s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 17/60 | train_loss=29.5178 val_loss=4.8442
+Step 50/406 | loss=29.8352 lr=0.000812
+Step 100/406 | loss=29.2378 lr=0.000810
+Step 150/406 | loss=29.1910 lr=0.000807
+Step 200/406 | loss=29.3086 lr=0.000805
+Step 250/406 | loss=29.2195 lr=0.000802
+Step 300/406 | loss=29.2749 lr=0.000799
+Step 350/406 | loss=29.2376 lr=0.000797
+Step 400/406 | loss=29.3440 lr=0.000794
+Timing (first 30 train batches) | data=0.048111s infer=0.254395s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 18/60 | train_loss=29.3419 val_loss=4.8442
+Step 50/406 | loss=29.5429 lr=0.000791
+Step 100/406 | loss=29.6682 lr=0.000789
+Step 150/406 | loss=29.5958 lr=0.000786
+Step 200/406 | loss=29.7880 lr=0.000783
+Step 250/406 | loss=29.7326 lr=0.000781
+Step 300/406 | loss=29.4514 lr=0.000778
+Step 350/406 | loss=29.4137 lr=0.000775
+Step 400/406 | loss=29.4436 lr=0.000773
+Timing (first 30 train batches) | data=0.047247s infer=0.255577s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 19/60 | train_loss=29.4444 val_loss=4.8442
+Step 50/406 | loss=29.0133 lr=0.000770
+Step 100/406 | loss=28.9237 lr=0.000767
+Step 150/406 | loss=28.7072 lr=0.000764
+Step 200/406 | loss=29.0810 lr=0.000761
+Step 250/406 | loss=29.3763 lr=0.000759
+Step 300/406 | loss=29.2764 lr=0.000756
+Step 350/406 | loss=29.1421 lr=0.000753
+Step 400/406 | loss=29.0513 lr=0.000750
+Timing (first 30 train batches) | data=0.040537s infer=0.255846s
+[VAL] supcon_loss=4.8442
+[TSNE] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE_contrastive/tsne_val_epoch_020.png
+[RESULTS] Epoch 20/60 | train_loss=29.0326 val_loss=4.8442
+Step 50/406 | loss=28.9920 lr=0.000747
+Step 100/406 | loss=29.5187 lr=0.000744
+Step 150/406 | loss=29.4640 lr=0.000742
+Step 200/406 | loss=29.6309 lr=0.000739
+Step 250/406 | loss=29.6286 lr=0.000736
+Step 300/406 | loss=29.5526 lr=0.000733
+Step 350/406 | loss=29.5554 lr=0.000730
+Step 400/406 | loss=29.4973 lr=0.000727
+Timing (first 30 train batches) | data=0.042175s infer=0.249940s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 21/60 | train_loss=29.4933 val_loss=4.8442
+Step 50/406 | loss=30.7156 lr=0.000724
+Step 100/406 | loss=29.7270 lr=0.000721
+Step 150/406 | loss=29.6913 lr=0.000718
+Step 200/406 | loss=29.4795 lr=0.000715
+Step 250/406 | loss=29.2925 lr=0.000713
+Step 300/406 | loss=29.4076 lr=0.000710
+Step 350/406 | loss=29.4641 lr=0.000707
+Step 400/406 | loss=29.5019 lr=0.000704
+Timing (first 30 train batches) | data=0.044782s infer=0.255554s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 22/60 | train_loss=29.5651 val_loss=4.8442
+Step 50/406 | loss=27.7229 lr=0.000700
+Step 100/406 | loss=28.2567 lr=0.000697
+Step 150/406 | loss=28.6512 lr=0.000694
+Step 200/406 | loss=28.5408 lr=0.000692
+Step 250/406 | loss=28.6773 lr=0.000689
+Step 300/406 | loss=28.6887 lr=0.000686
+Step 350/406 | loss=28.7838 lr=0.000683
+Step 400/406 | loss=28.7306 lr=0.000680
+Timing (first 30 train batches) | data=0.045576s infer=0.258287s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 23/60 | train_loss=28.7293 val_loss=4.8442
+Step 50/406 | loss=29.6268 lr=0.000676
+Step 100/406 | loss=28.7054 lr=0.000673
+Step 150/406 | loss=28.7863 lr=0.000670
+Step 200/406 | loss=28.6969 lr=0.000667
+Step 250/406 | loss=28.5910 lr=0.000664
+Step 300/406 | loss=28.6309 lr=0.000661
+Step 350/406 | loss=28.7881 lr=0.000658
+Step 400/406 | loss=28.7829 lr=0.000655
+Timing (first 30 train batches) | data=0.043287s infer=0.256560s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 24/60 | train_loss=28.7815 val_loss=4.8442
+Step 50/406 | loss=29.5110 lr=0.000651
+Step 100/406 | loss=29.0123 lr=0.000648
+Step 150/406 | loss=29.3569 lr=0.000645
+Step 200/406 | loss=29.4271 lr=0.000642
+Step 250/406 | loss=29.2602 lr=0.000639
+Step 300/406 | loss=29.1702 lr=0.000636
+Step 350/406 | loss=29.2465 lr=0.000633
+Step 400/406 | loss=29.2071 lr=0.000630
+Timing (first 30 train batches) | data=0.042854s infer=0.256677s
+[VAL] supcon_loss=4.8442
+[TSNE] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE_contrastive/tsne_val_epoch_025.png
+[RESULTS] Epoch 25/60 | train_loss=29.1602 val_loss=4.8442
+Step 50/406 | loss=30.0805 lr=0.000626
+Step 100/406 | loss=29.8349 lr=0.000623
+Step 150/406 | loss=29.5169 lr=0.000620
+Step 200/406 | loss=29.2836 lr=0.000617
+Step 250/406 | loss=29.1585 lr=0.000614
+Step 300/406 | loss=29.1324 lr=0.000611
+Step 350/406 | loss=29.2133 lr=0.000607
+Step 400/406 | loss=29.2975 lr=0.000604
+Timing (first 30 train batches) | data=0.048368s infer=0.254586s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 26/60 | train_loss=29.2866 val_loss=4.8442
+Step 50/406 | loss=29.3021 lr=0.000601
+Step 100/406 | loss=28.9757 lr=0.000598
+Step 150/406 | loss=28.8409 lr=0.000594
+Step 200/406 | loss=28.9647 lr=0.000591
+Step 250/406 | loss=28.8060 lr=0.000588
+Step 300/406 | loss=29.0518 lr=0.000585
+Step 350/406 | loss=29.1706 lr=0.000582
+Step 400/406 | loss=29.1783 lr=0.000579
+Timing (first 30 train batches) | data=0.047281s infer=0.256710s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 27/60 | train_loss=29.1513 val_loss=4.8442
+Step 50/406 | loss=28.8646 lr=0.000575
+Step 100/406 | loss=29.0645 lr=0.000572
+Step 150/406 | loss=29.0546 lr=0.000569
+Step 200/406 | loss=29.0392 lr=0.000565
+Step 250/406 | loss=28.8563 lr=0.000562
+Step 300/406 | loss=28.9158 lr=0.000559
+Step 350/406 | loss=28.9853 lr=0.000556
+Step 400/406 | loss=28.8845 lr=0.000553
+Timing (first 30 train batches) | data=0.059499s infer=0.256680s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 28/60 | train_loss=28.8777 val_loss=4.8442
+Step 50/406 | loss=29.9632 lr=0.000549
+Step 100/406 | loss=28.9931 lr=0.000546
+Step 150/406 | loss=29.0424 lr=0.000543
+Step 200/406 | loss=29.2808 lr=0.000539
+Step 250/406 | loss=29.0943 lr=0.000536
+Step 300/406 | loss=28.8562 lr=0.000533
+Step 350/406 | loss=28.9991 lr=0.000530
+Step 400/406 | loss=29.0180 lr=0.000527
+Timing (first 30 train batches) | data=0.043828s infer=0.256674s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 29/60 | train_loss=28.9893 val_loss=4.8442
+Step 50/406 | loss=27.9198 lr=0.000523
+Step 100/406 | loss=28.7763 lr=0.000520
+Step 150/406 | loss=28.8054 lr=0.000517
+Step 200/406 | loss=29.1443 lr=0.000513
+Step 250/406 | loss=29.0946 lr=0.000510
+Step 300/406 | loss=28.9941 lr=0.000507
+Step 350/406 | loss=28.9236 lr=0.000504
+Step 400/406 | loss=28.9749 lr=0.000500
+Timing (first 30 train batches) | data=0.051883s infer=0.256906s
+[VAL] supcon_loss=4.8442
+[TSNE] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE_contrastive/tsne_val_epoch_030.png
+[RESULTS] Epoch 30/60 | train_loss=28.9823 val_loss=4.8442
+Step 50/406 | loss=29.8789 lr=0.000497
+Step 100/406 | loss=29.7364 lr=0.000494
+Step 150/406 | loss=29.6422 lr=0.000490
+Step 200/406 | loss=29.5527 lr=0.000487
+Step 250/406 | loss=29.5265 lr=0.000484
+Step 300/406 | loss=29.6064 lr=0.000481
+Step 350/406 | loss=29.5679 lr=0.000477
+Step 400/406 | loss=29.3470 lr=0.000474
+Timing (first 30 train batches) | data=0.051831s infer=0.254989s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 31/60 | train_loss=29.3785 val_loss=4.8442
+Step 50/406 | loss=28.8945 lr=0.000471
+Step 100/406 | loss=28.8325 lr=0.000467
+Step 150/406 | loss=29.0055 lr=0.000464
+Step 200/406 | loss=28.6919 lr=0.000461
+Step 250/406 | loss=28.7769 lr=0.000458
+Step 300/406 | loss=28.8626 lr=0.000455
+Step 350/406 | loss=28.9790 lr=0.000451
+Step 400/406 | loss=28.8994 lr=0.000448
+Timing (first 30 train batches) | data=0.042756s infer=0.257324s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 32/60 | train_loss=28.8829 val_loss=4.8442
+Step 50/406 | loss=29.1735 lr=0.000445
+Step 100/406 | loss=29.2649 lr=0.000441
+Step 150/406 | loss=29.2011 lr=0.000438
+Step 200/406 | loss=29.1901 lr=0.000435
+Step 250/406 | loss=29.2062 lr=0.000432
+Step 300/406 | loss=29.1737 lr=0.000429
+Step 350/406 | loss=29.1202 lr=0.000425
+Step 400/406 | loss=29.1798 lr=0.000422
+Timing (first 30 train batches) | data=0.052581s infer=0.256941s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 33/60 | train_loss=29.1621 val_loss=4.8442
+Step 50/406 | loss=28.7356 lr=0.000419
+Step 100/406 | loss=29.4958 lr=0.000415
+Step 150/406 | loss=29.2994 lr=0.000412
+Step 200/406 | loss=29.1211 lr=0.000409
+Step 250/406 | loss=29.0811 lr=0.000406
+Step 300/406 | loss=29.2148 lr=0.000403
+Step 350/406 | loss=29.3139 lr=0.000400
+Step 400/406 | loss=29.4357 lr=0.000396
+Timing (first 30 train batches) | data=0.039709s infer=0.256396s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 34/60 | train_loss=29.4261 val_loss=4.8442
+Step 50/406 | loss=29.1980 lr=0.000393
+Step 100/406 | loss=28.6571 lr=0.000390
+Step 150/406 | loss=29.0987 lr=0.000387
+Step 200/406 | loss=29.0407 lr=0.000383
+Step 250/406 | loss=29.0445 lr=0.000380
+Step 300/406 | loss=29.0394 lr=0.000377
+Step 350/406 | loss=28.9668 lr=0.000374
+Step 400/406 | loss=28.8393 lr=0.000371
+Timing (first 30 train batches) | data=0.047240s infer=0.255760s
+[VAL] supcon_loss=4.8442
+[TSNE] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE_contrastive/tsne_val_epoch_035.png
+[RESULTS] Epoch 35/60 | train_loss=28.8403 val_loss=4.8442
+Step 50/406 | loss=28.4821 lr=0.000367
+Step 100/406 | loss=28.8053 lr=0.000364
+Step 150/406 | loss=28.6014 lr=0.000361
+Step 200/406 | loss=28.4729 lr=0.000358
+Step 250/406 | loss=28.6725 lr=0.000355
+Step 300/406 | loss=28.4918 lr=0.000352
+Step 350/406 | loss=28.4203 lr=0.000349
+Step 400/406 | loss=28.4496 lr=0.000346
+Timing (first 30 train batches) | data=0.041687s infer=0.255973s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 36/60 | train_loss=28.5087 val_loss=4.8442
+Step 50/406 | loss=28.2171 lr=0.000342
+Step 100/406 | loss=28.3476 lr=0.000339
+Step 150/406 | loss=28.4417 lr=0.000336
+Step 200/406 | loss=28.5234 lr=0.000333
+Step 250/406 | loss=28.4608 lr=0.000330
+Step 300/406 | loss=28.4467 lr=0.000327
+Step 350/406 | loss=28.4912 lr=0.000324
+Step 400/406 | loss=28.4997 lr=0.000321
+Timing (first 30 train batches) | data=0.045060s infer=0.255625s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 37/60 | train_loss=28.5161 val_loss=4.8442
+Step 50/406 | loss=28.7818 lr=0.000318
+Step 100/406 | loss=28.9647 lr=0.000315
+Step 150/406 | loss=29.2164 lr=0.000312
+Step 200/406 | loss=29.0367 lr=0.000309
+Step 250/406 | loss=29.0309 lr=0.000306
+Step 300/406 | loss=28.9636 lr=0.000303
+Step 350/406 | loss=28.8343 lr=0.000300
+Step 400/406 | loss=28.6386 lr=0.000297
+Timing (first 30 train batches) | data=0.045446s infer=0.255711s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 38/60 | train_loss=28.6482 val_loss=4.8442
+Step 50/406 | loss=29.2493 lr=0.000294
+Step 100/406 | loss=29.3223 lr=0.000291
+Step 150/406 | loss=29.5174 lr=0.000288
+Step 200/406 | loss=28.9621 lr=0.000285
+Step 250/406 | loss=28.7813 lr=0.000282
+Step 300/406 | loss=28.9368 lr=0.000279
+Step 350/406 | loss=28.9752 lr=0.000276
+Step 400/406 | loss=29.0858 lr=0.000273
+Timing (first 30 train batches) | data=0.050194s infer=0.256416s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 39/60 | train_loss=29.0507 val_loss=4.8442
+Step 50/406 | loss=29.5069 lr=0.000270
+Step 100/406 | loss=29.3649 lr=0.000267
+Step 150/406 | loss=29.1556 lr=0.000264
+Step 200/406 | loss=28.9055 lr=0.000262
+Step 250/406 | loss=28.8619 lr=0.000259
+Step 300/406 | loss=29.0761 lr=0.000256
+Step 350/406 | loss=29.0143 lr=0.000253
+Step 400/406 | loss=28.9625 lr=0.000250
+Timing (first 30 train batches) | data=0.042990s infer=0.256954s
+[VAL] supcon_loss=4.8442
+[TSNE] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE_contrastive/tsne_val_epoch_040.png
+[RESULTS] Epoch 40/60 | train_loss=29.0033 val_loss=4.8442
+Step 50/406 | loss=28.5108 lr=0.000247
+Step 100/406 | loss=28.8729 lr=0.000244
+Step 150/406 | loss=28.9634 lr=0.000242
+Step 200/406 | loss=28.5836 lr=0.000239
+Step 250/406 | loss=28.8339 lr=0.000236
+Step 300/406 | loss=28.8935 lr=0.000233
+Step 350/406 | loss=28.8315 lr=0.000231
+Step 400/406 | loss=28.9215 lr=0.000228
+Timing (first 30 train batches) | data=0.044209s infer=0.253978s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 41/60 | train_loss=28.9253 val_loss=4.8442
+Step 50/406 | loss=29.3395 lr=0.000225
+Step 100/406 | loss=29.5464 lr=0.000222
+Step 150/406 | loss=29.4627 lr=0.000220
+Step 200/406 | loss=29.3684 lr=0.000217
+Step 250/406 | loss=28.9852 lr=0.000214
+Step 300/406 | loss=29.1566 lr=0.000212
+Step 350/406 | loss=29.0861 lr=0.000209
+Step 400/406 | loss=29.0311 lr=0.000206
+Timing (first 30 train batches) | data=0.041977s infer=0.255808s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 42/60 | train_loss=28.9929 val_loss=4.8442
+Step 50/406 | loss=28.4996 lr=0.000204
+Step 100/406 | loss=28.6158 lr=0.000201
+Step 150/406 | loss=28.6489 lr=0.000198
+Step 200/406 | loss=28.4677 lr=0.000196
+Step 250/406 | loss=28.4929 lr=0.000193
+Step 300/406 | loss=28.5315 lr=0.000191
+Step 350/406 | loss=28.6213 lr=0.000188
+Step 400/406 | loss=28.5872 lr=0.000186
+Timing (first 30 train batches) | data=0.041697s infer=0.256754s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 43/60 | train_loss=28.5825 val_loss=4.8442
+Step 50/406 | loss=29.6659 lr=0.000183
+Step 100/406 | loss=29.3138 lr=0.000180
+Step 150/406 | loss=29.5868 lr=0.000178
+Step 200/406 | loss=29.7025 lr=0.000175
+Step 250/406 | loss=29.3848 lr=0.000173
+Step 300/406 | loss=29.2450 lr=0.000171
+Step 350/406 | loss=29.0885 lr=0.000168
+Step 400/406 | loss=28.8467 lr=0.000166
+Timing (first 30 train batches) | data=0.043698s infer=0.256062s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 44/60 | train_loss=28.8286 val_loss=4.8442
+Step 50/406 | loss=27.7119 lr=0.000163
+Step 100/406 | loss=27.7226 lr=0.000161
+Step 150/406 | loss=28.3075 lr=0.000158
+Step 200/406 | loss=28.4792 lr=0.000156
+Step 250/406 | loss=28.2004 lr=0.000154
+Step 300/406 | loss=28.3961 lr=0.000151
+Step 350/406 | loss=28.4534 lr=0.000149
+Step 400/406 | loss=28.5161 lr=0.000147
+Timing (first 30 train batches) | data=0.054625s infer=0.255770s
+[VAL] supcon_loss=4.8442
+[TSNE] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE_contrastive/tsne_val_epoch_045.png
+[RESULTS] Epoch 45/60 | train_loss=28.5285 val_loss=4.8442
+Step 50/406 | loss=28.7116 lr=0.000144
+Step 100/406 | loss=27.9932 lr=0.000142
+Step 150/406 | loss=28.3291 lr=0.000140
+Step 200/406 | loss=28.4199 lr=0.000137
+Step 250/406 | loss=28.3198 lr=0.000135
+Step 300/406 | loss=28.2606 lr=0.000133
+Step 350/406 | loss=28.2429 lr=0.000131
+Step 400/406 | loss=28.3576 lr=0.000129
+Timing (first 30 train batches) | data=0.053388s infer=0.254682s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 46/60 | train_loss=28.3440 val_loss=4.8442
+Step 50/406 | loss=28.3206 lr=0.000126
+Step 100/406 | loss=28.5024 lr=0.000124
+Step 150/406 | loss=28.9933 lr=0.000122
+Step 200/406 | loss=28.7051 lr=0.000120
+Step 250/406 | loss=28.9113 lr=0.000118
+Step 300/406 | loss=28.8932 lr=0.000116
+Step 350/406 | loss=28.9220 lr=0.000114
+Step 400/406 | loss=28.8241 lr=0.000112
+Timing (first 30 train batches) | data=0.042323s infer=0.257787s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 47/60 | train_loss=28.8079 val_loss=4.8442
+Step 50/406 | loss=28.8357 lr=0.000109
+Step 100/406 | loss=28.8577 lr=0.000107
+Step 150/406 | loss=29.0485 lr=0.000105
+Step 200/406 | loss=28.9465 lr=0.000103
+Step 250/406 | loss=28.9433 lr=0.000101
+Step 300/406 | loss=28.6792 lr=0.000100
+Step 350/406 | loss=28.8013 lr=0.000098
+Step 400/406 | loss=28.7752 lr=0.000096
+Timing (first 30 train batches) | data=0.046403s infer=0.256354s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 48/60 | train_loss=28.7792 val_loss=4.8442
+Step 50/406 | loss=29.3988 lr=0.000094
+Step 100/406 | loss=28.5653 lr=0.000092
+Step 150/406 | loss=28.8310 lr=0.000090
+Step 200/406 | loss=28.5466 lr=0.000088
+Step 250/406 | loss=28.5209 lr=0.000086
+Step 300/406 | loss=28.5692 lr=0.000084
+Step 350/406 | loss=28.4961 lr=0.000083
+Step 400/406 | loss=28.4969 lr=0.000081
+Timing (first 30 train batches) | data=0.046377s infer=0.256094s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 49/60 | train_loss=28.5148 val_loss=4.8442
+Step 50/406 | loss=28.5994 lr=0.000079
+Step 100/406 | loss=28.3611 lr=0.000077
+Step 150/406 | loss=28.3685 lr=0.000075
+Step 200/406 | loss=28.5820 lr=0.000074
+Step 250/406 | loss=28.7966 lr=0.000072
+Step 300/406 | loss=28.7208 lr=0.000070
+Step 350/406 | loss=28.7308 lr=0.000069
+Step 400/406 | loss=28.8159 lr=0.000067
+Timing (first 30 train batches) | data=0.045087s infer=0.256641s
+[VAL] supcon_loss=4.8442
+[TSNE] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE_contrastive/tsne_val_epoch_050.png
+[RESULTS] Epoch 50/60 | train_loss=28.7794 val_loss=4.8442
+Step 50/406 | loss=29.2161 lr=0.000065
+Step 100/406 | loss=28.9679 lr=0.000064
+Step 150/406 | loss=28.9371 lr=0.000062
+Step 200/406 | loss=29.0749 lr=0.000061
+Step 250/406 | loss=29.0988 lr=0.000059
+Step 300/406 | loss=28.9751 lr=0.000058
+Step 350/406 | loss=28.7637 lr=0.000056
+Step 400/406 | loss=28.8270 lr=0.000055
+Timing (first 30 train batches) | data=0.048081s infer=0.256783s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 51/60 | train_loss=28.7939 val_loss=4.8442
+Step 50/406 | loss=27.9871 lr=0.000053
+Step 100/406 | loss=27.8451 lr=0.000052
+Step 150/406 | loss=27.9699 lr=0.000050
+Step 200/406 | loss=28.1829 lr=0.000049
+Step 250/406 | loss=28.0999 lr=0.000047
+Step 300/406 | loss=28.0201 lr=0.000046
+Step 350/406 | loss=28.0551 lr=0.000045
+Step 400/406 | loss=27.9980 lr=0.000043
+Timing (first 30 train batches) | data=0.042885s infer=0.258106s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 52/60 | train_loss=28.0041 val_loss=4.8442
+Step 50/406 | loss=27.8054 lr=0.000042
+Step 100/406 | loss=28.4206 lr=0.000041
+Step 150/406 | loss=28.5374 lr=0.000039
+Step 200/406 | loss=28.8619 lr=0.000038
+Step 250/406 | loss=28.6031 lr=0.000037
+Step 300/406 | loss=28.4617 lr=0.000036
+Step 350/406 | loss=28.5261 lr=0.000035
+Step 400/406 | loss=28.5441 lr=0.000033
+Timing (first 30 train batches) | data=0.045738s infer=0.256744s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 53/60 | train_loss=28.4976 val_loss=4.8442
+Step 50/406 | loss=29.3038 lr=0.000032
+Step 100/406 | loss=29.1038 lr=0.000031
+Step 150/406 | loss=28.3379 lr=0.000030
+Step 200/406 | loss=28.2020 lr=0.000029
+Step 250/406 | loss=28.3707 lr=0.000028
+Step 300/406 | loss=28.3392 lr=0.000027
+Step 350/406 | loss=28.4036 lr=0.000026
+Step 400/406 | loss=28.4301 lr=0.000025
+Timing (first 30 train batches) | data=0.058854s infer=0.255597s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 54/60 | train_loss=28.4638 val_loss=4.8442
+Step 50/406 | loss=29.3773 lr=0.000023
+Step 100/406 | loss=29.3745 lr=0.000023
+Step 150/406 | loss=29.2336 lr=0.000022
+Step 200/406 | loss=29.3096 lr=0.000021
+Step 250/406 | loss=29.2475 lr=0.000020
+Step 300/406 | loss=29.1513 lr=0.000019
+Step 350/406 | loss=29.0342 lr=0.000018
+Step 400/406 | loss=28.9707 lr=0.000017
+Timing (first 30 train batches) | data=0.040557s infer=0.255944s
+[VAL] supcon_loss=4.8442
+[TSNE] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE_contrastive/tsne_val_epoch_055.png
+[RESULTS] Epoch 55/60 | train_loss=28.9513 val_loss=4.8442
+Step 50/406 | loss=28.0996 lr=0.000016
+Step 100/406 | loss=27.8790 lr=0.000015
+Step 150/406 | loss=27.8695 lr=0.000015
+Step 200/406 | loss=27.8788 lr=0.000014
+Step 250/406 | loss=27.8733 lr=0.000013
+Step 300/406 | loss=27.9615 lr=0.000012
+Step 350/406 | loss=27.9806 lr=0.000012
+Step 400/406 | loss=28.2521 lr=0.000011
+Timing (first 30 train batches) | data=0.050189s infer=0.255742s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 56/60 | train_loss=28.2298 val_loss=4.8442
+Step 50/406 | loss=29.5988 lr=0.000010
+Step 100/406 | loss=29.3246 lr=0.000010
+Step 150/406 | loss=29.2887 lr=0.000009
+Step 200/406 | loss=28.9997 lr=0.000008
+Step 250/406 | loss=28.9017 lr=0.000008
+Step 300/406 | loss=29.0022 lr=0.000007
+Step 350/406 | loss=28.7676 lr=0.000007
+Step 400/406 | loss=28.7661 lr=0.000006
+Timing (first 30 train batches) | data=0.051376s infer=0.256281s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 57/60 | train_loss=28.7855 val_loss=4.8442
+Step 50/406 | loss=29.1312 lr=0.000006
+Step 100/406 | loss=28.7647 lr=0.000005
+Step 150/406 | loss=28.6563 lr=0.000005
+Step 200/406 | loss=28.6287 lr=0.000004
+Step 250/406 | loss=28.6324 lr=0.000004
+Step 300/406 | loss=28.8145 lr=0.000003
+Step 350/406 | loss=28.8956 lr=0.000003
+Step 400/406 | loss=28.9502 lr=0.000003
+Timing (first 30 train batches) | data=0.046270s infer=0.256454s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 58/60 | train_loss=28.9090 val_loss=4.8442
+Step 50/406 | loss=27.7641 lr=0.000002
+Step 100/406 | loss=27.9528 lr=0.000002
+Step 150/406 | loss=28.0946 lr=0.000002
+Step 200/406 | loss=28.2310 lr=0.000002
+Step 250/406 | loss=28.3236 lr=0.000001
+Step 300/406 | loss=28.2550 lr=0.000001
+Step 350/406 | loss=28.3371 lr=0.000001
+Step 400/406 | loss=28.2841 lr=0.000001
+Timing (first 30 train batches) | data=0.051871s infer=0.255813s
+[VAL] supcon_loss=4.8442
+[RESULTS] Epoch 59/60 | train_loss=28.2676 val_loss=4.8442
+Step 50/406 | loss=29.0609 lr=0.000001
+Step 100/406 | loss=28.6640 lr=0.000000
+Step 150/406 | loss=28.6525 lr=0.000000
+Step 200/406 | loss=28.5437 lr=0.000000
+Step 250/406 | loss=28.4861 lr=0.000000
+Step 300/406 | loss=28.6442 lr=0.000000
+Step 350/406 | loss=28.5720 lr=0.000000
+Step 400/406 | loss=28.5134 lr=0.000000
+Timing (first 30 train batches) | data=0.046080s infer=0.255731s
+[VAL] supcon_loss=4.8442
+[TSNE] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE_contrastive/tsne_val_epoch_060.png
+[RESULTS] Epoch 60/60 | train_loss=28.5212 val_loss=4.8442
+Checkpoint saved: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/contrastive_pretraining/last.pt
+[FINAL] Best epoch: 6 | best_loss=4.8442

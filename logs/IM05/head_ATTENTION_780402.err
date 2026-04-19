@@ -1,0 +1,52 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/main.py", line 409, in <module>
+    main(config)
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/main.py", line 402, in main
+    run_single_train(device, model_config, data_config, training_config)
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/main.py", line 215, in run_single_train
+    trainer = Trainer(
+              ^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/utils/trainer.py", line 61, in __init__
+    self.model(x)
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/models/model.py", line 50, in forward
+    x = self.head(x)
+        ^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/models/head.py", line 49, in forward
+    return self.head(x)
+           ^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/models/head.py", line 125, in forward
+    x = self.proj(x)  # [B, 256, H, W]
+        ^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/conv.py", line 553, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/conv.py", line 548, in _conv_forward
+    return F.conv2d(
+           ^^^^^^^^^
+RuntimeError: Expected 3D (unbatched) or 4D (batched) input to conv2d, but got input of size: [64, 768]

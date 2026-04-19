@@ -20,10 +20,13 @@ from .preprocess import CLAHETransform, extract_wbc_crop2, AddGaussianNoise
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
 
+# img_size = (224, 224)
+img_size = (294, 294)
+
 train_tfms = transforms.Compose([
     transforms.ToPILImage(),
     # transforms.Resize((300, 300)),
-    transforms.Resize((294, 294)),
+    transforms.Resize(img_size),
 
     # CLAHETransform(p=0.5), 
 
@@ -59,7 +62,7 @@ train_tfms = transforms.Compose([
 train_tfms = transforms.Compose([
     transforms.ToPILImage(),
     # transforms.Resize((300, 300)),
-    transforms.Resize((294, 294)),
+    transforms.Resize(img_size),
     transforms.RandomHorizontalFlip(p=0.5),
     transforms.RandomVerticalFlip(p=0.5),
     transforms.RandomRotation(degrees=180),
@@ -90,7 +93,7 @@ train_tfms = transforms.Compose([
 val_tfms = transforms.Compose([
     transforms.ToPILImage(),
     # transforms.Resize((300, 300)),
-    transforms.Resize((294, 294)),
+    transforms.Resize(img_size),
     transforms.ToTensor(),
     transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
 ])
@@ -98,7 +101,7 @@ val_tfms = transforms.Compose([
 tta_tfms = transforms.Compose([
     transforms.ToPILImage(),
     # transforms.Resize((300, 300)),
-    transforms.Resize((294, 294)),
+    transforms.Resize(img_size),
     transforms.RandomHorizontalFlip(p=0.5),
     transforms.RandomVerticalFlip(p=0.5),
     transforms.RandomRotation(20),
@@ -172,7 +175,7 @@ class IM05_Dataset(Dataset):
 
     def _preprocess_image(self, img: np.ndarray) -> torch.Tensor:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        # img = extract_wbc_crop2(img, resize_mode="resize", output_size=(294, 294))
+        # img = extract_wbc_crop2(img, resize_mode="resize", output_size=img_size)
         img = self.transform(img)
         return img.contiguous()
 

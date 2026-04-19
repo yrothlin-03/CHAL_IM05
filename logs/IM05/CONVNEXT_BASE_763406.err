@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/tests.py", line 228, in <module>
+    main_bis(config)
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/tests.py", line 146, in main_bis
+    model = Model(**model_config).to(device)
+            ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/models/model.py", line 38, in __init__
+    self.head = QUERY_ATTENTION_HEAD(
+                ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/models/head.py", line 141, in __init__
+    self.attn = nn.MultiheadAttention(
+                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/activation.py", line 1191, in __init__
+    assert self.head_dim * num_heads == self.embed_dim, (
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: embed_dim must be divisible by num_heads

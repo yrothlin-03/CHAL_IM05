@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 
-class HEAD(nn.Module):
+class LINEAR(nn.Module):
     def __init__(self, n_classes: int, in_dim: int, n_layers: int, p: float = 0.3):
         super().__init__()
 
@@ -10,7 +10,7 @@ class HEAD(nn.Module):
         dim = in_dim
 
         for i in range(n_layers - 1):
-            next_dim = max(dim // 2, n_classes)  
+            next_dim = max(dim // 2, n_classes)
             layers.append(nn.Linear(dim, next_dim))
             layers.append(nn.ReLU())
             layers.append(nn.Dropout(p=p))
@@ -22,28 +22,32 @@ class HEAD(nn.Module):
 
     def forward(self, x):
         return self.head(x)
-    
 
 
-
-class HEAD2(nn.Module):
-    def __init__(self, n_classes: int, in_dim: int, hidden_dim: int = 512, p: float = 0.3):
+class HEAD(nn.Module):
+    def __init__(self, head_name: str, n_classes: int, in_dim: int, hidden_dim: int = 512, p: float = 0.3):
         super().__init__()
-        self.head = nn.Sequential(
-            nn.Linear(in_dim, hidden_dim),
-            nn.LayerNorm(hidden_dim),
-            nn.GELU(),
-            nn.Dropout(p),
-            nn.Linear(hidden_dim, n_classes),
-        )
+        self.head = self._get_head(head_name, n_classes, in_dim, hidden_dim, p)
+
+    def _get_head(self, head_name: str, n_classes: int, in_dim: int, hidden_dim: int, p: float):
+        if head_name == "LINEAR":
+            return LINEAR(n_classes, in_dim, n_layers=3, p=p)
+        elif head_name == "LINEAR2":
+            return LINEAR2(n_classes, in_dim, hidden_dims=(hidden_dim, hidden_dim // 2), p=p)
+        elif head_name == "CNN":
+            return CNN(in_dim=in_dim, num_classes=n_classes, dropout=p)
+        elif head_name == "ATTENTION":
+            return TRANSFORMER(in_dim=in_dim, n_classes=n_classes)
+        elif head_name == "QUERY":
+            return QUERY(n_classes=n_classes, in_dim=in_dim, d_model=256, n_queries=4, n_heads=8, p=p)
+        else:
+            raise ValueError(f"Unknown head name: {head_name}")
 
     def forward(self, x):
         return self.head(x)
-    
 
-    
 
-class HEAD3(nn.Module):
+class LINEAR2(nn.Module):
     def __init__(self, n_classes: int, in_dim: int, hidden_dims=(512, 256), p: float = 0.3):
         super().__init__()
 
@@ -63,27 +67,21 @@ class HEAD3(nn.Module):
 
     def forward(self, x):
         return self.head(x)
-    
 
 
-
-class CNN_HEAD(nn.Module):
-    def __init__(self, in_channels: int, num_classes: int = 13, dropout: float = 0.5):
+class CNN(nn.Module):
+    def __init__(self, in_dim: int, num_classes: int = 13, dropout: float = 0.5):
         super().__init__()
         self.features = nn.Sequential(
-            nn.Conv2d(in_channels, 256, kernel_size=3, padding=1),
+            nn.Linear(in_dim, 256),
             nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Dropout2d(dropout * 0.5),
-
-            nn.Conv2d(256, 128, kernel_size=3, padding=1),
+            nn.Dropout(dropout * 0.5),
+            nn.Linear(256, 128),
             nn.ReLU(),
-            nn.AdaptiveAvgPool2d((1, 1)),
-            nn.Dropout2d(dropout * 0.5),
+            nn.Dropout(dropout * 0.5),
         )
 
         self.classifier = nn.Sequential(
-            nn.Flatten(),
             nn.Linear(128, 128),
             nn.ReLU(),
             nn.Dropout(dropout),
@@ -96,13 +94,10 @@ class CNN_HEAD(nn.Module):
         return x
 
 
-
-
-
-class TRANSFORMER_HEAD(nn.Module):
-    def __init__(self, in_channels, n_classes):
+class TRANSFORMER(nn.Module):
+    def __init__(self, in_dim, n_classes):
         super().__init__()
-        self.proj = nn.Conv2d(in_channels, 256, 1)
+        self.proj = nn.Linear(in_dim, 256)
 
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=256,
@@ -114,18 +109,13 @@ class TRANSFORMER_HEAD(nn.Module):
         self.cls = nn.Linear(256, n_classes)
 
     def forward(self, x):
-        x = self.proj(x)  # [B, 256, H, W]
-        B, C, H, W = x.shape
-        x = x.flatten(2).transpose(1, 2)  # 
-
+        x = self.proj(x).unsqueeze(1)
         x = self.transformer(x)
         x = x.mean(dim=1)
-
         return self.cls(x)
 
 
-
-class QUERY_ATTENTION_HEAD(nn.Module):
+class QUERY(nn.Module):
     def __init__(
         self,
         n_classes: int,

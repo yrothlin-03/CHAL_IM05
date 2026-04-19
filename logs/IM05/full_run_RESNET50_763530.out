@@ -1,0 +1,47 @@
+--------------------------------------------------------------------------------
+BACKBONE: RESNET_50
+MODE: training
+DEVICE: cuda
+--------------------------------------------------------------------------------
+Training with 10-fold cross-validation...
+================================================================================
+FOLD 1/10
+================================================================================
+--------------------------------------------------------------------------------
+MODEL INFORMATIONS
+Backbone         : RESNET_50
+Feature dim      : 2048
+Backbone params  : 23,508,032
+Head params      : 26,637
+Total params     : 23,534,669
+Trainable params : 23,534,669
+Frozen backbone  : False
+--------------------------------------------------------------------------------
+[DATALOADER]: Using grouped KFOLD
+[DATALOADER] Train distribution: [11713, 7291, 2471, 775, 374, 330, 351, 324, 397, 102, 1811, 62, 9]
+[DATALOADER] Val distribution  : [1302, 810, 275, 86, 41, 36, 40, 36, 44, 12, 201, 6, 2]
+[DATALOADER]: Using weighted sampling
+[DATALOADER]: Using TTA
+Successfully loaded data with sizes: train=26010, val=2891, test=N/A
+Validation set distribution: {0: 1302, 1: 810, 2: 275, 3: 86, 4: 41, 5: 36, 6: 40, 7: 36, 8: 44, 9: 12, 10: 201, 11: 6, 12: 2}
+Checkpoint directory: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/tests/fold_0
+Trainer config: {'save_ckpt': True, 'ckpt_dir': '/home/infres/yrothlin-24/CHAL_IM05/checkpoints/tests/fold_0', 'ckpt_every': 1, 'resume_from': '/home/infres/yrothlin-24/CHAL_IM05/checkpoints/tests/best.pt', 'resume': True, 'resume_from_pretrained': '/home/infres/yrothlin-24/CHAL_IM05/checkpoints/contrastive_pretraining/best.pt', 'resume_pretrained': False, 'monitor': 'macro_f1', 'use_mixup': True, 'mixup_alpha': 0.2, 'use_cutmix': True, 'cutmix_alpha': 1.0, 'cutmix_prob': 0.5, 'loss': 'focal', 'gamma': 2.0, 'bb_lr': 0.0003, 'head_lr': 0.0003, 'finetune_bb_lr': 0.0001, 'finetune_head_lr': 0.0001, 'weight_decay': 0.0001, 'num_epochs': 40, 'warmup_epochs': 0, 'optimizer': 'adamw', 'scheduler': 'cosine_restarts', 'use_amp': False, 'grad_clip': 1.0, 'log_step': 50, 'tta_rounds': 3, 'label_smoothing': 0.05, 'use_weights': False, 'weights': [0.131885, 0.167166, 0.287122, 0.512761, 0.738572, 0.786459, 0.760902, 0.792986, 0.716469, 1.409173, 0.335431, 1.824578, 4.536496], 'plot_tsne': True, 'tsne_split': 'val', 'tsne_every': 5, 'tsne_max_samples': 1000, 'tsne_perplexity': 30, 'tsne_dir': '/home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE', 'plot_confusion': True, 'confusion_split': 'val', 'confusion_every': 1, 'confusion_normalize': True, 'confusion_dir': '/home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion', 'class_names': ['SNE', 'LY', 'MO', 'EO', 'BA', 'VLY', 'BNE', 'MMY', 'MY', 'PMY', 'BL', 'PC', 'PLY']}
+MODE EVALUATION : False
+Using TTA with : 3 rounds
+TSNE will be plotted every 5 epochs and saved to: /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE
+Confusion matrices will be plotted every 1 epochs and saved to: /home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion
+Backbone frozen at epoch 1. Trainable parameters: 26637
+Backbone unfrozen at epoch 1. Trainable parameters: 23534669
+Step 50/407 | loss=1.6800 bb_lr=0.000100 head_lr=0.000100
+Step 100/407 | loss=1.4609 bb_lr=0.000100 head_lr=0.000100
+Step 150/407 | loss=1.3203 bb_lr=0.000100 head_lr=0.000100
+Step 200/407 | loss=1.2408 bb_lr=0.000100 head_lr=0.000100
+Step 250/407 | loss=1.1803 bb_lr=0.000100 head_lr=0.000100
+Step 300/407 | loss=1.1274 bb_lr=0.000100 head_lr=0.000100
+Step 350/407 | loss=1.0828 bb_lr=0.000100 head_lr=0.000100
+Step 400/407 | loss=1.0407 bb_lr=0.000100 head_lr=0.000100
+Timing (first 30 train batches) | data=0.105801s infer=0.031032s
+[ TRAIN METRICS ]:
+bacc=0.325 macro_f1=0.351
+  best : 0(p0.54 r0.70 f0.61) 1(p0.48 r0.62 f0.54) 3(p0.54 r0.44 f0.48) 2(p0.44 r0.50 f0.47) 10(p0.47 r0.45 f0.46)
+  worst: 12(p0.31 r0.07 f0.11) 7(p0.31 r0.13 f0.19) 6(p0.37 r0.15 f0.21) 5(p0.39 r0.15 f0.21) 9(p0.37 r0.18 f0.24)

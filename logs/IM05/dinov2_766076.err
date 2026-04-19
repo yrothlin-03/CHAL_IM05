@@ -1,0 +1,21 @@
+Using cache found in /home/infres/yrothlin-24/.cache/torch/hub/facebookresearch_dinov2_main
+/home/infres/yrothlin-24/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:51: UserWarning: xFormers is not available (SwiGLU)
+  warnings.warn("xFormers is not available (SwiGLU)")
+/home/infres/yrothlin-24/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:33: UserWarning: xFormers is not available (Attention)
+  warnings.warn("xFormers is not available (Attention)")
+/home/infres/yrothlin-24/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:40: UserWarning: xFormers is not available (Block)
+  warnings.warn("xFormers is not available (Block)")
+/home/infres/yrothlin-24/CHAL_IM05/deep_learning/utils/trainer.py:144: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = torch.cuda.amp.GradScaler(enabled=self.use_amp)
+Using cache found in /home/infres/yrothlin-24/.cache/torch/hub/facebookresearch_dinov2_main
+/home/infres/yrothlin-24/CHAL_IM05/deep_learning/utils/trainer.py:144: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = torch.cuda.amp.GradScaler(enabled=self.use_amp)
+Using cache found in /home/infres/yrothlin-24/.cache/torch/hub/facebookresearch_dinov2_main
+/home/infres/yrothlin-24/CHAL_IM05/deep_learning/utils/trainer.py:144: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = torch.cuda.amp.GradScaler(enabled=self.use_amp)
+Using cache found in /home/infres/yrothlin-24/.cache/torch/hub/facebookresearch_dinov2_main
+/home/infres/yrothlin-24/CHAL_IM05/deep_learning/utils/trainer.py:144: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = torch.cuda.amp.GradScaler(enabled=self.use_amp)
+Using cache found in /home/infres/yrothlin-24/.cache/torch/hub/facebookresearch_dinov2_main
+/home/infres/yrothlin-24/CHAL_IM05/deep_learning/utils/trainer.py:144: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = torch.cuda.amp.GradScaler(enabled=self.use_amp)

@@ -139,6 +139,7 @@ def parse_config() -> Dict[str, Any]:
     parser.add_argument("--model.backbone_name", type=str, required=True)
     parser.add_argument("--model.freeze_backbone", type=str2bool, required=True)
     parser.add_argument("--model.pretrained", type=str2bool, required=True)
+    parser.add_argument("--model.head_name", type=str, required=True)
 
     args = parser.parse_args()
 
@@ -404,5 +405,5 @@ def main(config: Dict[str, Any]) -> None:
 if __name__ == "__main__":
     config_path = Path("/home/infres/yrothlin-24/CHAL_IM05/configs/training.yaml")
     # config = get_config(config_path)
-    config = parse_config()
+    config = parse_config() # for slurm jobs
     main(config)

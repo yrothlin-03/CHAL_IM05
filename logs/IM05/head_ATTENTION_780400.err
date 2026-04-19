@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/main.py", line 409, in <module>
+    main(config)
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/main.py", line 402, in main
+    run_single_train(device, model_config, data_config, training_config)
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/main.py", line 197, in run_single_train
+    model = build_model(model_config, device)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/main.py", line 187, in build_model
+    model = Model(**model_config).to(device)
+            ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/models/model.py", line 19, in __init__
+    self.head = HEAD(head_name=head_name, n_classes=num_classes, in_dim=self.features_shape)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/models/head.py", line 32, in __init__
+    self.head = self._get_head(head_name, n_classes, in_dim, hidden_dim, p)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/models/head.py", line 46, in _get_head
+    raise ValueError(f"Unknown head name: {head_name}")
+ValueError: Unknown head name: ATTENTION

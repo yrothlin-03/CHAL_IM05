@@ -1,0 +1,280 @@
+----------------------------------------------------------------------------------------------------
+MODE : TRAINING
+DEVICE : cuda
+----------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+MODEL INFORMATIONS
+Backbone         : SWIN_V2_T
+Feature dim      : 768
+Backbone params  : 27,582,570
+Head params      : 9,997
+Total params     : 27,592,567
+Trainable params : 27,592,567
+Frozen backbone  : False
+--------------------------------------------------------------------------------
+[DATALOADER]: Using grouped single split
+[DATALOADER] Train distribution: [11713, 7291, 2471, 775, 373, 329, 352, 324, 397, 103, 1811, 61, 10]
+[DATALOADER] Val distribution  : [1302, 810, 275, 86, 42, 37, 39, 36, 44, 11, 201, 7, 1]
+[DATALOADER]: Using weighted sampling
+[DATALOADER]: Using TTA
+Successfully loaded data with sizes : train=26010, val=2891
+Validation set distribution: {0: 1302, 1: 810, 2: 275, 3: 86, 4: 42, 5: 37, 6: 39, 7: 36, 8: 44, 9: 11, 10: 201, 11: 7, 12: 1}
+Trainer config: {'save_ckpt': True, 'ckpt_dir': '/home/infres/yrothlin-24/CHAL_IM05/checkpoints/tests', 'ckpt_every': 1, 'resume_from': '/home/infres/yrothlin-24/CHAL_IM05/checkpoints/tests/best.pt', 'resume': True, 'resume_from_pretrained': '/home/infres/yrothlin-24/CHAL_IM05/checkpoints/contrastive_pretraining/best.pt', 'resume_pretrained': False, 'monitor': 'macro_f1', 'use_mixup': True, 'mixup_alpha': 0.2, 'use_cutmix': True, 'cutmix_alpha': 1.0, 'cutmix_prob': 0.5, 'loss': 'focal', 'gamma': 2.0, 'bb_lr': 0.0003, 'head_lr': 0.0003, 'finetune_bb_lr': 0.0001, 'finetune_head_lr': 0.0001, 'weight_decay': 0.0001, 'num_epochs': 30, 'warmup_epochs': 0, 'optimizer': 'adamw', 'scheduler': 'cosine_restarts', 'use_amp': False, 'grad_clip': 1.0, 'log_step': 50, 'tta_rounds': 3, 'label_smoothing': 0.05, 'use_weights': False, 'weights': [0.131885, 0.167166, 0.287122, 0.512761, 0.738572, 0.786459, 0.760902, 0.792986, 0.716469, 1.409173, 0.335431, 1.824578, 4.536496], 'plot_tsne': True, 'tsne_split': 'val', 'tsne_every': 5, 'tsne_max_samples': 1000, 'tsne_perplexity': 30, 'tsne_dir': '/home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE', 'plot_confusion': True, 'confusion_split': 'val', 'confusion_every': 1, 'confusion_normalize': True, 'confusion_dir': '/home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion', 'class_names': ['SNE', 'LY', 'MO', 'EO', 'BA', 'VLY', 'BNE', 'MMY', 'MY', 'PMY', 'BL', 'PC', 'PLY']}
+MODE EVALUATION : False
+Using TTA with : 3 rounds
+TSNE will be plotted every 5 epochs and saved to: /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE
+Confusion matrices will be plotted every 1 epochs and saved to: /home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion
+Backbone frozen at epoch 1. Trainable parameters: 9997
+Backbone unfrozen at epoch 1. Trainable parameters: 27592567
+Step 50/407 | loss=1.5194 bb_lr=0.000100 head_lr=0.000100
+Step 100/407 | loss=1.3272 bb_lr=0.000100 head_lr=0.000100
+Step 150/407 | loss=1.2145 bb_lr=0.000100 head_lr=0.000100
+Step 200/407 | loss=1.1543 bb_lr=0.000100 head_lr=0.000100
+Step 250/407 | loss=1.1113 bb_lr=0.000100 head_lr=0.000100
+Step 300/407 | loss=1.0779 bb_lr=0.000100 head_lr=0.000100
+Step 350/407 | loss=1.0543 bb_lr=0.000100 head_lr=0.000100
+Step 400/407 | loss=1.0266 bb_lr=0.000100 head_lr=0.000100
+Timing (first 30 train batches) | data=0.031425s infer=0.081781s
+[ TRAIN METRICS ]:
+bacc=0.301 macro_f1=0.319
+  best : 0(p0.55 r0.68 f0.61) 1(p0.47 r0.59 f0.52) 10(p0.44 r0.44 f0.44) 3(p0.47 r0.42 f0.44) 2(p0.40 r0.47 f0.43)
+  worst: 12(p0.44 r0.05 f0.09) 6(p0.25 r0.07 f0.11) 7(p0.25 r0.13 f0.17) 5(p0.31 r0.14 f0.19) 8(p0.29 r0.20 f0.24)
+[ VALIDATION METRICS TTA]:
+Val dist: {0: 1302, 1: 810, 10: 201, 2: 275, 7: 36, 6: 39, 5: 37, 3: 86, 8: 44, 4: 42, 11: 7, 9: 11, 12: 1}
+bacc=0.686 macro_f1=0.616
+  best : 0(p0.98 r0.96 f0.97) 3(p0.98 r0.92 f0.95) 1(p0.95 r0.93 f0.94) 4(p0.95 r0.88 f0.91) 2(p0.86 r0.88 f0.87)
+  worst: 12(p0.14 r1.00 f0.25) 9(p0.24 r0.45 f0.31) 6(p0.27 r0.44 f0.34) 7(p0.33 r0.36 f0.35) 5(p0.34 r0.46 f0.39)
+[CONFUSION] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion/confusion_val_epoch_001_norm.png
+[ RESULTS ] : Epoch 1/30 | train_loss=1.0234 val_loss=0.2481
+New best macro_f1: 0.6156 at epoch 1. Saving checkpoint.
+Checkpoint saved: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/tests/best.pt
+Step 50/407 | loss=0.8443 bb_lr=0.000098 head_lr=0.000098
+Step 100/407 | loss=0.8409 bb_lr=0.000098 head_lr=0.000098
+Step 150/407 | loss=0.7975 bb_lr=0.000098 head_lr=0.000098
+Step 200/407 | loss=0.8030 bb_lr=0.000098 head_lr=0.000098
+Step 250/407 | loss=0.7897 bb_lr=0.000098 head_lr=0.000098
+Step 300/407 | loss=0.7893 bb_lr=0.000098 head_lr=0.000098
+Step 350/407 | loss=0.7775 bb_lr=0.000098 head_lr=0.000098
+Step 400/407 | loss=0.7624 bb_lr=0.000098 head_lr=0.000098
+Timing (first 30 train batches) | data=0.027569s infer=0.082597s
+[ TRAIN METRICS ]:
+bacc=0.422 macro_f1=0.441
+  best : 0(p0.63 r0.70 f0.66) 1(p0.57 r0.63 f0.60) 4(p0.59 r0.57 f0.58) 3(p0.57 r0.57 f0.57) 2(p0.50 r0.54 f0.52)
+  worst: 6(p0.35 r0.19 f0.25) 12(p0.41 r0.21 f0.28) 7(p0.35 r0.26 f0.30) 8(p0.36 r0.32 f0.34) 5(p0.43 r0.29 f0.34)
+[ VALIDATION METRICS TTA]:
+Val dist: {0: 1302, 1: 810, 10: 201, 2: 275, 7: 36, 6: 39, 5: 37, 3: 86, 8: 44, 4: 42, 11: 7, 9: 11, 12: 1}
+bacc=0.677 macro_f1=0.618
+  best : 3(p0.94 r0.98 f0.96) 0(p0.99 r0.91 f0.95) 1(p0.96 r0.91 f0.94) 4(p0.95 r0.88 f0.91) 2(p0.88 r0.84 f0.86)
+  worst: 12(p0.00 r0.00 f0.00) 6(p0.24 r0.59 f0.34) 7(p0.29 r0.58 f0.39) 5(p0.43 r0.43 f0.43) 11(p0.50 r0.43 f0.46)
+[CONFUSION] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion/confusion_val_epoch_002_norm.png
+[ RESULTS ] : Epoch 2/30 | train_loss=0.7614 val_loss=0.2494
+New best macro_f1: 0.6181 at epoch 2. Saving checkpoint.
+Checkpoint saved: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/tests/best.pt
+Step 50/407 | loss=0.7330 bb_lr=0.000090 head_lr=0.000090
+Step 100/407 | loss=0.6995 bb_lr=0.000090 head_lr=0.000090
+Step 150/407 | loss=0.7200 bb_lr=0.000090 head_lr=0.000090
+Step 200/407 | loss=0.7279 bb_lr=0.000090 head_lr=0.000090
+Step 250/407 | loss=0.7272 bb_lr=0.000090 head_lr=0.000090
+Step 300/407 | loss=0.7263 bb_lr=0.000090 head_lr=0.000090
+Step 350/407 | loss=0.7178 bb_lr=0.000090 head_lr=0.000090
+Step 400/407 | loss=0.7206 bb_lr=0.000090 head_lr=0.000090
+Timing (first 30 train batches) | data=0.034747s infer=0.080620s
+[ TRAIN METRICS ]:
+bacc=0.446 macro_f1=0.463
+  best : 0(p0.63 r0.69 f0.66) 1(p0.59 r0.64 f0.61) 4(p0.58 r0.58 f0.58) 3(p0.57 r0.57 f0.57) 2(p0.53 r0.57 f0.55)
+  worst: 6(p0.35 r0.22 f0.27) 7(p0.37 r0.28 f0.32) 12(p0.44 r0.29 f0.35) 8(p0.38 r0.36 f0.37) 9(p0.41 r0.35 f0.38)
+[ VALIDATION METRICS TTA]:
+Val dist: {0: 1302, 1: 810, 10: 201, 2: 275, 7: 36, 6: 39, 5: 37, 3: 86, 8: 44, 4: 42, 11: 7, 9: 11, 12: 1}
+bacc=0.761 macro_f1=0.655
+  best : 0(p0.99 r0.95 f0.97) 3(p0.93 r0.98 f0.95) 4(p0.95 r0.93 f0.94) 1(p0.98 r0.86 f0.91) 2(p0.86 r0.90 f0.88)
+  worst: 11(p0.25 r0.43 f0.32) 6(p0.28 r0.49 f0.36) 5(p0.31 r0.57 f0.40) 9(p0.32 r0.91 f0.48) 7(p0.49 r0.47 f0.48)
+[CONFUSION] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion/confusion_val_epoch_003_norm.png
+[ RESULTS ] : Epoch 3/30 | train_loss=0.7201 val_loss=0.2455
+New best macro_f1: 0.6550 at epoch 3. Saving checkpoint.
+Checkpoint saved: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/tests/best.pt
+Step 50/407 | loss=0.7434 bb_lr=0.000079 head_lr=0.000079
+Step 100/407 | loss=0.7164 bb_lr=0.000079 head_lr=0.000079
+Step 150/407 | loss=0.6993 bb_lr=0.000079 head_lr=0.000079
+Step 200/407 | loss=0.6921 bb_lr=0.000079 head_lr=0.000079
+Step 250/407 | loss=0.6884 bb_lr=0.000079 head_lr=0.000079
+Step 300/407 | loss=0.6864 bb_lr=0.000079 head_lr=0.000079
+Step 350/407 | loss=0.6835 bb_lr=0.000079 head_lr=0.000079
+Step 400/407 | loss=0.6839 bb_lr=0.000079 head_lr=0.000079
+Timing (first 30 train batches) | data=0.027421s infer=0.081409s
+[ TRAIN METRICS ]:
+bacc=0.462 macro_f1=0.477
+  best : 0(p0.63 r0.69 f0.66) 1(p0.58 r0.63 f0.61) 3(p0.58 r0.58 f0.58) 4(p0.56 r0.56 f0.56) 10(p0.55 r0.54 f0.54)
+  worst: 6(p0.38 r0.24 f0.29) 7(p0.36 r0.29 f0.32) 5(p0.42 r0.31 f0.36) 8(p0.39 r0.35 f0.37) 9(p0.46 r0.43 f0.45)
+[ VALIDATION METRICS TTA]:
+Val dist: {0: 1302, 1: 810, 10: 201, 2: 275, 7: 36, 6: 39, 5: 37, 3: 86, 8: 44, 4: 42, 11: 7, 9: 11, 12: 1}
+bacc=0.697 macro_f1=0.651
+  best : 0(p0.98 r0.95 f0.97) 3(p0.99 r0.94 f0.96) 4(p0.97 r0.93 f0.95) 1(p0.93 r0.95 f0.94) 2(p0.91 r0.87 f0.89)
+  worst: 12(p0.00 r0.00 f0.00) 11(p0.33 r0.43 f0.38) 6(p0.28 r0.59 f0.38) 5(p0.35 r0.54 f0.43) 8(p0.57 r0.45 f0.51)
+[CONFUSION] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion/confusion_val_epoch_004_norm.png
+[ RESULTS ] : Epoch 4/30 | train_loss=0.6827 val_loss=0.2063
+Step 50/407 | loss=0.6916 bb_lr=0.000065 head_lr=0.000065
+Step 100/407 | loss=0.6704 bb_lr=0.000065 head_lr=0.000065
+Step 150/407 | loss=0.6762 bb_lr=0.000065 head_lr=0.000065
+Step 200/407 | loss=0.6594 bb_lr=0.000065 head_lr=0.000065
+Step 250/407 | loss=0.6643 bb_lr=0.000065 head_lr=0.000065
+Step 300/407 | loss=0.6817 bb_lr=0.000065 head_lr=0.000065
+Step 350/407 | loss=0.6845 bb_lr=0.000065 head_lr=0.000065
+Step 400/407 | loss=0.6770 bb_lr=0.000065 head_lr=0.000065
+Timing (first 30 train batches) | data=0.030932s infer=0.082637s
+[ TRAIN METRICS ]:
+bacc=0.484 macro_f1=0.498
+  best : 0(p0.64 r0.69 f0.66) 1(p0.58 r0.62 f0.60) 3(p0.59 r0.60 f0.59) 4(p0.59 r0.59 f0.59) 12(p0.62 r0.53 f0.57)
+  worst: 6(p0.38 r0.25 f0.30) 7(p0.37 r0.28 f0.31) 5(p0.46 r0.36 f0.40) 8(p0.43 r0.39 f0.41) 9(p0.44 r0.40 f0.42)
+[ VALIDATION METRICS TTA]:
+Val dist: {0: 1302, 1: 810, 10: 201, 2: 275, 7: 36, 6: 39, 5: 37, 3: 86, 8: 44, 4: 42, 11: 7, 9: 11, 12: 1}
+bacc=0.793 macro_f1=0.744
+  best : 12(p1.00 r1.00 f1.00) 0(p0.99 r0.95 f0.97) 3(p1.00 r0.93 f0.96) 1(p0.97 r0.93 f0.95) 4(p0.93 r0.93 f0.93)
+  worst: 6(p0.27 r0.59 f0.37) 11(p0.50 r0.43 f0.46) 7(p0.42 r0.67 f0.52) 5(p0.52 r0.62 f0.57) 8(p0.57 r0.59 f0.58)
+[TSNE] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE/tsne_val_epoch_005.png
+[CONFUSION] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion/confusion_val_epoch_005_norm.png
+[ RESULTS ] : Epoch 5/30 | train_loss=0.6762 val_loss=0.2080
+New best macro_f1: 0.7439 at epoch 5. Saving checkpoint.
+Checkpoint saved: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/tests/best.pt
+Step 50/407 | loss=0.6515 bb_lr=0.000050 head_lr=0.000050
+Step 100/407 | loss=0.6209 bb_lr=0.000050 head_lr=0.000050
+Step 150/407 | loss=0.6264 bb_lr=0.000050 head_lr=0.000050
+Step 200/407 | loss=0.6132 bb_lr=0.000050 head_lr=0.000050
+Step 250/407 | loss=0.6390 bb_lr=0.000050 head_lr=0.000050
+Step 300/407 | loss=0.6452 bb_lr=0.000050 head_lr=0.000050
+Step 350/407 | loss=0.6382 bb_lr=0.000050 head_lr=0.000050
+Step 400/407 | loss=0.6322 bb_lr=0.000050 head_lr=0.000050
+Timing (first 30 train batches) | data=0.028863s infer=0.081467s
+[ TRAIN METRICS ]:
+bacc=0.502 macro_f1=0.514
+  best : 0(p0.64 r0.69 f0.67) 1(p0.60 r0.64 f0.62) 4(p0.60 r0.59 f0.60) 3(p0.59 r0.59 f0.59) 2(p0.56 r0.58 f0.57)
+  worst: 7(p0.38 r0.30 f0.34) 6(p0.41 r0.30 f0.35) 9(p0.45 r0.42 f0.44) 8(p0.45 r0.43 f0.44) 5(p0.50 r0.40 f0.44)
+[ VALIDATION METRICS TTA]:
+Val dist: {0: 1302, 1: 810, 10: 201, 2: 275, 7: 36, 6: 39, 5: 37, 3: 86, 8: 44, 4: 42, 11: 7, 9: 11, 12: 1}
+bacc=0.810 macro_f1=0.712
+  best : 3(p0.99 r0.98 f0.98) 0(p0.99 r0.92 f0.95) 4(p0.95 r0.95 f0.95) 1(p0.97 r0.93 f0.95) 2(p0.91 r0.88 f0.89)
+  worst: 6(p0.22 r0.69 f0.33) 11(p0.50 r0.43 f0.46) 5(p0.38 r0.62 f0.47) 12(p0.33 r1.00 f0.50) 7(p0.43 r0.72 f0.54)
+[CONFUSION] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion/confusion_val_epoch_006_norm.png
+[ RESULTS ] : Epoch 6/30 | train_loss=0.6319 val_loss=0.2142
+Step 50/407 | loss=0.5517 bb_lr=0.000035 head_lr=0.000035
+Step 100/407 | loss=0.5962 bb_lr=0.000035 head_lr=0.000035
+Step 150/407 | loss=0.6136 bb_lr=0.000035 head_lr=0.000035
+Step 200/407 | loss=0.6142 bb_lr=0.000035 head_lr=0.000035
+Step 250/407 | loss=0.6094 bb_lr=0.000035 head_lr=0.000035
+Step 300/407 | loss=0.6158 bb_lr=0.000035 head_lr=0.000035
+Step 350/407 | loss=0.6203 bb_lr=0.000035 head_lr=0.000035
+Step 400/407 | loss=0.6149 bb_lr=0.000035 head_lr=0.000035
+Timing (first 30 train batches) | data=0.034552s infer=0.081787s
+[ TRAIN METRICS ]:
+bacc=0.474 macro_f1=0.484
+  best : 0(p0.62 r0.66 f0.64) 1(p0.58 r0.61 f0.60) 4(p0.57 r0.58 f0.57) 3(p0.56 r0.57 f0.57) 2(p0.52 r0.55 f0.54)
+  worst: 6(p0.38 r0.26 f0.31) 7(p0.38 r0.31 f0.34) 5(p0.43 r0.34 f0.38) 8(p0.41 r0.37 f0.39) 9(p0.46 r0.43 f0.44)
+[ VALIDATION METRICS TTA]:
+Val dist: {0: 1302, 1: 810, 10: 201, 2: 275, 7: 36, 6: 39, 5: 37, 3: 86, 8: 44, 4: 42, 11: 7, 9: 11, 12: 1}
+bacc=0.797 macro_f1=0.715
+  best : 3(p1.00 r0.95 f0.98) 4(p0.98 r0.98 f0.98) 0(p0.99 r0.95 f0.97) 1(p0.96 r0.94 f0.95) 2(p0.92 r0.88 f0.90)
+  worst: 11(p0.20 r0.43 f0.27) 6(p0.30 r0.69 f0.42) 12(p0.33 r1.00 f0.50) 7(p0.46 r0.64 f0.53) 5(p0.57 r0.57 f0.57)
+[CONFUSION] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion/confusion_val_epoch_007_norm.png
+[ RESULTS ] : Epoch 7/30 | train_loss=0.6182 val_loss=0.1874
+Step 50/407 | loss=0.5212 bb_lr=0.000021 head_lr=0.000021
+Step 100/407 | loss=0.5799 bb_lr=0.000021 head_lr=0.000021
+Step 150/407 | loss=0.5639 bb_lr=0.000021 head_lr=0.000021
+Step 200/407 | loss=0.5614 bb_lr=0.000021 head_lr=0.000021
+Step 250/407 | loss=0.5778 bb_lr=0.000021 head_lr=0.000021
+Step 300/407 | loss=0.5745 bb_lr=0.000021 head_lr=0.000021
+Step 350/407 | loss=0.5774 bb_lr=0.000021 head_lr=0.000021
+Step 400/407 | loss=0.5712 bb_lr=0.000021 head_lr=0.000021
+Timing (first 30 train batches) | data=0.032552s infer=0.081239s
+[ TRAIN METRICS ]:
+bacc=0.501 macro_f1=0.511
+  best : 0(p0.64 r0.68 f0.66) 1(p0.60 r0.63 f0.61) 3(p0.60 r0.60 f0.60) 4(p0.58 r0.59 f0.59) 2(p0.54 r0.56 f0.55)
+  worst: 6(p0.39 r0.30 f0.34) 7(p0.41 r0.33 f0.37) 8(p0.44 r0.40 f0.42) 5(p0.48 r0.39 f0.43) 9(p0.49 r0.45 f0.47)
+[ VALIDATION METRICS TTA]:
+Val dist: {0: 1302, 1: 810, 10: 201, 2: 275, 7: 36, 6: 39, 5: 37, 3: 86, 8: 44, 4: 42, 11: 7, 9: 11, 12: 1}
+bacc=0.796 macro_f1=0.765
+  best : 12(p1.00 r1.00 f1.00) 3(p0.97 r0.98 f0.97) 0(p0.99 r0.95 f0.97) 1(p0.96 r0.95 f0.95) 4(p0.97 r0.93 f0.95)
+  worst: 6(p0.31 r0.67 f0.42) 11(p0.43 r0.43 f0.43) 5(p0.49 r0.62 f0.55) 8(p0.59 r0.55 f0.56) 7(p0.52 r0.69 f0.60)
+[CONFUSION] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion/confusion_val_epoch_008_norm.png
+[ RESULTS ] : Epoch 8/30 | train_loss=0.5698 val_loss=0.1784
+New best macro_f1: 0.7649 at epoch 8. Saving checkpoint.
+Checkpoint saved: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/tests/best.pt
+Step 50/407 | loss=0.5376 bb_lr=0.000010 head_lr=0.000010
+Step 100/407 | loss=0.5805 bb_lr=0.000010 head_lr=0.000010
+Step 150/407 | loss=0.5846 bb_lr=0.000010 head_lr=0.000010
+Step 200/407 | loss=0.5786 bb_lr=0.000010 head_lr=0.000010
+Step 250/407 | loss=0.5786 bb_lr=0.000010 head_lr=0.000010
+Step 300/407 | loss=0.5743 bb_lr=0.000010 head_lr=0.000010
+Step 350/407 | loss=0.5706 bb_lr=0.000010 head_lr=0.000010
+Step 400/407 | loss=0.5736 bb_lr=0.000010 head_lr=0.000010
+Timing (first 30 train batches) | data=0.030905s infer=0.080424s
+[ TRAIN METRICS ]:
+bacc=0.524 macro_f1=0.533
+  best : 0(p0.66 r0.70 f0.68) 1(p0.62 r0.66 f0.64) 3(p0.60 r0.62 f0.61) 4(p0.60 r0.61 f0.60) 10(p0.58 r0.58 f0.58)
+  worst: 6(p0.43 r0.31 f0.36) 7(p0.42 r0.33 f0.37) 8(p0.47 r0.44 f0.45) 9(p0.49 r0.46 f0.48) 5(p0.53 r0.44 f0.48)
+[ VALIDATION METRICS TTA]:
+Val dist: {0: 1302, 1: 810, 10: 201, 2: 275, 7: 36, 6: 39, 5: 37, 3: 86, 8: 44, 4: 42, 11: 7, 9: 11, 12: 1}
+bacc=0.806 macro_f1=0.765
+  best : 12(p1.00 r1.00 f1.00) 3(p0.99 r0.97 f0.98) 0(p0.99 r0.94 f0.96) 4(p0.98 r0.95 f0.96) 1(p0.96 r0.95 f0.95)
+  worst: 6(p0.29 r0.77 f0.42) 11(p0.43 r0.43 f0.43) 5(p0.55 r0.62 f0.58) 7(p0.52 r0.69 f0.60) 8(p0.64 r0.57 f0.60)
+[CONFUSION] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion/confusion_val_epoch_009_norm.png
+[ RESULTS ] : Epoch 9/30 | train_loss=0.5733 val_loss=0.1875
+Step 50/407 | loss=0.5319 bb_lr=0.000002 head_lr=0.000002
+Step 100/407 | loss=0.5220 bb_lr=0.000002 head_lr=0.000002
+Step 150/407 | loss=0.5430 bb_lr=0.000002 head_lr=0.000002
+Step 200/407 | loss=0.5571 bb_lr=0.000002 head_lr=0.000002
+Step 250/407 | loss=0.5525 bb_lr=0.000002 head_lr=0.000002
+Step 300/407 | loss=0.5483 bb_lr=0.000002 head_lr=0.000002
+Step 350/407 | loss=0.5507 bb_lr=0.000002 head_lr=0.000002
+Step 400/407 | loss=0.5462 bb_lr=0.000002 head_lr=0.000002
+Timing (first 30 train batches) | data=0.030807s infer=0.081721s
+[ TRAIN METRICS ]:
+bacc=0.518 macro_f1=0.529
+  best : 0(p0.65 r0.68 f0.67) 1(p0.60 r0.64 f0.62) 11(p0.61 r0.55 f0.58) 10(p0.58 r0.58 f0.58) 3(p0.58 r0.58 f0.58)
+  worst: 6(p0.43 r0.34 f0.38) 7(p0.44 r0.36 f0.40) 8(p0.47 r0.42 f0.44) 5(p0.52 r0.43 f0.47) 9(p0.49 r0.46 f0.47)
+[ VALIDATION METRICS TTA]:
+Val dist: {0: 1302, 1: 810, 10: 201, 2: 275, 7: 36, 6: 39, 5: 37, 3: 86, 8: 44, 4: 42, 11: 7, 9: 11, 12: 1}
+bacc=0.810 macro_f1=0.752
+  best : 12(p1.00 r1.00 f1.00) 3(p0.98 r0.98 f0.98) 0(p0.99 r0.94 f0.96) 1(p0.96 r0.94 f0.95) 4(p0.97 r0.93 f0.95)
+  worst: 11(p0.30 r0.43 f0.35) 6(p0.30 r0.79 f0.43) 5(p0.52 r0.62 f0.57) 8(p0.64 r0.52 f0.57) 7(p0.54 r0.69 f0.61)
+[TSNE] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/TSNE/tsne_val_epoch_010.png
+[CONFUSION] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion/confusion_val_epoch_010_norm.png
+[ RESULTS ] : Epoch 10/30 | train_loss=0.5492 val_loss=0.1886
+Step 50/407 | loss=0.6353 bb_lr=0.000100 head_lr=0.000100
+Step 100/407 | loss=0.6429 bb_lr=0.000100 head_lr=0.000100
+Step 150/407 | loss=0.6232 bb_lr=0.000100 head_lr=0.000100
+Step 200/407 | loss=0.6348 bb_lr=0.000100 head_lr=0.000100
+Step 250/407 | loss=0.6401 bb_lr=0.000100 head_lr=0.000100
+Step 300/407 | loss=0.6311 bb_lr=0.000100 head_lr=0.000100
+Step 350/407 | loss=0.6337 bb_lr=0.000100 head_lr=0.000100
+Step 400/407 | loss=0.6401 bb_lr=0.000100 head_lr=0.000100
+Timing (first 30 train batches) | data=0.031705s infer=0.081541s
+[ TRAIN METRICS ]:
+bacc=0.499 macro_f1=0.511
+  best : 0(p0.64 r0.70 f0.67) 1(p0.59 r0.63 f0.61) 4(p0.59 r0.60 f0.60) 3(p0.59 r0.59 f0.59) 2(p0.57 r0.58 f0.57)
+  worst: 6(p0.41 r0.28 f0.33) 7(p0.40 r0.31 f0.35) 8(p0.45 r0.42 f0.44) 5(p0.50 r0.40 f0.45) 9(p0.48 r0.44 f0.46)
+[ VALIDATION METRICS TTA]:
+Val dist: {0: 1302, 1: 810, 10: 201, 2: 275, 7: 36, 6: 39, 5: 37, 3: 86, 8: 44, 4: 42, 11: 7, 9: 11, 12: 1}
+bacc=0.784 macro_f1=0.723
+  best : 3(p1.00 r0.95 f0.98) 0(p0.99 r0.95 f0.97) 4(p0.97 r0.93 f0.95) 1(p0.95 r0.94 f0.95) 10(p0.92 r0.85 f0.88)
+  worst: 6(p0.29 r0.77 f0.42) 5(p0.41 r0.54 f0.47) 11(p0.60 r0.43 f0.50) 7(p0.45 r0.61 f0.52) 8(p0.64 r0.52 f0.57)
+[CONFUSION] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion/confusion_val_epoch_011_norm.png
+[ RESULTS ] : Epoch 11/30 | train_loss=0.6414 val_loss=0.2060
+Step 50/407 | loss=0.6401 bb_lr=0.000098 head_lr=0.000098
+Step 100/407 | loss=0.6141 bb_lr=0.000098 head_lr=0.000098
+Step 150/407 | loss=0.6140 bb_lr=0.000098 head_lr=0.000098
+Step 200/407 | loss=0.6023 bb_lr=0.000098 head_lr=0.000098
+Step 250/407 | loss=0.6097 bb_lr=0.000098 head_lr=0.000098
+Step 300/407 | loss=0.6108 bb_lr=0.000098 head_lr=0.000098
+Step 350/407 | loss=0.6012 bb_lr=0.000098 head_lr=0.000098
+Step 400/407 | loss=0.6011 bb_lr=0.000098 head_lr=0.000098
+Timing (first 30 train batches) | data=0.027990s infer=0.082057s
+[ TRAIN METRICS ]:
+bacc=0.491 macro_f1=0.503
+  best : 0(p0.63 r0.68 f0.65) 1(p0.60 r0.63 f0.61) 4(p0.57 r0.57 f0.57) 3(p0.56 r0.58 f0.57) 11(p0.59 r0.53 f0.56)
+  worst: 6(p0.38 r0.29 f0.33) 7(p0.39 r0.33 f0.36) 8(p0.43 r0.38 f0.40) 5(p0.47 r0.39 f0.43) 9(p0.50 r0.46 f0.48)
+[ VALIDATION METRICS TTA]:
+Val dist: {0: 1302, 1: 810, 10: 201, 2: 275, 7: 36, 6: 39, 5: 37, 3: 86, 8: 44, 4: 42, 11: 7, 9: 11, 12: 1}
+bacc=0.768 macro_f1=0.712
+  best : 12(p1.00 r1.00 f1.00) 3(p0.95 r0.98 f0.97) 0(p0.99 r0.92 f0.96) 1(p0.95 r0.94 f0.95) 4(p0.97 r0.86 f0.91)
+  worst: 11(p0.23 r0.43 f0.30) 6(p0.25 r0.67 f0.37) 7(p0.43 r0.36 f0.39) 8(p0.47 r0.57 f0.52) 5(p0.47 r0.59 f0.52)
+[CONFUSION] Saved to /home/infres/yrothlin-24/CHAL_IM05/logs/tests/confusion/confusion_val_epoch_012_norm.png
+[ RESULTS ] : Epoch 12/30 | train_loss=0.6004 val_loss=0.2129

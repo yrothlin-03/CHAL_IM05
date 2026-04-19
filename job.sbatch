@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH -p A100
+#SBATCH -p L40S
 #SBATCH -N 1
 #SBATCH -n 1
 #SBATCH -c 12
 #SBATCH --mem=48G
 #SBATCH --gres=gpu:1
 #SBATCH --time=20:00:00
-#SBATCH --job-name=convnext_tiny_without_contrastive_pretraining
+#SBATCH --job-name=FULL_RUN_CONVNEXT_TINY_CNN
 #SBATCH --output=logs/IM05/%x_%j.out
 #SBATCH --error=logs/IM05/%x_%j.err
 
@@ -79,7 +79,7 @@ python -m deep_learning.main \
   --data.shuffle true \
   --data.num_workers 4 \
   --data.pin_memory true \
-  --data.n_splits 1 \
+  --data.n_splits 5 \
   --data.use_weighted_sampler true \
   --data.use_undersampling false \
   --data.sampler_power 0.5 \
@@ -87,4 +87,5 @@ python -m deep_learning.main \
   --model.num_classes 13 \
   --model.backbone_name CONVNEXT_TINY \
   --model.freeze_backbone false \
-  --model.pretrained true
+  --model.pretrained true \
+  --model.head_name CNN

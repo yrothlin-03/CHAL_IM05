@@ -1,0 +1,60 @@
+Using cache found in /home/infres/yrothlin-24/.cache/torch/hub/facebookresearch_dinov2_main
+/home/infres/yrothlin-24/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:51: UserWarning: xFormers is not available (SwiGLU)
+  warnings.warn("xFormers is not available (SwiGLU)")
+/home/infres/yrothlin-24/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:33: UserWarning: xFormers is not available (Attention)
+  warnings.warn("xFormers is not available (Attention)")
+/home/infres/yrothlin-24/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:40: UserWarning: xFormers is not available (Block)
+  warnings.warn("xFormers is not available (Block)")
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/tests.py", line 228, in <module>
+    main_bis(config)
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/tests.py", line 170, in main_bis
+    trainer = Trainer(
+              ^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/utils/trainer.py", line 61, in __init__
+    self.model(x)
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/models/model.py", line 75, in forward
+    x = self.backbone(x)
+        ^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/models/backbone.py", line 191, in forward
+    x = self.backbone(x)
+        ^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/models/vision_transformer.py", line 349, in forward
+    ret = self.forward_features(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/models/vision_transformer.py", line 261, in forward_features
+    x = self.prepare_tokens_with_masks(x, masks)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/models/vision_transformer.py", line 218, in prepare_tokens_with_masks
+    x = self.patch_embed(x)
+        ^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/patch_embed.py", line 72, in forward
+    assert H % patch_H == 0, f"Input image height {H} is not a multiple of patch height {patch_H}"
+           ^^^^^^^^^^^^^^^^
+AssertionError: Input image height 300 is not a multiple of patch height 14

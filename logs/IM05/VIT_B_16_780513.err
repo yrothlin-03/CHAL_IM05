@@ -1,0 +1,37 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/main.py", line 409, in <module>
+    main(config)
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/main.py", line 402, in main
+    run_single_train(device, model_config, data_config, training_config)
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/main.py", line 197, in run_single_train
+    model = build_model(model_config, device)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/main.py", line 187, in build_model
+    model = Model(**model_config).to(device)
+            ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/models/model.py", line 13, in __init__
+    self.backbone = Backbone(name=backbone_name, pretrained=pretrained)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/models/backbone.py", line 52, in __init__
+    self.features_shape = self._get_features_shape()
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/CHAL_IM05/deep_learning/models/backbone.py", line 165, in _get_features_shape
+    y = self.backbone(x)
+        ^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torchvision/models/vision_transformer.py", line 291, in forward
+    x = self._process_input(x)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torchvision/models/vision_transformer.py", line 271, in _process_input
+    torch._assert(h == self.image_size, f"Wrong image height! Expected {self.image_size} but got {h}!")
+  File "/home/infres/yrothlin-24/.local/share/mamba/envs/IM05/lib/python3.11/site-packages/torch/__init__.py", line 2228, in _assert
+    assert condition, message
+           ^^^^^^^^^
+AssertionError: Wrong image height! Expected 384 but got 224!

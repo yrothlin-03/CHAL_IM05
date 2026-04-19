@@ -912,6 +912,7 @@ class Trainer:
 
 
     def train(self):
+        self.save_backbone_tsne(split=self.tsne_split, epoch=0)
         best_epoch = -1
 
         for epoch in range(1, self.num_epochs + 1):

@@ -363,26 +363,26 @@ def generate_images(
 
 
 if __name__ == "__main__":
-    train_gan(
-        data_dir="/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train",
-        labels_csv="/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train_metadata.csv",
-        target_class="PLY",
-        output_dir="/home/infres/yrothlin-24/CHAL_IM05/gan_wbc_outputs",
-        image_size=256,
-        batch_size=16,
-        epochs=2000,
-        z_dim=256,
-        lr=1e-4,
-        critic_steps=5,
-        lambda_gp=10.0,
-        num_workers=4,
-        use_augmented=True,
-        unique_base_only=False,
-    )
-
-    # generate_images(
-    #     checkpoint_path="/home/infres/yrothlin-24/CHAL_IM05/gan_wbc_outputs/PLY/generator_epoch_0300.pt",
-    #     output_dir="/home/infres/yrothlin-24/CHAL_IM05/generated_wbc/PLY",
-    #     n_images=200,
+    # train_gan(
+    #     data_dir="/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train",
+    #     labels_csv="/home/infres/yrothlin-24/CHAL_IM05/IMA205-challenge_resampled/train_metadata.csv",
+    #     target_class="PLY",
+    #     output_dir="/home/infres/yrothlin-24/CHAL_IM05/gan_wbc_outputs",
+    #     image_size=256,
+    #     batch_size=16,
+    #     epochs=2000,
     #     z_dim=256,
+    #     lr=1e-4,
+    #     critic_steps=5,
+    #     lambda_gp=10.0,
+    #     num_workers=4,
+    #     use_augmented=True,
+    #     unique_base_only=False,
     # )
+
+    generate_images(
+        checkpoint_path="/home/infres/yrothlin-24/CHAL_IM05/gan_wbc_outputs/PLY/generator_epoch_2000.pt",
+        output_dir="/home/infres/yrothlin-24/CHAL_IM05/generated_wbc/PLY",
+        n_images=200,
+        z_dim=256,
+    )

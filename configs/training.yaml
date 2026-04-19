@@ -9,7 +9,7 @@ training:
   resume_from: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/tests/best.pt
   resume: true
   resume_from_pretrained: /home/infres/yrothlin-24/CHAL_IM05/checkpoints/contrastive_pretraining/best.pt
-  resume_pretrained: false
+  resume_pretrained: true
   monitor: macro_f1
   early_stopping: true
   early_stopping_patience: 10
@@ -105,17 +105,22 @@ data:
 model:
   num_classes: 13
   backbone_name: CONVNEXT_TINY
+  head_name: LINEAR
   freeze_backbone: false
   pretrained: true
 
 
-
+# Available heads : 
+    # 'LINEAR',
+    # 'LINEAR2',
+    # 'CNN',
+    # 'TRANSFORMER',
+    # 'QUERY',
 
   # Available backbones : 
     # 'RESNET_50',
     # 'RESNET_18',
     # 'RESNET_101',
-    # 'EFFICIENTNET_B4',
     # 'EFFICIENTNET_B7',
     # 'EFFICIENTNET_V2_S',
     # 'EFFICIENTNET_V2_M',

@@ -161,7 +161,8 @@ class Backbone(nn.Module):
 
     def _get_features_shape(self) -> int:
         with torch.no_grad():
-            x = torch.zeros(1, 3, 224, 224)
+            x = torch.zeros(1, 3, 224, 224) 
+            # x = torch.zeros(1, 3, 384, 384)
             y = self.backbone(x)
             if hasattr(y, "last_hidden_state"):
                 y = y.last_hidden_state[:, 0, :]   # token CLS

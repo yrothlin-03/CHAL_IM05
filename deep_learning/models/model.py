@@ -3,17 +3,11 @@ import torch.nn as nn
 
 from .backbone import Backbone
 
-from .head import (
-    HEAD,
-    HEAD2,
-    CNN_HEAD,
-    TRANSFORMER_HEAD,
-    QUERY_ATTENTION_HEAD
-)
+from .head import HEAD
 
 
 class Model(nn.Module):
-    def __init__(self, backbone_name: str, num_classes: int = 13, freeze_backbone: bool = False, pretrained: bool = False):
+    def __init__(self, backbone_name: str, head_name: str, num_classes: int = 13, freeze_backbone: bool = False, pretrained: bool = False):
         super().__init__()
 
         self.backbone = Backbone(name=backbone_name, pretrained=pretrained)
@@ -22,29 +16,8 @@ class Model(nn.Module):
         if freeze_backbone:
             self.freeze_backbone()
 
-        # self.head = HEAD2(
-        #     n_classes=num_classes,
-        #     in_dim=self.features_shape,
-        #     # n_layers=1,
-        #     p=0.3
-        # )
-
-        self.head = HEAD(
-            n_classes = num_classes,
-            n_layers = 3,
-            in_dim = self.features_shape,
-            p = 0.3
-        )
-
-        # self.head = QUERY_ATTENTION_HEAD(
-        #     n_classes=num_classes,
-        #     in_dim=self.features_shape,
-        #     d_model=256,
-        #     n_queries=13,
-        #     n_heads=4,
-        #     p=0.3,
-        # )
-
+        self.head = HEAD(head_name=head_name, n_classes=num_classes, in_dim=self.features_shape)
+        
         backbone_params = sum(p.numel() for p in self.backbone.parameters())
         head_params = sum(p.numel() for p in self.head.parameters())
         total_params = sum(p.numel() for p in self.parameters())

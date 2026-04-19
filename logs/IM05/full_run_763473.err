@@ -1,0 +1,5 @@
+/home/infres/yrothlin-24/CHAL_IM05/deep_learning/utils/trainer.py:136: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = torch.cuda.amp.GradScaler(enabled=self.use_amp)
+/home/infres/yrothlin-24/CHAL_IM05/deep_learning/utils/trainer.py:136: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = torch.cuda.amp.GradScaler(enabled=self.use_amp)
+slurmstepd: error: *** JOB 763473 ON node55 CANCELLED AT 2026-04-01T04:27:21 ***

@@ -1,0 +1,25 @@
+--------------------------------------------------------------------------------
+BACKBONE: RESNET_50
+MODE: training
+DEVICE: cuda
+--------------------------------------------------------------------------------
+Training with 5-fold cross-validation...
+================================================================================
+FOLD 1/5
+================================================================================
+--------------------------------------------------------------------------------
+MODEL INFORMATIONS
+Backbone         : RESNET_50
+Feature dim      : 2048
+Backbone params  : 23,508,032
+Head params      : 26,637
+Total params     : 23,534,669
+Trainable params : 23,534,669
+Frozen backbone  : False
+--------------------------------------------------------------------------------
+[DATALOADER]: Using grouped KFOLD
+[DATALOADER] Train distribution: [10412, 6480, 2197, 689, 332, 293, 312, 288, 353, 91, 1610, 55, 8]
+[DATALOADER] Val distribution  : [2603, 1621, 549, 172, 83, 73, 79, 72, 88, 23, 402, 13, 3]
+[DATALOADER]: Using weighted sampling
+[DATALOADER]: Using TTA
+Successfully loaded data with sizes: train=23120, val=5781, test=N/A
