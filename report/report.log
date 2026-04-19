@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.27)  19 APR 2026 16:42
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.27)  19 APR 2026 19:26
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -569,128 +569,140 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 
 [10 <./figures/query_explain.png>]
-Underfull \hbox (badness 2856) in paragraph at lines 451--452
+Underfull \hbox (badness 1838) in paragraph at lines 433--435
+\T1/pcr/m/n/10 3407, 777]\T1/ptm/m/n/10 . Les ré-sul-tats obtenus en val-i-da-tion sont
+ []
+
+
+
+
+Underfull \hbox (badness 2856) in paragraph at lines 470--471
 \T1/ptm/m/n/10 la cross-entropy stan-dard dans notre cadre, no-tam-ment
  []
 
 
 
-
-Overfull \hbox (4.3108pt too wide) in paragraph at lines 474--488
+[11]
+Overfull \hbox (4.3108pt too wide) in paragraph at lines 493--507
  [][] 
  []
 
 
 
-[11]
-Underfull \hbox (badness 2608) in paragraph at lines 522--523
+
+Underfull \hbox (badness 2608) in paragraph at lines 541--542
 \T1/ptm/m/n/10 straté-gies de \T1/ptm/b/n/10 co-sine an-neal-ing \T1/ptm/m/n/10 avec ou sans warmup.
  []
 
 
-Underfull \hbox (badness 3838) in paragraph at lines 522--523
+Underfull \hbox (badness 3838) in paragraph at lines 541--542
 \T1/ptm/m/n/10 Le warmup per-met de sta-biliser les pre-mières étapes
  []
 
 
 
-<figures/contrastive_explain.png, id=267, 731.73375pt x 338.26375pt>
+[12]
+<figures/contrastive_explain.png, id=277, 731.73375pt x 338.26375pt>
 File: figures/contrastive_explain.png Graphic file (type png)
 <use figures/contrastive_explain.png>
-Package pdftex.def Info: figures/contrastive_explain.png  used on input line 539.
+Package pdftex.def Info: figures/contrastive_explain.png  used on input line 558.
 (pdftex.def)             Requested size: 247.6778pt x 114.49716pt.
 
 
-[12 <./figures/contrastive_explain.png>]
 File: figures/tsne_without_contrastive.png Graphic file (type png)
 <use figures/tsne_without_contrastive.png>
-Package pdftex.def Info: figures/tsne_without_contrastive.png  used on input line 556.
+Package pdftex.def Info: figures/tsne_without_contrastive.png  used on input line 575.
 (pdftex.def)             Requested size: 247.6778pt x 197.2883pt.
-<figures/tsne_with_contrastive.png, id=285, 715.83435pt x 570.2103pt>
+<figures/tsne_with_contrastive.png, id=283, 715.83435pt x 570.2103pt>
 File: figures/tsne_with_contrastive.png Graphic file (type png)
 <use figures/tsne_with_contrastive.png>
-Package pdftex.def Info: figures/tsne_with_contrastive.png  used on input line 563.
+Package pdftex.def Info: figures/tsne_with_contrastive.png  used on input line 582.
 (pdftex.def)             Requested size: 247.6778pt x 197.2883pt.
-
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 
 
+[13 <./figures/contrastive_explain.png>]
 
 
-[13 <./figures/tsne_with_contrastive.png>]
 
-<figures/gan_samples.png, id=301, 2073.7475pt x 2073.7475pt>
+[14 <./figures/tsne_with_contrastive.png>]
+<figures/gan_samples.png, id=308, 2073.7475pt x 2073.7475pt>
 File: figures/gan_samples.png Graphic file (type png)
 <use figures/gan_samples.png>
-Package pdftex.def Info: figures/gan_samples.png  used on input line 614.
+Package pdftex.def Info: figures/gan_samples.png  used on input line 633.
 (pdftex.def)             Requested size: 247.6778pt x 247.66818pt.
 
 
-[14 <./figures/gan_samples.png (PNG copy)>]
 
-<figures/jepa.png, id=317, 874.26625pt x 196.735pt>
+
+[15 <./figures/gan_samples.png (PNG copy)>]
+<figures/jepa.png, id=324, 874.26625pt x 196.735pt>
 File: figures/jepa.png Graphic file (type png)
 <use figures/jepa.png>
-Package pdftex.def Info: figures/jepa.png  used on input line 674.
+Package pdftex.def Info: figures/jepa.png  used on input line 693.
 (pdftex.def)             Requested size: 247.6778pt x 55.73383pt.
 
 
-[15 <./figures/jepa.png>]
-Underfull \hbox (badness 2662) in paragraph at lines 683--684
+
+Underfull \hbox (badness 2662) in paragraph at lines 702--703
 []\T1/ptm/m/n/10 Ainsi, bien que non ex-plorée ex-péri-men-tale-ment ici,
  []
 
 
-Underfull \hbox (badness 1502) in paragraph at lines 694--695
+Underfull \hbox (badness 1502) in paragraph at lines 713--714
 \T1/ptm/m/n/10 a été le \T1/ptm/b/n/10 temps de cal-cul\T1/ptm/m/n/10 . L'entraînement de plusieurs
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 696--697
+Underfull \hbox (badness 10000) in paragraph at lines 715--716
 []\T1/ptm/m/n/10 Concernant le \T1/ptm/b/n/10 deep learn-ing\T1/ptm/m/n/10 , plusieurs choix
  []
 
 
-Underfull \hbox (badness 1655) in paragraph at lines 696--697
+Underfull \hbox (badness 1655) in paragraph at lines 715--716
 \T1/ptm/m/n/10 méthodologiques n'ont pas donné les ré-sul-tats at-ten-dus.
  []
 
 
 
+[16 <./figures/jepa.png>]
 
 
-[16]
-Underfull \hbox (badness 1874) in paragraph at lines 717--718
+Underfull \hbox (badness 1874) in paragraph at lines 736--737
 []\T1/ptm/m/n/10 La ges-tion du \T1/ptm/b/n/10 déséquili-bre des classes \T1/ptm/m/n/10 est un fac-
  []
 
 
-Underfull \hbox (badness 4467) in paragraph at lines 717--718
+Underfull \hbox (badness 4467) in paragraph at lines 736--737
 \T1/ptm/m/n/10 l'oversampling ex-plicite s'est avéré moins ef-fi-cace en
  []
 
 
-Underfull \hbox (badness 7081) in paragraph at lines 725--726
+Underfull \hbox (badness 7081) in paragraph at lines 744--745
 []\T1/ptm/m/n/10 Plusieurs per-spec-tives peu-vent être en-vis-agées pour
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 725--726
+Underfull \hbox (badness 10000) in paragraph at lines 744--745
 \T1/ptm/m/n/10 améliorer ce tra-vail. L'exploration plus ap-pro-fondie
  []
 
 
-Underfull \hbox (badness 1838) in paragraph at lines 725--726
+Underfull \hbox (badness 1838) in paragraph at lines 744--745
 \T1/ptm/m/n/10 de tirer da-van-tage parti des ar-chi-tec-tures mod-ernes, en
  []
 
 (./report.bbl
 
-)
+[17])
 
-[17] (./report.aux)
+
+
+[18
+
+] (./report.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
@@ -699,18 +711,18 @@ Package rerunfilecheck Info: File `report.out' has not changed.
 (rerunfilecheck)             Checksum: 84E2F0AB8BA2131C6ED9FB541FB9659E;4492.
  ) 
 Here is how much of TeX's memory you used:
- 11765 strings out of 473190
- 183127 string characters out of 5715800
- 594190 words of memory out of 5000000
+ 11767 strings out of 473190
+ 183141 string characters out of 5715800
+ 594192 words of memory out of 5000000
  34759 multiletter control sequences out of 15000+600000
  674510 words of font info for 156 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,9n,79p,1198b,455s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,9n,79p,1198b,591s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on report.pdf (17 pages, 10157692 bytes).
+Output written on report.pdf (18 pages, 10160158 bytes).
 PDF statistics:
- 439 PDF objects out of 1000 (max. 8388607)
- 358 compressed objects within 4 object streams
- 97 named destinations out of 1000 (max. 500000)
+ 444 PDF objects out of 1000 (max. 8388607)
+ 362 compressed objects within 4 object streams
+ 99 named destinations out of 1000 (max. 500000)
  255 words of extra memory for PDF output out of 10000 (max. 10000000)
 

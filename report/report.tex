@@ -430,13 +430,32 @@ Au final, ces expériences montrent que le choix de la tête ne doit pas être p
 
 Dans ce type de problème, les performances observées peuvent varier de manière non négligeable en fonction du \textbf{split des données} et de la \textbf{seed aléatoire} utilisée. En effet, la répartition des classes dans les ensembles d’entraînement et de validation peut modifier la difficulté de la tâche, en particulier dans un contexte déséquilibré où certaines classes rares peuvent être sous-représentées dans un split donné. De même, l’initialisation des poids et l’ordre des batchs influencent la dynamique d’apprentissage, ce qui peut conduire à des variations de performance d’un entraînement à l’autre.
 
+Afin de quantifier cet effet, nous avons entraîné le modèle avec plusieurs seeds différentes :
+\texttt{[42, 1337, 2023, 3407, 777]}. Les résultats obtenus en validation sont présentés dans le tableau ci-dessous.
+
+\begin{table}[h]
+\centering
+\caption{Impact de la seed sur les performances en validation.}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Seed} & \textbf{Best epoch} & \textbf{Score} \\
+\hline
+42   & 13 & 0.7672 \\
+1337 & 3  & 0.7394 \\
+2023 & 19 & 0.8069 \\
+3407 & 16 & 0.8126 \\
+777  & 10 & 0.7981 \\
+\hline
+\end{tabular}
+\end{table}
+
+On observe une variabilité non négligeable des performances, avec un score variant d’environ $0.74$ à $0.81$. La moyenne des scores est de $0.785$ avec un écart-type d’environ $0.028$, ce qui confirme que la seed a un impact significatif sur les résultats. Cette variance s’explique à la fois par l’initialisation des poids, la stochasticité de l’optimisation, et la sensibilité du modèle à la distribution exacte des données dans chaque split.
+
 Pour atténuer cette variabilité, nous utilisons une stratégie de \textbf{validation croisée de type K-fold}. Le principe consiste à partitionner le jeu de données en $K$ sous-ensembles, puis à entraîner $K$ modèles différents, chacun utilisant $K-1$ folds pour l’entraînement et le fold restant pour la validation. Cette approche permet d’exploiter l’ensemble des données pour l’évaluation tout en réduisant la dépendance à un unique split.
 
-Dans notre cas, nous utilisons le K-fold principalement comme une méthode d’\textbf{agrégation de modèles}. Concrètement, les $K$ modèles entraînés sont ensuite utilisés conjointement au moment de l’inférence : pour chaque exemple de test, nous récupérons les prédictions des $K$ modèles et appliquons un \textbf{vote majoritaire}. Cette stratégie permet de lisser les erreurs spécifiques à un modèle donné et d’obtenir des prédictions plus robustes.
+Dans notre cas, le K-fold est également utilisé comme une méthode d’\textbf{agrégation de modèles}. Concrètement, les $K$ modèles entraînés sont ensuite utilisés conjointement au moment de l’inférence : pour chaque exemple de test, nous récupérons les prédictions des $K$ modèles et appliquons un \textbf{vote majoritaire}. Cette stratégie permet de lisser les erreurs spécifiques à un modèle donné et d’obtenir des prédictions plus robustes.
 
 Au final, la combinaison \textbf{K-fold + vote majoritaire} permet de limiter l’impact des fluctuations dues au split et à la seed, et de produire des résultats plus robustes et reproductibles, en particulier dans un contexte de données limitées et déséquilibrées.
-
-
 \subsection{En pratique}
 
 En pratique l'amélioration des performances relevait surtout d'un équilibre subtile entre ces différents aspects :
